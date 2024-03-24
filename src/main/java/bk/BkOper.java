@@ -3,9 +3,18 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
-import com.googlecode.lanterna.SGR;
+import java.util.Random;
+
+import com.googlecode.lanterna.Symbols;
+import com.googlecode.lanterna.TerminalPosition;
+import com.googlecode.lanterna.TerminalSize;
+import com.googlecode.lanterna.TextCharacter;
+import com.googlecode.lanterna.TextColor;
+import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
+import com.googlecode.lanterna.screen.Screen;
+import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 
@@ -49,58 +58,157 @@ public class BkOper extends AppOper {
 
   @Override
   public void perform() {
+    loadUtil();
     DefaultTerminalFactory defaultTerminalFactory = new DefaultTerminalFactory();
     Terminal terminal = null;
+    Screen screen = null;
     try {
       terminal = defaultTerminalFactory.createTerminal();
-      terminal.enterPrivateMode();
-      //      terminal.clearScreen();
-      terminal.putString("Hello\n");
-      terminal.flush();
+      screen = new TerminalScreen(terminal);
+      screen.startScreen();
 
-      terminal.enableSGR(SGR.REVERSE);
-      terminal.putString("SGR.REVERSE\n");
-      terminal.resetColorAndSGR();
+      // Turn off cursor for now
+      screen.setCursorPosition(null);
 
-      terminal.enableSGR(SGR.BOLD);
-      terminal.putString("SGR.BOLD\n");
-      terminal.resetColorAndSGR();
-
-      terminal.enableSGR(SGR.BORDERED);
-      terminal.putString("SGR.BORDERED\n");
-      terminal.resetColorAndSGR();
-
-      terminal.flush();
-
-      terminal.resetColorAndSGR();
-      terminal.setCursorPosition(terminal.getCursorPosition().withColumn(0).withRelativeRow(1));
-      terminal.putCharacter('D');
-      terminal.putCharacter('o');
-      terminal.putCharacter('n');
-      terminal.putCharacter('e');
-      terminal.putCharacter('\n');
-      terminal.flush();
-
-      while (true) {
-        KeyStroke keyStroke = terminal.pollInput();
-        if (keyStroke == null)
-          continue;
-        if (keyStroke.getKeyType() == KeyType.Escape)
-          break;
-
-        pr("keyStroke:", keyStroke);
-        var ch = keyStroke.getCharacter();
-        if (ch != null) {
-          pr("ch:", ch);
+      // Draw some random content
+      Random random = new Random();
+      TerminalSize terminalSize = screen.getTerminalSize();
+      for (int column = 0; column < terminalSize.getColumns(); column++) {
+        for (int row = 0; row < terminalSize.getRows(); row++) {
+          screen.setCharacter(column, row, TextCharacter.fromCharacter(' ', TextColor.ANSI.DEFAULT,
+              // This will pick a random background color
+              TextColor.ANSI.values()[random.nextInt(TextColor.ANSI.values().length)])[0]);
         }
       }
-      terminal.exitPrivateMode();
+
+      // Make changes visible
+      screen.refresh();
+
+      //       
+      //      long startTime = System.currentTimeMillis();
+      //      while (System.currentTimeMillis() - startTime < 2000) {
+      //        // The call to pollInput() is not blocking, unlike readInput()
+      //        if (screen.pollInput() != null) {
+      //          break;
+      //        }
+      //        try {
+      //          Thread.sleep(1);
+      //        } catch (InterruptedException ignore) {
+      //          break;
+      //        }
+      //      }
+
+      /*
+       * Ok, now we loop and keep modifying the screen until the user exits by
+       * pressing escape on the keyboard or the input stream is closed. When
+       * using the Swing/AWT bundled emulator, if the user closes the window
+       * this will result in an EOF KeyStroke.
+       */
+      while (true) {
+        KeyStroke keyStroke = screen.pollInput();
+        if (keyStroke != null
+            && (keyStroke.getKeyType() == KeyType.Escape || keyStroke.getKeyType() == KeyType.EOF)) {
+          break;
+        }
+
+        /*
+         * Screens will automatically listen and record size changes, but you
+         * have to let the Screen know when is a good time to update its
+         * internal buffers. Usually you should do this at the start of your
+         * "drawing" loop, if you have one. This ensures that the dimensions of
+         * the buffers stays constant and doesn't change while you are drawing
+         * content. The method doReizeIfNecessary() will check if the terminal
+         * has been resized since last time it was called (or since the screen
+         * was created if this is the first time calling) and update the buffer
+         * dimensions accordingly. It returns null if the terminal has not
+         * changed size since last time.
+         */
+        TerminalSize newSize = screen.doResizeIfNecessary();
+        if (newSize != null) {
+          terminalSize = newSize;
+        }
+
+        // Increase this to increase speed
+        final int charactersToModifyPerLoop = 1;
+        for (int i = 0; i < charactersToModifyPerLoop; i++) {
+          /*
+           * We pick a random location
+           */
+          TerminalPosition cellToModify = new TerminalPosition(random.nextInt(terminalSize.getColumns()),
+              random.nextInt(terminalSize.getRows()));
+
+          /*
+           * Pick a random background color again
+           */
+          TextColor.ANSI color = TextColor.ANSI.values()[random.nextInt(TextColor.ANSI.values().length)];
+
+          /*
+           * Update it in the back buffer, notice that just like
+           * TerminalPosition and TerminalSize, TextCharacter objects are
+           * immutable so the withBackgroundColor(..) call below returns a copy
+           * with the background color modified.
+           */
+          TextCharacter characterInBackBuffer = screen.getBackCharacter(cellToModify);
+          characterInBackBuffer = characterInBackBuffer.withBackgroundColor(color);
+          characterInBackBuffer = characterInBackBuffer.withCharacter(' '); // Because of the label box further down, if it shrinks
+          screen.setCharacter(cellToModify, characterInBackBuffer);
+        }
+
+        /*
+         * Just like with Terminal, it's probably easier to draw using
+         * TextGraphics. Let's do that to put a little box with information on
+         * the size of the terminal window
+         */
+        String sizeLabel = "Terminal Size: " + terminalSize;
+        TerminalPosition labelBoxTopLeft = new TerminalPosition(1, 1);
+        TerminalSize labelBoxSize = new TerminalSize(sizeLabel.length() + 2, 3);
+        TerminalPosition labelBoxTopRightCorner = labelBoxTopLeft
+            .withRelativeColumn(labelBoxSize.getColumns() - 1);
+        TextGraphics textGraphics = screen.newTextGraphics();
+        //This isn't really needed as we are overwriting everything below anyway, but just for demonstrative purpose
+        textGraphics.fillRectangle(labelBoxTopLeft, labelBoxSize, ' ');
+
+        /*
+         * Draw horizontal lines, first upper then lower
+         */
+        textGraphics.drawLine(labelBoxTopLeft.withRelativeColumn(1),
+            labelBoxTopLeft.withRelativeColumn(labelBoxSize.getColumns() - 2),
+            Symbols.DOUBLE_LINE_HORIZONTAL);
+        textGraphics.drawLine(labelBoxTopLeft.withRelativeRow(2).withRelativeColumn(1),
+            labelBoxTopLeft.withRelativeRow(2).withRelativeColumn(labelBoxSize.getColumns() - 2),
+            Symbols.DOUBLE_LINE_HORIZONTAL);
+
+        /*
+         * Manually do the edges and (since it's only one) the vertical lines,
+         * first on the left then on the right
+         */
+        textGraphics.setCharacter(labelBoxTopLeft, Symbols.DOUBLE_LINE_TOP_LEFT_CORNER);
+        textGraphics.setCharacter(labelBoxTopLeft.withRelativeRow(1), Symbols.DOUBLE_LINE_VERTICAL);
+        textGraphics.setCharacter(labelBoxTopLeft.withRelativeRow(2), Symbols.DOUBLE_LINE_BOTTOM_LEFT_CORNER);
+        textGraphics.setCharacter(labelBoxTopRightCorner, Symbols.DOUBLE_LINE_TOP_RIGHT_CORNER);
+        textGraphics.setCharacter(labelBoxTopRightCorner.withRelativeRow(1), Symbols.DOUBLE_LINE_VERTICAL);
+        textGraphics.setCharacter(labelBoxTopRightCorner.withRelativeRow(2),
+            Symbols.DOUBLE_LINE_BOTTOM_RIGHT_CORNER);
+
+        /*
+         * Finally put the text inside the box
+         */
+        textGraphics.putString(labelBoxTopLeft.withRelative(1, 1), sizeLabel);
+
+        /*
+         * Ok, we are done and can display the change. Let's also be nice and
+         * allow the OS to schedule other threads so we don't clog up the core
+         * completely.
+         */
+        screen.refresh();
+        Thread.yield();
+      }
     } catch (Throwable t) {
       throw asRuntimeException(t);
     }
-    Files.close(terminal);
-    if (false)
-      sleepMs(1);
+    Files.close(screen);
+    // There seems to be a problem with restoring the cursor position; it positions the cursor at the end of the last line
+    pr();
   }
 
 }
