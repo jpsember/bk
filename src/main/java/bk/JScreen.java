@@ -46,8 +46,7 @@ public class JScreen {
   public void close() {
     if (mScreen == null)
       return;
-    pr("closing screen");
-    sleepMs(1000);
+    msg("closing screen");
     Files.close(mScreen);
     // There seems to be a problem with restoring the cursor position; it positions the cursor at the end of the last line
     pr();
@@ -56,30 +55,21 @@ public class JScreen {
   }
 
   public boolean isOpen() {
-    pr("isOpen:", mScreen != null);
     return mScreen != null;
   }
 
   public void update() {
-    pr("update");
-    sleepMs(1000);
     try {
-      // badArg("upd");
       KeyStroke keyStroke = mScreen.pollInput();
       if (keyStroke != null) {
-        pr("process key");
-        sleepMs(1000);
         mKeyHandler.processKey(keyStroke);
       }
 
       // Update size of terminal
       TerminalSize newSize = mScreen.doResizeIfNecessary();
       if (newSize != null) {
-        mTerminalSize = newSize;
+        todo("probably need special handling if resize occurred");
       }
-
-      pr("quit req:", quitRequested());
-      sleepMs(1000);
 
       if (!quitRequested()) {
         mPaintHandler.repaint();
@@ -87,7 +77,8 @@ public class JScreen {
         mScreen.refresh();
       }
     } catch (Throwable t) {
-      crash(t);
+      closeIfError(t);
+      throw asRuntimeException(t);
     }
   }
 
@@ -102,12 +93,10 @@ public class JScreen {
   public void mainLoop() {
     msg("mainLoop start");
     while (isOpen()) {
-      msg("update");
       update();
       sleepMs(10);
-      if (quitRequested()) {
+      if (quitRequested())
         close();
-      }
     }
     msg("done main loop");
   }
@@ -125,16 +114,15 @@ public class JScreen {
   }
 
   public void updateRandomContent() {
-    if (mTerminalSize == null)
-      return;
+    var termSize = mScreen.getTerminalSize();
     // Increase this to increase speed
     final int charactersToModifyPerLoop = 1;
     for (int i = 0; i < charactersToModifyPerLoop; i++) {
       /*
        * We pick a random location
        */
-      TerminalPosition cellToModify = new TerminalPosition(random.nextInt(mTerminalSize.getColumns()),
-          random.nextInt(mTerminalSize.getRows()));
+      TerminalPosition cellToModify = new TerminalPosition(random.nextInt(termSize.getColumns()),
+          random.nextInt(termSize.getRows()));
 
       /*
        * Pick a random background color again
@@ -158,7 +146,7 @@ public class JScreen {
      * Let's do that to put a little box with information on the size of the
      * terminal window
      */
-    String sizeLabel = "Terminal Size: " + mTerminalSize;
+    String sizeLabel = "Terminal Size: " + termSize;
     TerminalPosition labelBoxTopLeft = new TerminalPosition(1, 1);
     TerminalSize labelBoxSize = new TerminalSize(sizeLabel.length() + 2, 3);
     TerminalPosition labelBoxTopRightCorner = labelBoxTopLeft
@@ -194,13 +182,15 @@ public class JScreen {
     textGraphics.putString(labelBoxTopLeft.withRelative(1, 1), sizeLabel);
   }
 
-  public void crash(Throwable t) {
-    if (mProblem == null) {
-      mProblem = t;
+  /**
+   * Restore normal terminal window if an exception is not null (so that
+   * subsequent dumping of the exception will actually appear to the user in the
+   * normal terminal window)
+   */
+  public Throwable closeIfError(Throwable t) {
+    if (t != null)
       close();
-      // pr("Caught exception:", t.getMessage());
-      throw asRuntimeException(t);
-    }
+    return t;
   }
 
   private Random random;
@@ -208,7 +198,6 @@ public class JScreen {
   private AbstractScreen mScreen;
   private KeyHandler mKeyHandler;
   private PaintHandler mPaintHandler;
-  private TerminalSize mTerminalSize;
   private boolean mQuitFlag;
-  private Throwable mProblem;
+
 }

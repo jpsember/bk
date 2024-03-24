@@ -54,8 +54,7 @@ public class BkOper extends AppOper implements KeyHandler, PaintHandler {
       s.mainLoop();
       msg("done main loop");
     } catch (Throwable t) {
-      s.crash(t);
-      setError(t);
+      setError(s.closeIfError(t));
     }
   }
 
