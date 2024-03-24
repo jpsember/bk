@@ -15,5 +15,4 @@ public final class Util {
   public static void msg(Object... args) {
     pr(">>>", BasePrinter.toString(args));
   }
-
 }

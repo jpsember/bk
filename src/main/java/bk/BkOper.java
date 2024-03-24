@@ -9,8 +9,9 @@ import com.googlecode.lanterna.input.KeyType;
 import bk.gen.BkConfig;
 import js.app.AppOper;
 import js.base.BasePrinter;
+import js.geometry.IPoint;
 
-public class BkOper extends AppOper implements KeyHandler, PaintHandler {
+public class BkOper extends AppOper implements ScreenHandler {
 
   @Override
   public String userCommand() {
@@ -41,40 +42,42 @@ public class BkOper extends AppOper implements KeyHandler, PaintHandler {
     return mConfig;
   }
 
-  private BkConfig mConfig;
-
   @Override
   public void perform() {
-    s = new JScreen(this, this);
+    mScreen = new JScreen(this);
     try {
       loadUtil();
-      msg("opening");
-      s.open();
-      msg("mainLoop...");
-      s.mainLoop();
-      msg("done main loop");
+      mScreen.open();
+      mScreen.mainLoop();
     } catch (Throwable t) {
-      setError(s.closeIfError(t));
+      setError(mScreen.closeIfError(t));
     }
   }
 
   @Override
   public void repaint() {
-    // TODO Auto-generated method stub
+    todo("repaint");
     if (!mDrawn) {
-      s.drawRandomContent();
+      mScreen.drawRandomContent();
       mDrawn = true;
     }
-    s.updateRandomContent();
+    mScreen.updateRandomContent();
   }
 
   @Override
   public void processKey(KeyStroke keyStroke) {
-    // TODO Auto-generated method stub
+    todo("processKey:", keyStroke);
     if (keyStroke.getKeyType() == KeyType.Escape)
-      s.quit();
+      mScreen.quit();
   }
 
+  @Override
+  public void processNewSize(IPoint size) {
+    todo("processNewSize:", size);
+  }
+
+  private BkConfig mConfig;
   private boolean mDrawn;
-  private JScreen s;
+  private JScreen mScreen;
+
 }

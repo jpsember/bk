@@ -18,15 +18,15 @@ import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 
 import js.file.Files;
+import js.geometry.IPoint;
 
 /**
  * Wrapper for lanterna terminal / screen
  */
 public class JScreen {
 
-  public JScreen(KeyHandler keyHandler, PaintHandler paintHandler) {
-    mKeyHandler = keyHandler;
-    mPaintHandler = paintHandler;
+  public JScreen(ScreenHandler handler) {
+    mHandler = handler;
   }
 
   public void open() {
@@ -62,17 +62,19 @@ public class JScreen {
     try {
       KeyStroke keyStroke = mScreen.pollInput();
       if (keyStroke != null) {
-        mKeyHandler.processKey(keyStroke);
+        mHandler.processKey(keyStroke);
       }
 
       // Update size of terminal
-      TerminalSize newSize = mScreen.doResizeIfNecessary();
-      if (newSize != null) {
-        todo("probably need special handling if resize occurred");
+      mScreen.doResizeIfNecessary();
+      var currSize = toIpoint(mScreen.getTerminalSize());
+      if (!currSize.equals(mScreenSize)) {
+        mScreenSize = currSize;
+        mHandler.processNewSize(mScreenSize);
       }
 
       if (!quitRequested()) {
-        mPaintHandler.repaint();
+        mHandler.repaint();
         // Make changes visible
         mScreen.refresh();
       }
@@ -80,6 +82,14 @@ public class JScreen {
       closeIfError(t);
       throw asRuntimeException(t);
     }
+  }
+
+  public IPoint screenSize() {
+    return mScreenSize;
+  }
+
+  private static IPoint toIpoint(TerminalSize s) {
+    return IPoint.with(s.getColumns(), s.getRows());
   }
 
   public boolean quitRequested() {
@@ -196,8 +206,8 @@ public class JScreen {
   private Random random;
   private Terminal mTerminal;
   private AbstractScreen mScreen;
-  private KeyHandler mKeyHandler;
-  private PaintHandler mPaintHandler;
+  private ScreenHandler mHandler;
+  private IPoint mScreenSize;
   private boolean mQuitFlag;
 
 }
