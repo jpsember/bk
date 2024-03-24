@@ -10,11 +10,13 @@ import bk.gen.BkConfig;
 import js.app.AppOper;
 import js.base.BasePrinter;
 import js.geometry.IPoint;
+import js.geometry.IRect;
 
 public class BkOper extends AppOper implements ScreenHandler {
 
   @Override
   public String userCommand() {
+    todo("have option to output pr to a log file which is tracked by something");
     return "bk";
   }
 
@@ -31,7 +33,6 @@ public class BkOper extends AppOper implements ScreenHandler {
   @Override
   protected void longHelp(BasePrinter b) {
     todo("more longHelp to come later...");
-    // TODO Auto-generated method stub
     super.longHelp(b);
   }
 
@@ -45,6 +46,12 @@ public class BkOper extends AppOper implements ScreenHandler {
   @Override
   public void perform() {
     mScreen = new JScreen(this);
+    mScreen.window().setHandler(new WindowHandler() {
+      @Override
+      public void paint(JWindow window) {
+mScreen.drawRect(window.bounds());
+      }
+    });
     try {
       loadUtil();
       mScreen.open();
@@ -57,11 +64,18 @@ public class BkOper extends AppOper implements ScreenHandler {
   @Override
   public void repaint() {
     todo("repaint");
-    if (!mDrawn) {
-      mScreen.drawRandomContent();
-      mDrawn = true;
+    if (!mScreenValid) {
+      mScreenValid = true;
+      IRect bounds = new IRect(mScreen.screenSize());
+      mMainWindow.setBounds(bounds);
+      mMainWindow.repaint();
     }
-    mScreen.updateRandomContent();
+
+    //    if (!mDrawn) {
+    //      mScreen.drawRandomContent();
+    //      mDrawn = true;
+    //    }
+    //    mScreen.updateRandomContent();
   }
 
   @Override
@@ -74,10 +88,12 @@ public class BkOper extends AppOper implements ScreenHandler {
   @Override
   public void processNewSize(IPoint size) {
     todo("processNewSize:", size);
+    mScreenValid = false;
   }
 
   private BkConfig mConfig;
-  private boolean mDrawn;
+  //private boolean mDrawn;
   private JScreen mScreen;
-
+  private boolean mScreenValid;
+  private JWindow mMainWindow = new JWindow();
 }

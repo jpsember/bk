@@ -19,6 +19,7 @@ import com.googlecode.lanterna.terminal.Terminal;
 
 import js.file.Files;
 import js.geometry.IPoint;
+import js.geometry.IRect;
 
 /**
  * Wrapper for lanterna terminal / screen
@@ -27,6 +28,11 @@ public class JScreen {
 
   public JScreen(ScreenHandler handler) {
     mHandler = handler;
+    mMainWindow = new JWindow();
+  }
+
+  public JWindow window() {
+    return mMainWindow;
   }
 
   public void open() {
@@ -75,6 +81,9 @@ public class JScreen {
 
       if (!quitRequested()) {
         mHandler.repaint();
+
+        performPaint(window(), true);
+
         // Make changes visible
         mScreen.refresh();
       }
@@ -203,11 +212,41 @@ public class JScreen {
     return t;
   }
 
+  private void performPaint(JWindow w, boolean validFlag) {
+    if (validFlag && w.paintValid())
+      return;
+    w.setPaintValid(true);
+    var h = w.handler();
+    h.paint(w);
+    for (var c : w.children()) {
+      performPaint(c, false);
+    }
+
+  }
+
   private Random random;
   private Terminal mTerminal;
   private AbstractScreen mScreen;
   private ScreenHandler mHandler;
   private IPoint mScreenSize;
   private boolean mQuitFlag;
+  private final JWindow mMainWindow;
+
+  public void drawRect(IRect bounds) {
+    TextGraphics textGraphics = mScreen.newTextGraphics();
+    todo("have to keep track of local coordinate system?");
+    //This isn't really needed as we are overwriting everything below anyway, but just for demonstrative purpose
+//    textGraphics.fillRectangle(labelBoxTopLeft, labelBoxSize, ' ');
+
+    /*
+     * Draw horizontal lines, first upper then lower
+     */
+    textGraphics.drawLine(labelBoxTopLeft.withRelativeColumn(1),
+        labelBoxTopLeft.withRelativeColumn(labelBoxSize.getColumns() - 2), Symbols.DOUBLE_LINE_HORIZONTAL);
+    textGraphics.drawLine(labelBoxTopLeft.withRelativeRow(2).withRelativeColumn(1),
+        labelBoxTopLeft.withRelativeRow(2).withRelativeColumn(labelBoxSize.getColumns() - 2),
+        Symbols.DOUBLE_LINE_HORIZONTAL);
+
+  }
 
 }
