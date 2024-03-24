@@ -84,20 +84,6 @@ public class BkOper extends AppOper {
       // Make changes visible
       screen.refresh();
 
-      //       
-      //      long startTime = System.currentTimeMillis();
-      //      while (System.currentTimeMillis() - startTime < 2000) {
-      //        // The call to pollInput() is not blocking, unlike readInput()
-      //        if (screen.pollInput() != null) {
-      //          break;
-      //        }
-      //        try {
-      //          Thread.sleep(1);
-      //        } catch (InterruptedException ignore) {
-      //          break;
-      //        }
-      //      }
-
       /*
        * Ok, now we loop and keep modifying the screen until the user exits by
        * pressing escape on the keyboard or the input stream is closed. When
@@ -111,18 +97,7 @@ public class BkOper extends AppOper {
           break;
         }
 
-        /*
-         * Screens will automatically listen and record size changes, but you
-         * have to let the Screen know when is a good time to update its
-         * internal buffers. Usually you should do this at the start of your
-         * "drawing" loop, if you have one. This ensures that the dimensions of
-         * the buffers stays constant and doesn't change while you are drawing
-         * content. The method doReizeIfNecessary() will check if the terminal
-         * has been resized since last time it was called (or since the screen
-         * was created if this is the first time calling) and update the buffer
-         * dimensions accordingly. It returns null if the terminal has not
-         * changed size since last time.
-         */
+        // Update size of terminal
         TerminalSize newSize = screen.doResizeIfNecessary();
         if (newSize != null) {
           terminalSize = newSize;
@@ -201,7 +176,7 @@ public class BkOper extends AppOper {
          * completely.
          */
         screen.refresh();
-        Thread.yield();
+        sleepMs(50);
       }
     } catch (Throwable t) {
       throw asRuntimeException(t);
