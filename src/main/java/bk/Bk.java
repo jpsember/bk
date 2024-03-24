@@ -9,7 +9,7 @@ public class Bk extends App {
   public static void main(String[] args) {
     loadTools();
     Bk app = new Bk();
-    app.setCustomArgs("-v");
+    //app.setCustomArgs("-v");
     app.startApplication(args);
     app.exitWithReturnCode();
   }
