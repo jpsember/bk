@@ -2,9 +2,17 @@ package bk;
 
 import static js.base.Tools.*;
 
+import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
+import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import com.googlecode.lanterna.screen.Screen;
+import com.googlecode.lanterna.screen.TerminalScreen;
+import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
+import com.googlecode.lanterna.terminal.Terminal;
+
+import bk.gen.BkConfig;
 import js.app.AppOper;
 import js.base.BasePrinter;
-import bk.gen.BkConfig;
+import js.base.DateTimeTools;
 
 public class BkOper extends AppOper {
 
@@ -41,8 +49,29 @@ public class BkOper extends AppOper {
 
   @Override
   public void perform() {
-    loadTools();
-    todo("No implementation yet");
+    Screen screen = null;
+    Terminal term = null;
+    try {
+      term = new DefaultTerminalFactory().createTerminal();
+      screen = new TerminalScreen(term);
+      WindowBasedTextGUI gui = new MultiWindowTextGUI(screen);
+      screen.startScreen();
+    } catch (Throwable t) {
+      throw asRuntimeException(t);
+    }
+
+    // use GUI here until the GUI wants to exit
+
+    for (int i = 0; i < 20; i++) {
+      pr("i:", i);
+      DateTimeTools.sleepForRealMs(1000);
+    }
+
+    try {
+      screen.stopScreen();
+    } catch (Throwable t) {
+      throw asRuntimeException(t);
+    }
   }
 
 }
