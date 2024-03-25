@@ -19,19 +19,31 @@ import com.googlecode.lanterna.terminal.Terminal;
 
 import js.file.Files;
 import js.geometry.IPoint;
-import js.geometry.IRect;
 
 /**
  * Wrapper for lanterna terminal / screen
  */
 public class JScreen {
 
+  private static JScreen SHARED_INSTANCE;
+
+  public static JScreen sharedInstance() {
+    if (SHARED_INSTANCE == null)
+      badState("no shared instance");
+    return SHARED_INSTANCE;
+  }
+
   public JScreen(ScreenHandler handler) {
+    checkState(SHARED_INSTANCE == null, "already built");
     mHandler = handler;
-    mMainWindow = new JWindow();
+    SHARED_INSTANCE = this;
   }
 
   public JWindow window() {
+    if (mMainWindow == null) {
+      var w = new JWindow();
+      mMainWindow = w;
+    }
     return mMainWindow;
   }
 
@@ -93,7 +105,15 @@ public class JScreen {
     }
   }
 
+  public AbstractScreen screen() {
+    return mScreen;
+  }
+
   public IPoint screenSize() {
+    if (mScreenSize == null) {
+      mScreenSize = toIpoint(mScreen.getTerminalSize());
+      pr("screen size is:", mScreenSize);
+    }
     return mScreenSize;
   }
 
@@ -230,23 +250,6 @@ public class JScreen {
   private ScreenHandler mHandler;
   private IPoint mScreenSize;
   private boolean mQuitFlag;
-  private final JWindow mMainWindow;
-
-  public void drawRect(IRect bounds) {
-    TextGraphics textGraphics = mScreen.newTextGraphics();
-    todo("have to keep track of local coordinate system?");
-    //This isn't really needed as we are overwriting everything below anyway, but just for demonstrative purpose
-//    textGraphics.fillRectangle(labelBoxTopLeft, labelBoxSize, ' ');
-
-    /*
-     * Draw horizontal lines, first upper then lower
-     */
-    textGraphics.drawLine(labelBoxTopLeft.withRelativeColumn(1),
-        labelBoxTopLeft.withRelativeColumn(labelBoxSize.getColumns() - 2), Symbols.DOUBLE_LINE_HORIZONTAL);
-    textGraphics.drawLine(labelBoxTopLeft.withRelativeRow(2).withRelativeColumn(1),
-        labelBoxTopLeft.withRelativeRow(2).withRelativeColumn(labelBoxSize.getColumns() - 2),
-        Symbols.DOUBLE_LINE_HORIZONTAL);
-
-  }
+  private JWindow mMainWindow;
 
 }

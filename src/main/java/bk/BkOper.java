@@ -49,11 +49,14 @@ public class BkOper extends AppOper implements ScreenHandler {
     mScreen.window().setHandler(new WindowHandler() {
       @Override
       public void paint(JWindow window) {
-mScreen.drawRect(window.bounds());
+        pr("painting, window:", window);
+        window.drawRect(new IRect(window.bounds().size()));
+        pr("done drawrect");
       }
     });
     try {
       loadUtil();
+      todo("when do we set the screen size?");
       mScreen.open();
       mScreen.mainLoop();
     } catch (Throwable t) {
@@ -67,15 +70,10 @@ mScreen.drawRect(window.bounds());
     if (!mScreenValid) {
       mScreenValid = true;
       IRect bounds = new IRect(mScreen.screenSize());
-      mMainWindow.setBounds(bounds);
-      mMainWindow.repaint();
+      var w = mScreen.window();
+      w.setBounds(bounds);
+      w.repaint();
     }
-
-    //    if (!mDrawn) {
-    //      mScreen.drawRandomContent();
-    //      mDrawn = true;
-    //    }
-    //    mScreen.updateRandomContent();
   }
 
   @Override
@@ -92,8 +90,7 @@ mScreen.drawRect(window.bounds());
   }
 
   private BkConfig mConfig;
-  //private boolean mDrawn;
   private JScreen mScreen;
   private boolean mScreenValid;
-  private JWindow mMainWindow = new JWindow();
+
 }

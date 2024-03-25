@@ -2,16 +2,28 @@ package bk;
 
 import static js.base.Tools.*;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.Writer;
+
 import js.app.App;
+import js.base.DateTimeTools;
+import js.base.LoggerInterface;
 
 public class Bk extends App {
 
   public static void main(String[] args) {
-    loadTools();
-    Bk app = new Bk();
-    //app.setCustomArgs("-v");
-    app.startApplication(args);
-    app.exitWithReturnCode();
+    var logger = new OurTextLogger();
+    logger(logger);
+    try {
+      loadTools();
+      Bk app = new Bk();
+      //app.setCustomArgs("-v");
+      app.startApplication(args);
+      app.exitWithReturnCode();
+    } finally {
+      logger.println("...Bk is exiting");
+    }
   }
 
   @Override
@@ -24,4 +36,30 @@ public class Bk extends App {
     registerOper(new BkOper());
   }
 
+  private static class OurTextLogger implements LoggerInterface {
+
+    public OurTextLogger() {
+      try {
+        var fw = new FileWriter("_SKIP_log.txt");
+        mWriter = new BufferedWriter(fw);
+        mWriter.append("\n\n\n\n\n\n\nBk Writer opened at: " + DateTimeTools.humanTimeString()
+            + "\n--------------------------------------------------\n");
+      } catch (Throwable t) {
+        throw asRuntimeException(t);
+      }
+    }
+
+    private Writer mWriter;
+
+    @Override
+    public void println(String message) {
+      try {
+        mWriter.append(message);
+        mWriter.write('\n');
+        mWriter.flush();
+      } catch (Throwable t) {
+        throw asRuntimeException(t);
+      }
+    }
+  }
 }

@@ -15,4 +15,8 @@ public final class Util {
   public static void msg(Object... args) {
     pr(">>>", BasePrinter.toString(args));
   }
+
+  public static JScreen screen() {
+    return JScreen.sharedInstance();
+  }
 }
