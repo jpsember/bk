@@ -12,6 +12,7 @@ import com.googlecode.lanterna.TextCharacter;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.input.KeyStroke;
+import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.AbstractScreen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
@@ -28,16 +29,13 @@ public class JScreen {
   private static JScreen SHARED_INSTANCE;
 
   public static JScreen sharedInstance() {
-    if (SHARED_INSTANCE == null)
-      badState("no shared instance");
+    if (SHARED_INSTANCE == null) {
+      SHARED_INSTANCE = new JScreen();
+    }
     return SHARED_INSTANCE;
   }
 
-  public JScreen(ScreenHandler handler) {
-    todo("This should be a singleton");
-    checkState(SHARED_INSTANCE == null, "already built");
-    mHandler = handler;
-    SHARED_INSTANCE = this;
+  private JScreen() {
   }
 
   //  public JWindow window() {
@@ -57,10 +55,10 @@ public class JScreen {
       // Turn off cursor for now
       mScreen.setCursorPosition(null);
       pr("set screen to:", mScreen);
-
-      // Open a window manager for the screen
-
-      mWindowManager = new WinMgr();
+      //
+      //      // Open a window manager for the screen
+      //
+      //      mWindowManager = new WinMgr();
     } catch (Throwable t) {
       throw asRuntimeException(t);
     }
@@ -85,7 +83,10 @@ public class JScreen {
     try {
       KeyStroke keyStroke = mScreen.pollInput();
       if (keyStroke != null) {
-        mHandler.processKey(keyStroke);
+        pr("got:", keyStroke);
+        if (keyStroke.getKeyType() == KeyType.Escape)
+          quit();
+        //        mHandler.processKey(keyStroke);
       }
 
       // Update size of terminal
@@ -93,7 +94,8 @@ public class JScreen {
       var currSize = toIpoint(mScreen.getTerminalSize());
       if (!currSize.equals(mScreenSize)) {
         mScreenSize = currSize;
-        mHandler.processNewSize(mScreenSize);
+        //mHandler.processNewSize(mScreenSize);
+        todo("resize the child views etc");
       }
 
       if (!quitRequested()) {
@@ -114,10 +116,10 @@ public class JScreen {
   public AbstractScreen screen() {
     return mScreen;
   }
-
-  public WinMgr windowManager() {
-    return mWindowManager;
-  }
+  //
+  //  public WinMgr windowManager() {
+  //    return mWindowManager;
+  //  }
 
   public IPoint screenSize() {
     if (mScreenSize == null) {
@@ -257,8 +259,8 @@ public class JScreen {
   private Random random;
   private Terminal mTerminal;
   private AbstractScreen mScreen;
-  private ScreenHandler mHandler;
+  //  private ScreenHandler mHandler;
   private IPoint mScreenSize;
   private boolean mQuitFlag;
-  private WinMgr mWindowManager;
+  //  private WinMgr mWindowManager;
 }

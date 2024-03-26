@@ -23,7 +23,10 @@ public final class Util {
   public static JScreen screen() {
     return JScreen.sharedInstance();
   }
-  
+
+  public static WinMgr winMgr() {
+    return WinMgr.SHARED_INSTANCE;
+  }
 
   public static String randomText(int maxLength, boolean withLinefeeds) {
     StringBuilder sb = new StringBuilder();

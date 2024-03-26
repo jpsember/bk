@@ -9,6 +9,7 @@ import js.base.Pair;
 
 public class WinMgr extends BaseObject {
 
+  public static final WinMgr SHARED_INSTANCE;
   private static final int S_TYPE_CONTAINER = 1;
 
   public WinMgr pushContainer() {
@@ -59,4 +60,9 @@ public class WinMgr extends BaseObject {
   }
 
   private Stack<Pair<Integer, Object>> mStack = new Stack();
+  
+  static {
+    SHARED_INSTANCE = new WinMgr();
+  }
+  
 }

@@ -159,9 +159,9 @@ public class JWindow {
 
   private String mId;
 
-  protected final void registerListener(WidgetListener listener) {
-    mListener = listener;
-  }
+//  protected final void registerListener(WidgetListener listener) {
+//    mListener = listener;
+//  }
 
   /**
    * Notify WidgetListener, if there is one, of an event involving this widget
@@ -265,7 +265,7 @@ public class JWindow {
     return getClass().getSimpleName();
   }
 
-  private WidgetListener mListener;
+//  private WidgetListener mListener;
   private JComponent mWrappedComponent;
 
 }
