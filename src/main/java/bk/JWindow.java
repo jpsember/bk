@@ -3,7 +3,10 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
+import java.awt.event.ActionEvent;
 import java.util.List;
+
+import javax.swing.JComponent;
 
 import com.googlecode.lanterna.Symbols;
 
@@ -101,4 +104,168 @@ public class JWindow {
 
     }
   };
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  public final JWindow setId(String id) {
+    checkState(!hasId(), "already has an id");
+    // If id is not null, it cannot be empty
+    checkArgument(!"".equals(id));
+    mId = id;
+    return this;
+  }
+
+  public final boolean hasId() {
+    return mId != null;
+  }
+
+  public final String id() {
+    if (mId == null)
+      throw badState("window has no id");
+    return mId;
+  }
+
+  public final String optionalId() {
+    return ifNullOrEmpty(mId, "<no id>");
+  }
+
+  private String mId;
+
+  protected final void registerListener(WidgetListener listener) {
+    mListener = listener;
+  }
+
+  /**
+   * Notify WidgetListener, if there is one, of an event involving this widget
+   */
+  protected final void notifyListener() {
+    notFinished("notifyListener");
+//    if (mListener != null)
+//      widgets().notifyWidgetListener(this, mListener);
+  }
+
+  @Override
+  public String toString() {
+    return id() + ":" + getClass().getSimpleName();
+  }
+
+  public void displayKeyboard() {
+    throw new UnsupportedOperationException();
+  }
+
+  public void hideKeyboard() {
+    throw new UnsupportedOperationException();
+  }
+
+  public void setInputType(int inputType) {
+    throw new UnsupportedOperationException();
+  }
+
+  public void setEnabled(boolean enabled) {
+    throw notSupported(className());
+  }
+
+  public boolean enabled() {
+    throw notSupported(className());
+  }
+
+  public void setVisible(boolean visible) {
+    todo("setVisible not implemented for:", className());
+  }
+
+  public void doClick() {
+    throw new UnsupportedOperationException();
+  }
+
+  public void setChecked(boolean state) {
+    throw new UnsupportedOperationException();
+  }
+
+  public boolean isChecked() {
+    throw new UnsupportedOperationException();
+  }
+
+  public void setValue(Number number) {
+    throw new UnsupportedOperationException();
+  }
+
+ 
+  /**
+   * Replace this widget in its view hierarchy with another
+   */
+  public void replaceWith(JWindow other) {
+    throw new UnsupportedOperationException();
+  }
+
+  public void actionPerformed(ActionEvent e) {
+    notifyListener();
+  }
+
+  public void setComponent(JComponent component) {
+    mWrappedComponent = component;
+  }
+
+  public final JComponent component() {
+    return mWrappedComponent;
+  }
+
+  public final <T extends JComponent> T swingComponent() {
+    return (T) component();
+  }
+
+  /**
+   * Get component to attach tooltip to (if there is one). Default
+   * implementation returns swingComponent()
+   */
+  public JComponent componentForTooltip() {
+    return swingComponent();
+  }
+
+  public void setText(String text) {
+    throw new UnsupportedOperationException();
+  }
+
+  public String getText() {
+    throw new UnsupportedOperationException();
+  }
+
+  public void setHint(String hint) {
+    throw new UnsupportedOperationException();
+  }
+
+  private String className() {
+    return getClass().getSimpleName();
+  }
+
+  private WidgetListener mListener;
+  private JComponent mWrappedComponent;
+
 }

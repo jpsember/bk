@@ -54,6 +54,10 @@ public class BkOper extends AppOper implements ScreenHandler {
         pr("done drawrect");
       }
     });
+    
+    
+    
+    
     try {
       loadUtil();
       todo("when do we set the screen size?");
