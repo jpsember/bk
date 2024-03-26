@@ -10,13 +10,11 @@ import bk.gen.BkConfig;
 import js.app.AppOper;
 import js.base.BasePrinter;
 import js.geometry.IPoint;
-import js.geometry.IRect;
 
 public class BkOper extends AppOper implements ScreenHandler {
 
   @Override
   public String userCommand() {
-    todo("have option to output pr to a log file which is tracked by something");
     return "bk";
   }
 
@@ -46,18 +44,24 @@ public class BkOper extends AppOper implements ScreenHandler {
   @Override
   public void perform() {
     mScreen = new JScreen(this);
-    mScreen.window().setHandler(new WindowHandler() {
-      @Override
-      public void paint(JWindow window) {
-        pr("painting, window:", window);
-        window.drawRect(new IRect(window.bounds().size()));
-        pr("done drawrect");
-      }
-    });
-    
-    
-    
-    
+
+    var mgr = mScreen.windowManager();
+
+    {
+      mgr.pushContainer();
+      mgr.window();
+      mgr.popContainer();
+    }
+    //    mScreen.window().setHandler(new WindowHandler() {
+    //      @Override
+    //      public void paint(JWindow window) {
+    //        pr("painting, window:", window);
+    //        window.drawRect(new IRect(window.bounds().size()));
+    //        pr("done drawrect");
+    //      }
+    //    });
+    //    
+
     try {
       loadUtil();
       todo("when do we set the screen size?");
@@ -73,10 +77,10 @@ public class BkOper extends AppOper implements ScreenHandler {
     todo("repaint");
     if (!mScreenValid) {
       mScreenValid = true;
-      IRect bounds = new IRect(mScreen.screenSize());
-      var w = mScreen.window();
-      w.setBounds(bounds);
-      w.repaint();
+      //      IRect bounds = new IRect(mScreen.screenSize());
+      //      var w = mScreen.window();
+      //      w.setBounds(bounds);
+      //      w.repaint();
     }
   }
 

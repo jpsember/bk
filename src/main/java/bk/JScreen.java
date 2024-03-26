@@ -34,18 +34,19 @@ public class JScreen {
   }
 
   public JScreen(ScreenHandler handler) {
+    todo("This should be a singleton");
     checkState(SHARED_INSTANCE == null, "already built");
     mHandler = handler;
     SHARED_INSTANCE = this;
   }
 
-  public JWindow window() {
-    if (mMainWindow == null) {
-      var w = new JWindow();
-      mMainWindow = w;
-    }
-    return mMainWindow;
-  }
+  //  public JWindow window() {
+  //    if (mMainWindow == null) {
+  //      var w = new JWindow();
+  //      mMainWindow = w;
+  //    }
+  //    return mMainWindow;
+  //  }
 
   public void open() {
     try {
@@ -56,6 +57,10 @@ public class JScreen {
       // Turn off cursor for now
       mScreen.setCursorPosition(null);
       pr("set screen to:", mScreen);
+
+      // Open a window manager for the screen
+
+      mWindowManager = new WinMgr();
     } catch (Throwable t) {
       throw asRuntimeException(t);
     }
@@ -92,9 +97,10 @@ public class JScreen {
       }
 
       if (!quitRequested()) {
-        mHandler.repaint();
+        todo("no longer calling window handler's repaint method");
+        //        mHandler.repaint();
 
-        performPaint(window(), true);
+        //   performPaint(window(), true);
 
         // Make changes visible
         mScreen.refresh();
@@ -107,6 +113,10 @@ public class JScreen {
 
   public AbstractScreen screen() {
     return mScreen;
+  }
+
+  public WinMgr windowManager() {
+    return mWindowManager;
   }
 
   public IPoint screenSize() {
@@ -250,6 +260,5 @@ public class JScreen {
   private ScreenHandler mHandler;
   private IPoint mScreenSize;
   private boolean mQuitFlag;
-  private JWindow mMainWindow;
-
+  private WinMgr mWindowManager;
 }

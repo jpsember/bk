@@ -4,6 +4,6 @@ package bk;
  * A window that contains other windows
  *
  */
-public class JContainer {
+public class JContainer extends JWindow {
 
 }

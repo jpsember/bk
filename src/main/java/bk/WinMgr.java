@@ -28,10 +28,34 @@ public class WinMgr extends BaseObject {
   }
 
   private <T> T pop(int type) {
+    var x = (T) peek(type);
+    mStack.pop();
+
+    if (type == S_TYPE_CONTAINER) {
+      todo("layout the container");
+    }
+    return x;
+  }
+
+  private <T> T peek(int type) {
     checkState(!mStack.isEmpty(), "stack is empty");
-    var p = mStack.pop();
-    checkState(p.first == type, "expected to pop", type, "but got", p.first);
+    var p = mStack.peek();
+    checkState(p.first == type, "expected stack top to contain", type, "but got", p.first);
     return (T) p.second;
+  }
+
+  private JContainer container() {
+    return peek(S_TYPE_CONTAINER);
+  }
+
+  /**
+   * Construct a window and add it to the current container
+   */
+  public WinMgr window() {
+    var c = container();
+    var w = new JWindow();
+    c.children().add(w);
+    return this;
   }
 
   private Stack<Pair<Integer, Object>> mStack = new Stack();

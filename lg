@@ -1,0 +1,2 @@
+touch _SKIP_log.txt
+tail -f _SKIP_log.txt
