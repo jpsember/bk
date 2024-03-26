@@ -18,6 +18,8 @@ public class WinMgr extends BaseObject {
 
   public WinMgr pushContainer() {
     var con = new JContainer();
+    con.mHorzFlag = mHorzFlag;
+    mHorzFlag = false;
     push(S_TYPE_CONTAINER, con);
     return this;
   }
@@ -30,6 +32,31 @@ public class WinMgr extends BaseObject {
   private void push(int type, Object object) {
     checkState(mStack.size() < 100, "stack is too large");
     mStack.push(pair(type, object));
+  }
+
+  public WinMgr horz() {
+    mHorzFlag = true;
+    return this;
+  }
+
+  public WinMgr width(int columns) {
+    mSizer.widthChars = columns;
+    return this;
+  }
+
+  public WinMgr height(int rows) {
+    mSizer.heightChars = rows;
+    return this;
+  }
+
+  public WinMgr widthPct(int pct) {
+    mSizer.widthPct = pct;
+    return this;
+  }
+
+  public WinMgr heightPct(int pct) {
+    mSizer.heightPct = pct;
+    return this;
   }
 
   private <T> T pop(int type) {
@@ -61,6 +88,8 @@ public class WinMgr extends BaseObject {
   public WinMgr window() {
     var c = container();
     var w = new JWindow();
+    w.setSize(mSizer);
+    mSizer = new Sizer();
     c.children().add(w);
     return this;
   }
@@ -76,4 +105,10 @@ public class WinMgr extends BaseObject {
     return peek(S_TYPE_CONTAINER);
   }
 
+  private boolean mHorzFlag;
+  //  private int mColumns;
+  //  private int mRows;
+  //  private int mColumnsPct;
+  //  private int mRowsPct;
+  private Sizer mSizer = new Sizer();
 }

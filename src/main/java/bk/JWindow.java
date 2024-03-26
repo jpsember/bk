@@ -246,4 +246,8 @@ public class JWindow {
   //  private WidgetListener mListener;
   private JComponent mWrappedComponent;
 
+   void setSize(Sizer s) {
+     mSizer = s;
+  }
+   Sizer mSizer;
 }
