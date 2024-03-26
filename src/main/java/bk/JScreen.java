@@ -84,29 +84,29 @@ public class JScreen {
       KeyStroke keyStroke = mScreen.pollInput();
       if (keyStroke != null) {
         pr("got:", keyStroke);
-        if (keyStroke.getKeyType() == KeyType.Escape)
+        if (keyStroke.getKeyType() == KeyType.Escape) {
           quit();
+          return;
+        }
+        todo("send key event to the window that has focus");
         //        mHandler.processKey(keyStroke);
       }
-
       // Update size of terminal
       mScreen.doResizeIfNecessary();
       var currSize = toIpoint(mScreen.getTerminalSize());
-      if (!currSize.equals(mScreenSize)) {
-        mScreenSize = currSize;
-        //mHandler.processNewSize(mScreenSize);
-        todo("resize the child views etc");
+      if (!currSize.equals(mPrevLayoutScreenSize)) {
+        mPrevLayoutScreenSize = currSize;
+        pr("laying out views for screen size:", currSize);
+        layoutViews(currSize);
       }
 
-      if (!quitRequested()) {
-        todo("no longer calling window handler's repaint method");
-        //        mHandler.repaint();
+      todo("no longer calling window handler's repaint method");
 
-        //   performPaint(window(), true);
+      updateViews();
 
-        // Make changes visible
-        mScreen.refresh();
-      }
+      // Make changes visible
+      mScreen.refresh();
+      //      sleepMs(200);
     } catch (Throwable t) {
       closeIfError(t);
       throw asRuntimeException(t);
@@ -120,14 +120,14 @@ public class JScreen {
   //  public WinMgr windowManager() {
   //    return mWindowManager;
   //  }
-
-  public IPoint screenSize() {
-    if (mScreenSize == null) {
-      mScreenSize = toIpoint(mScreen.getTerminalSize());
-      pr("screen size is:", mScreenSize);
-    }
-    return mScreenSize;
-  }
+  //
+  //  public IPoint screenSize() {
+  //    if (mScreenSize == null) {
+  //      mScreenSize = toIpoint(mScreen.getTerminalSize());
+  //      pr("screen size changing to:", mScreenSize);
+  //    }
+  //    return mScreenSize;
+  //  }
 
   private static IPoint toIpoint(TerminalSize s) {
     return IPoint.with(s.getColumns(), s.getRows());
@@ -253,14 +253,34 @@ public class JScreen {
     for (var c : w.children()) {
       performPaint(c, false);
     }
+  }
 
+  private void layoutViews(IPoint screenSize) {
+    var m = winMgr();
+    var c = m.topLevelContainer();
+    c.repaint();
+    c.layout(IPoint.ZERO, screenSize);
+  }
+
+  private void updateViews() {
+    var m = winMgr();
+    var c = m.topLevelContainer();
+    updateViewsAux(c);
+  }
+
+  private void updateViewsAux(JWindow w) {
+    todo("give windows a chance to perform updates even if their paint is valid");
+    if (!w.paintValid()) {
+      w.render();
+      w.setPaintValid(true);
+    }
+    for (var c : w.children())
+      updateViewsAux(c);
   }
 
   private Random random;
   private Terminal mTerminal;
   private AbstractScreen mScreen;
-  //  private ScreenHandler mHandler;
-  private IPoint mScreenSize;
+  private IPoint mPrevLayoutScreenSize;
   private boolean mQuitFlag;
-  //  private WinMgr mWindowManager;
 }

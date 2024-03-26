@@ -51,6 +51,15 @@ public class JWindow {
     setPaintValid(false);
   }
 
+  /**
+   * Render the window onto the screen
+   */
+  public void render() {
+    todo("for now, just drawing a rectangle");
+    pr("bounds:",bounds());
+    drawRect(new IRect(bounds().size()));
+  }
+
   public void drawRect(IRect bounds) {
     var js = screen();
     var s = js.screen();
@@ -104,37 +113,7 @@ public class JWindow {
 
     }
   };
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
   public final JWindow setId(String id) {
     checkState(!hasId(), "already has an id");
     // If id is not null, it cannot be empty
@@ -159,17 +138,17 @@ public class JWindow {
 
   private String mId;
 
-//  protected final void registerListener(WidgetListener listener) {
-//    mListener = listener;
-//  }
+  //  protected final void registerListener(WidgetListener listener) {
+  //    mListener = listener;
+  //  }
 
   /**
    * Notify WidgetListener, if there is one, of an event involving this widget
    */
   protected final void notifyListener() {
     notFinished("notifyListener");
-//    if (mListener != null)
-//      widgets().notifyWidgetListener(this, mListener);
+    //    if (mListener != null)
+    //      widgets().notifyWidgetListener(this, mListener);
   }
 
   @Override
@@ -217,7 +196,6 @@ public class JWindow {
     throw new UnsupportedOperationException();
   }
 
- 
   /**
    * Replace this widget in its view hierarchy with another
    */
@@ -265,7 +243,7 @@ public class JWindow {
     return getClass().getSimpleName();
   }
 
-//  private WidgetListener mListener;
+  //  private WidgetListener mListener;
   private JComponent mWrappedComponent;
 
 }

@@ -43,9 +43,8 @@ public class BkOper extends AppOper {
 
     var mgr = winMgr();
     {
-      mgr.pushContainer();
+      // Layout a single window
       mgr.window();
-      mgr.popContainer();
     }
     //    mScreen.window().setHandler(new WindowHandler() {
     //      @Override

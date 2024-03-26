@@ -12,6 +12,10 @@ public class WinMgr extends BaseObject {
   public static final WinMgr SHARED_INSTANCE;
   private static final int S_TYPE_CONTAINER = 1;
 
+  private WinMgr() {
+    pushContainer();
+  }
+
   public WinMgr pushContainer() {
     var con = new JContainer();
     push(S_TYPE_CONTAINER, con);
@@ -29,6 +33,8 @@ public class WinMgr extends BaseObject {
   }
 
   private <T> T pop(int type) {
+    if (mStack.size() <= 1)
+      badState("attempt to pop the outermost container");
     var x = (T) peek(type);
     mStack.pop();
 
@@ -60,9 +66,14 @@ public class WinMgr extends BaseObject {
   }
 
   private Stack<Pair<Integer, Object>> mStack = new Stack();
-  
+
   static {
     SHARED_INSTANCE = new WinMgr();
   }
-  
+
+  public JContainer topLevelContainer() {
+    checkState(mStack.size() == 1, "unexpected stack size:", mStack.size());
+    return peek(S_TYPE_CONTAINER);
+  }
+
 }
