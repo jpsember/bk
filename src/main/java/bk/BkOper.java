@@ -57,25 +57,19 @@ public class BkOper extends AppOper {
       pr("calling screen.open()....");
       screen.open();
       pr("...finished screen.open()");
-      
-      
-      
-      
-      
-      
-      
+
       var mgr = winMgr();
 
       // Create a root container
       mgr.pushContainer();
       {
-        // Layout two windows; the second has some horizontal panels
-        pr("laying out first window with size=75");
+        // Construct two windows; the second has some horizontal panels
+        pr("constructing out first window with size=75");
         mgr.pct(75);
         mgr.window();
-        pr("laying out second container with size=25");
+        pr("constructing second container with size=25");
         mgr.pct(25);
-        if (true){
+        if (true) {
           mgr.horz().pushContainer();
           {
             mgr.chars(15).window();
@@ -83,20 +77,11 @@ public class BkOper extends AppOper {
             mgr.pct(20).window();
           }
           mgr.popContainer();
-          mgr.window();
         }
       }
-      
+
       mgr.doneConstruction();
 
-      
-      
-      
-      
-      
-      
-      
-      
       screen.mainLoop();
     } catch (Throwable t) {
       setError(screen.closeIfError(t));

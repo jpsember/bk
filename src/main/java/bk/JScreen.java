@@ -114,7 +114,7 @@ public class JScreen {
         //        layoutViews(currSize);
       }
 
-      updateViewsAux(c);
+      updateView(c);
 
       // Make changes visible
       mScreen.refresh();
@@ -264,22 +264,42 @@ public class JScreen {
     return t;
   }
 
-  private void updateViewsAux(JWindow w) {
+  /**
+   * If a view's layout is invalid, calls its layout() method, and invalidates
+   * its paint.
+   * 
+   * If the view's paint is invalid, renders it.
+   * 
+   * Recursively processes all child views in this manner as well.
+   */
+  private void updateView(JWindow w) {
+    final boolean db = true && alert("logging is on");
+
+    if (db) {
+      if (!w.layoutValid() || !w.paintValid())
+        pr(VERT_SP, "updateViews");
+    }
+
     if (!w.layoutValid()) {
+      if (db)
+        pr("...window", w.name(), "layout is invalid");
       w.setPaintValid(false);
-      w.layout(w.bounds());
-      
+      w.layout();
+      w.setLayoutValid();
+
       // Invalidate layout of any child views as well
       for (var c : w.children())
         c.setLayoutInvalid();
     }
 
     if (!w.paintValid()) {
+      if (db)
+        pr("...window", w.name(), "paint is invalid; rendering; bounds:", w.bounds());
       w.render();
       w.setPaintValid(true);
     }
     for (var c : w.children())
-      updateViewsAux(c);
+      updateView(c);
   }
 
   private Random random;

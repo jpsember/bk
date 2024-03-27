@@ -24,14 +24,24 @@ public class WinMgr extends BaseObject {
 
   public WinMgr pushContainer() {
     pr("pushing container...");
+
     var con = new JContainer();
+
+    // If this is not going to be the top-level window, add it as a child to the current parent.
+    if (!mStack.isEmpty()) {
+      var parent = container();
+      parent.children().add(con);
+    }
+
     con.mHorzFlag = mHorzFlag;
     mHorzFlag = false;
     if (mRootContainer == null)
       mRootContainer = con;
+
     applyParam(con);
     push(S_TYPE_CONTAINER, con);
-    pr("...done pushing container",VERT_SP);
+
+    pr("...done pushing container", VERT_SP);
     return this;
   }
 

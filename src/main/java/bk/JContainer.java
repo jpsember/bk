@@ -34,12 +34,10 @@ public class JContainer extends JWindow {
   }
 
   @Override
-  public void layout(IRect boundsWithinScreen) {
-    final boolean db = true;
+  public void layout() {
+    final boolean db = false;
 
     var problem = false;
-
-    super.layout(boundsWithinScreen);
 
     if (children().isEmpty())
       return;
@@ -51,6 +49,8 @@ public class JContainer extends JWindow {
 
     // True if we need to exchange x<->y and w<->h so we can always deal with x being the dynamic dimension
     boolean swap = !mHorzFlag;
+
+    var boundsWithinScreen = bounds();
 
     // The size of the container (normalized so windows are stacked horizontally)
 
