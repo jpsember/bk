@@ -13,14 +13,24 @@ public class WinMgr extends BaseObject {
   private static final int S_TYPE_CONTAINER = 1;
 
   private WinMgr() {
-    pushContainer();
+    // pushContainer();
+  }
+
+  public JContainer rootContainer() {
+    if (mRootContainer == null)
+      throw badState("no root container defined");
+    return mRootContainer;
   }
 
   public WinMgr pushContainer() {
     var con = new JContainer();
     con.mHorzFlag = mHorzFlag;
     mHorzFlag = false;
+
+    if (mRootContainer == null)
+      mRootContainer = con;
     push(S_TYPE_CONTAINER, con);
+    resetPendingWindowVars();
     return this;
   }
 
@@ -81,9 +91,14 @@ public class WinMgr extends BaseObject {
     var c = container();
     var w = new JWindow();
     w.setSize(mSizeExpr);
-    mSizeExpr = 0;
+    resetPendingWindowVars();
     c.children().add(w);
     return this;
+  }
+
+  private void resetPendingWindowVars() {
+    mHorzFlag = false;
+    mSizeExpr = -100;
   }
 
   private Stack<Pair<Integer, Object>> mStack = new Stack();
@@ -99,4 +114,6 @@ public class WinMgr extends BaseObject {
 
   private boolean mHorzFlag;
   private int mSizeExpr; // 0: unknown > 1: number of chars < 1: -percentage
+  private JContainer mRootContainer;
+
 }

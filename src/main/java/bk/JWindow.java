@@ -56,7 +56,7 @@ public class JWindow {
    */
   public void render() {
     todo("for now, just drawing a rectangle");
-    pr("bounds:", bounds());
+    pr("rendering bounds:", bounds());
     drawRect(new IRect(bounds().size()));
   }
 

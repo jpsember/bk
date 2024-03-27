@@ -42,13 +42,14 @@ public class BkOper extends AppOper {
     //    mScreen = new JScreen(this);
 
     var mgr = winMgr();
+
+    // Create a root container
+    mgr.pushContainer();
+
     {
       // Layout two windows
-      mgr.pushContainer();
       mgr.window();
       mgr.window();
-      mgr.popContainer();
-      
     }
     //    mScreen.window().setHandler(new WindowHandler() {
     //      @Override
