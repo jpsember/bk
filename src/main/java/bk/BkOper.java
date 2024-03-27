@@ -47,9 +47,18 @@ public class BkOper extends AppOper {
     mgr.pushContainer();
 
     {
-      // Layout two windows
+      // Layout two windows; the second has some horizontal panels
       mgr.window();
+      {
+        mgr.horz().pushContainer();
+        {
+          mgr.chars(15).window();
+          mgr.pct(75).window();
+          mgr.pct(25).window();
+        }
+        mgr.popContainer();
       mgr.window();
+      }
     }
     //    mScreen.window().setHandler(new WindowHandler() {
     //      @Override

@@ -56,8 +56,8 @@ public class WinMgr extends BaseObject {
   }
 
   public WinMgr pct(int pct) {
-    checkArgument(pct < 0, "expected negative percentage");
-    mSizeExpr = pct;
+    checkArgument(pct > 0, "expected positive percentage");
+    mSizeExpr = -pct;
     return this;
   }
 

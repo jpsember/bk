@@ -117,72 +117,54 @@ public class JWindow extends BaseObject {
     pr("rendering bounds:", bounds(), "for:", name());
     // Get rectangle with origin at this window's top left
     var b = new IRect(bounds().size());
-
     clearRect(b.withInset(1));
     drawRect(b);
   }
 
   /**
    * Translate a point from window space to screen space, and clamp to screen
-   * 
-   * @param wx
-   *          window space coordinates
-   * @param wy
-   * @return point, x in low word, y in high
    */
-  private int translateAndClampToScreen(int wx, int wy) {
+  private IPoint translateAndClampToScreen(int wx, int wy) {
     var wb = bounds();
     var sx = wx + wb.x;
     var sy = wy + wb.y;
 
     var cx1 = clampToWindowBoundsX(sx);
     var cy1 = clampToWindowBoundsY(sy);
-    return cx1 + (cy1 << 16);
+    return new IPoint(cx1, cy1);
+  }
+
+  private IRect translateAndClampToScreen(IRect r) {
+    var p1 = translateAndClampToScreen(r.x, r.y);
+    var p2 = translateAndClampToScreen(r.endX(), r.endY());
+    return IRect.rectContainingPoints(p1, p2);
   }
 
   public void clearRect(IRect bounds) {
-    var coord = translateAndClampToScreen(bounds.x, bounds.y);
-    var cx1 = coord & 0xffff;
-    var cy1 = coord >> 16;
-    coord = translateAndClampToScreen(bounds.endX(), bounds.endY());
-    var cx2 = coord & 0xffff;
-    var cy2 = coord >> 16;
-    if (cx1 >= cx2 || cy1 >= cy2)
+    var p = translateAndClampToScreen(bounds);
+    if (p.isDegenerate())
       return;
-    var js = screen();
-    var s = js.screen();
-
-    var tg = s.newTextGraphics();
-    tg.fillRectangle(new TerminalPosition(cx1, cy1), new TerminalSize(cx2 - cx1, cy2 - cy1), ' ');
+    var tg = textGraphics();
+    tg.fillRectangle(new TerminalPosition(p.x, p.y), new TerminalSize(p.width, p.height), ' ');
   }
 
   public void drawRect(IRect bounds) {
-    if (false && alert("changing size to 3,3"))
-      bounds = new IRect(bounds.x, bounds.y, 3, 3);
-    var coord = translateAndClampToScreen(bounds.x, bounds.y);
-    var x1 = coord & 0xffff;
-    var y1 = coord >> 16;
-
-    coord = translateAndClampToScreen(bounds.endX(), bounds.endY());
-    var x2 = coord & 0xffff;
-    var y2 = coord >> 16;
-
-    pr("drawRect, bounds:", bounds, "cx1:", x1, "cx2:", x2, "cy1:", y1, "cy2:", y2);
-
-    if (x1 >= x2 || y1 >= y2)
+    var p = translateAndClampToScreen(bounds);
+    if (p.isDegenerate())
       return;
 
-    var js = screen();
-    var s = js.screen();
-
-    var tg = s.newTextGraphics();
+    var tg = textGraphics();
     //    var min = new IPoint(cb.x, cb.y); //toTerm(cb.x, cb.y);
     //    var max = toTerm(cb.endX(), cb.endY());
-    if (x2 - x1 >= 2) {
+    var x1 = p.x;
+    var y1 = p.y;
+    var x2 = p.endX();
+    var y2 = p.endY();
+    if (p.width > 2) {
       tg.drawLine(x1 + 1, y1, x2 - 2, y1, Symbols.DOUBLE_LINE_HORIZONTAL);
       tg.drawLine(x1 + 1, y2 - 1, x2 - 2, y2 - 1, Symbols.DOUBLE_LINE_HORIZONTAL);
     }
-    if (y2 - y1 >= 2) {
+    if (p.height >= 2) {
       tg.drawLine(x1, y1 + 1, x1, y2 - 2, Symbols.DOUBLE_LINE_VERTICAL);
       tg.drawLine(x2 - 1, y1 + 1, x2 - 1, y2 - 2, Symbols.DOUBLE_LINE_VERTICAL);
     }

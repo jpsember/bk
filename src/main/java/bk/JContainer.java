@@ -14,11 +14,12 @@ public class JContainer extends JWindow {
 
   @Override
   public void render() {
-    
+    // The child views will render themselves.
+
+    // Special case: if this is the top level container, clear its bounds.
+    if (this == WinMgr.SHARED_INSTANCE.rootContainer())
+      clearRect(bounds().withLocation(IPoint.ZERO));
   }
-  //  private static int getComponent(IPoint pt, boolean horzFlag) {
-  //    return horzFlag ? pt.x : pt.y;
-  //  }
 
   private static IPoint swapIf(IPoint pt, boolean swap) {
     if (!swap)

@@ -5,6 +5,8 @@ import static js.base.Tools.*;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
+import com.googlecode.lanterna.graphics.TextGraphics;
+
 import js.base.BasePrinter;
 import js.base.DateTimeTools;
 
@@ -22,6 +24,10 @@ public final class Util {
 
   public static JScreen screen() {
     return JScreen.sharedInstance();
+  }
+
+  public static TextGraphics textGraphics() {
+    return screen().textGraphics();
   }
 
   public static WinMgr winMgr() {

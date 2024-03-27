@@ -98,6 +98,7 @@ public class JScreen {
       mScreen.doResizeIfNecessary();
       var currSize = toIpoint(mScreen.getTerminalSize());
       if (!currSize.equals(mPrevLayoutScreenSize)) {
+        mTextGraphics = null;
         mPrevLayoutScreenSize = currSize;
         pr("laying out views for screen size:", currSize);
         layoutViews(currSize);
@@ -119,6 +120,14 @@ public class JScreen {
   public AbstractScreen screen() {
     return mScreen;
   }
+
+  public TextGraphics textGraphics() {
+    if (mTextGraphics == null) {
+      mTextGraphics = screen().newTextGraphics();
+    }
+    return mTextGraphics;
+  }
+
   //
   //  public WinMgr windowManager() {
   //    return mWindowManager;
@@ -288,4 +297,5 @@ public class JScreen {
   private AbstractScreen mScreen;
   private IPoint mPrevLayoutScreenSize;
   private boolean mQuitFlag;
+  private TextGraphics mTextGraphics;
 }
