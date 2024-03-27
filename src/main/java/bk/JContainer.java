@@ -62,7 +62,7 @@ public class JContainer extends JWindow {
     // Determine the space to distribute to the fixed-width windows,
     // as well as the sum of the percentages of the dynamic-width windows
 
-    int pctSum = 0;
+    double pctSum = 0;
     int charsSum = 0;
     for (var child : children()) {
       var sizeExpr = child.getSizeExpr();
@@ -79,6 +79,7 @@ public class JContainer extends JWindow {
       pr("charsSum:", charsSum, "pctSum:", pctSum, "charsDynamic:", charsDynamicTotal);
 
     var staticCharsAllotted = 0;
+    int dynamicCharsAllotted = 0;
 
     for (JWindow c : children()) {
       if (db)
@@ -86,21 +87,24 @@ public class JContainer extends JWindow {
       var sizeExpr = c.getSizeExpr();
 
       int chars;
-      if (sizeExpr > 0)
+      if (sizeExpr > 0) {
         chars = sizeExpr;
-      else
-        chars = (charsDynamicTotal * -sizeExpr) / pctSum;
+        chars = MyMath.clamp(chars, 0, normSize.x - staticCharsAllotted);
+        staticCharsAllotted += chars;
+      } else {
+        var target = (charsDynamicTotal * -sizeExpr) / pctSum;
+        chars = (int) Math.round(target);
+        chars = MyMath.clamp(chars, 0, charsDynamicTotal - dynamicCharsAllotted);
+        dynamicCharsAllotted += chars;
+        pr("...pct:", -sizeExpr, "dynamicTot:", charsDynamicTotal, "target:", target);
+      }
       if (db)
         pr("sizeExpr:", sizeExpr, "chars:", chars);
-      chars = MyMath.clamp(chars, 0, normSize.x - staticCharsAllotted);
-      if (db)
+      if ( db)
         pr("charsDynamicTotal:", charsDynamicTotal, "clamped chars:", chars);
       if (chars == 0) {
         alert("problem fitting window");
       }
-
-      if (sizeExpr > 0)
-        staticCharsAllotted += chars;
 
       var ourNormSize = new IPoint(chars, normSize.y);
       var ourNormBounds = IRect.withLocAndSize(normNextPosition, ourNormSize);

@@ -147,7 +147,7 @@ public class JWindow extends BaseObject {
 
   public void drawRect(IRect bounds) {
     var p = translateAndClampToScreen(bounds);
-    if (p.isDegenerate())
+    if (p.width < 2 || p.height < 2)
       return;
 
     var tg = textGraphics();

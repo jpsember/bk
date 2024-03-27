@@ -23,25 +23,22 @@ public class WinMgr extends BaseObject {
   }
 
   public WinMgr pushContainer() {
-    pr("pushing container...");
-
-    var con = new JContainer();
+    var container = new JContainer();
+    
+    container.mHorzFlag = mHorzFlag;
+    mHorzFlag = false;
 
     // If this is not going to be the top-level window, add it as a child to the current parent.
-    if (!mStack.isEmpty()) {
+
+    if (mRootContainer == null) {
+      mRootContainer = container;
+    } else {
       var parent = container();
-      parent.children().add(con);
+      parent.children().add(container);
     }
 
-    con.mHorzFlag = mHorzFlag;
-    mHorzFlag = false;
-    if (mRootContainer == null)
-      mRootContainer = con;
-
-    applyParam(con);
-    push(S_TYPE_CONTAINER, con);
-
-    pr("...done pushing container", VERT_SP);
+    applyParam(container);
+    push(S_TYPE_CONTAINER, container);
     return this;
   }
 
