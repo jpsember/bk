@@ -1,9 +1,10 @@
 package bk;
 
+import static js.base.Tools.*;
+
 import js.geometry.IPoint;
 import js.geometry.IRect;
-
-import static js.base.Tools.*;
+import js.geometry.MyMath;
 
 /**
  * A window that contains other windows
@@ -11,72 +12,70 @@ import static js.base.Tools.*;
  */
 public class JContainer extends JWindow {
 
-  public void layout(IPoint screenLocation, IPoint size) {
+  //  private static int getComponent(IPoint pt, boolean horzFlag) {
+  //    return horzFlag ? pt.x : pt.y;
+  //  }
+
+  private static IPoint swapIf(IPoint pt, boolean swap) {
+    if (!swap)
+      return pt;
+    return IPoint.with(pt.y, pt.x);
+  }
+
+  private static IRect swapIf(IRect r, boolean swap) {
+    if (!swap)
+      return r;
+    return new IRect(r.y, r.x, r.height, r.width);
+  }
+
+  public void layout(IPoint screenLocation, IPoint size0) {
     todo("layout child windows");
 
     var problem = false;
 
-    var b = IRect.withLocAndSize(screenLocation, size);
+    var b = IRect.withLocAndSize(screenLocation, size0);
     setBounds(b);
 
     // Layout any children
     if (!children().isEmpty()) {
 
-      // int otherDim = mHorzFlag ? size.y : size.x;
-      int varDim = mHorzFlag ? size.x : size.y;
+      // True if we need to exchange x<->y and w<->h so we can always deal with x being the dynamic dimension
+      boolean swap = mHorzFlag;
+
+      var normSize = swapIf(size0, swap);
+      var normNextPosition = swapIf(screenLocation, swap);
 
       int pctSum = 0;
       int charsSum = 0;
-      for (var c : children()) {
-        var s = c.mSizer;
-        var chars = s.getChars(mHorzFlag);
-        if (chars >= 0)
-          charsSum += chars;
+      for (var child : children()) {
+        var sizeExpr = child.getSizeExpr();
+        if (sizeExpr > 0)
+          charsSum += sizeExpr;
         else
-          pctSum += s.getPct(mHorzFlag);
+          pctSum += -sizeExpr;
       }
       pctSum = Math.max(1, pctSum);
 
-      var charsRem = varDim;
-      var excess = Math.max(0, charsRem - charsSum);
+      var excess = Math.max(0, normSize.x - charsSum);
 
-      int xoff = b.x;
-      int yoff = b.y;
-
-      for (var c : children()) {
-        var s = c.mSizer;
-        var chars = s.getChars(mHorzFlag);
-        if (chars >= 0) {
-          if (chars > charsRem) {
-            problem = true;
-            alert("trouble fitting window, wanted:", chars, "but remaining:", charsRem);
-            chars = charsRem;
-          }
-        } else {
-          if (excess == 0) {
-            alert("trouble fitting window, no stretch space remaining");
-            problem = true;
-            chars = charsRem;
-          } else {
-            chars = (excess * s.getPct(mHorzFlag)) / pctSum;
-          }
-        }
-        if (chars <= 0) {
+      for (JWindow c : children()) {
+        var sizeExpr = c.getSizeExpr();
+        int chars;
+        if (sizeExpr > 0)
+          chars = sizeExpr;
+        else
+          chars = (excess * -sizeExpr) / pctSum;
+        chars = MyMath.clamp(chars, 0, excess);
+        if (chars == 0) {
           alert("problem fitting window");
           chars = 0;
         }
-        int charsWidth = size.x;
-        int charsHeight = size.y;
-        if (mHorzFlag)
-          charsWidth = chars;
-        else
-          charsHeight = chars;
 
-        c.setBounds(new IRect(xoff, yoff, charsWidth, charsHeight));
-        if (mHorzFlag)
-          xoff += charsWidth;
-        else
-          yoff += charsHeight;
+        var ourSize = new IPoint(chars, normSize.y);
+        var ourBounds = new IRect(normNextPosition, ourSize);
+
+        c.setBounds(swapIf(ourBounds, swap));
+        normNextPosition = normNextPosition.sumWith(ourSize.x, 0);
       }
       if (problem)
         alert("there was a layout problem");

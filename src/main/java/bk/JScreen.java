@@ -69,8 +69,10 @@ public class JScreen {
       return;
     msg("closing screen");
     Files.close(mScreen);
-    // There seems to be a problem with restoring the cursor position; it positions the cursor at the end of the last line
+    // There seems to be a problem with restoring the cursor position; it positions the cursor at the end of the last line.
+    // Probably because our logging doesn't print a linefeed until necessary.
     pr();
+    System.out.println();
     mScreen = null;
     mTerminal = null;
   }

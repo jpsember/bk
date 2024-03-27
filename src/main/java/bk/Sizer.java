@@ -1,6 +1,8 @@
 package bk;
 
+@Deprecated
 class Sizer {
+  
   public int widthPct = 100;
   public int heightPct = 100;
   public int widthChars = -1;

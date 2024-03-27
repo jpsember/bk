@@ -56,7 +56,7 @@ public class JWindow {
    */
   public void render() {
     todo("for now, just drawing a rectangle");
-    pr("bounds:",bounds());
+    pr("bounds:", bounds());
     drawRect(new IRect(bounds().size()));
   }
 
@@ -246,8 +246,14 @@ public class JWindow {
   //  private WidgetListener mListener;
   private JComponent mWrappedComponent;
 
-   void setSize(Sizer s) {
-     mSizer = s;
+  void setSize(int sizeExpr) {
+    mSizer = sizeExpr;
   }
-   Sizer mSizer;
+
+  int getSizeExpr() {
+    checkArgument(mSizer != 0, "size expression must not be zero");
+    return mSizer;
+  }
+
+  int mSizer;
 }

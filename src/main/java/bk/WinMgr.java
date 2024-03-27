@@ -39,23 +39,15 @@ public class WinMgr extends BaseObject {
     return this;
   }
 
-  public WinMgr width(int columns) {
-    mSizer.widthChars = columns;
+  public WinMgr chars(int charCount) {
+    checkArgument(charCount > 0, "expected positive character count");
+    mSizeExpr = charCount;
     return this;
   }
 
-  public WinMgr height(int rows) {
-    mSizer.heightChars = rows;
-    return this;
-  }
-
-  public WinMgr widthPct(int pct) {
-    mSizer.widthPct = pct;
-    return this;
-  }
-
-  public WinMgr heightPct(int pct) {
-    mSizer.heightPct = pct;
+  public WinMgr pct(int pct) {
+    checkArgument(pct < 0, "expected negative percentage");
+    mSizeExpr = pct;
     return this;
   }
 
@@ -88,8 +80,8 @@ public class WinMgr extends BaseObject {
   public WinMgr window() {
     var c = container();
     var w = new JWindow();
-    w.setSize(mSizer);
-    mSizer = new Sizer();
+    w.setSize(mSizeExpr);
+    mSizeExpr = 0;
     c.children().add(w);
     return this;
   }
@@ -106,9 +98,5 @@ public class WinMgr extends BaseObject {
   }
 
   private boolean mHorzFlag;
-  //  private int mColumns;
-  //  private int mRows;
-  //  private int mColumnsPct;
-  //  private int mRowsPct;
-  private Sizer mSizer = new Sizer();
+  private int mSizeExpr; // 0: unknown > 1: number of chars < 1: -percentage
 }
