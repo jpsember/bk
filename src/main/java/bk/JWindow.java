@@ -106,7 +106,7 @@ public class JWindow extends BaseObject {
   public void layout(IRect boundsWithinScreen) {
     setBounds(boundsWithinScreen);
     setLayoutValid();
-    setPaintValid(false);
+//    setPaintValid(false);
   }
 
   /**

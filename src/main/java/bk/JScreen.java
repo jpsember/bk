@@ -94,19 +94,27 @@ public class JScreen {
         todo("send key event to the window that has focus");
         //        mHandler.processKey(keyStroke);
       }
+
+      var m = winMgr();
+      var c = m.topLevelContainer();
+
       // Update size of terminal
       mScreen.doResizeIfNecessary();
       var currSize = toIpoint(mScreen.getTerminalSize());
       if (!currSize.equals(mPrevLayoutScreenSize)) {
         mTextGraphics = null;
         mPrevLayoutScreenSize = currSize;
-        pr("laying out views for screen size:", currSize);
-        layoutViews(currSize);
+
+        pr("screen size has changed; invalidating top level window; new size:", currSize);
+
+        c.setBounds(new IRect(currSize));
+        c.setLayoutInvalid();
+
+        //        pr("laying out views for screen size:", currSize);
+        //        layoutViews(currSize);
       }
 
-      todo("no longer calling window handler's repaint method");
-
-      updateViews();
+      updateViewsAux(c);
 
       // Make changes visible
       mScreen.refresh();
@@ -255,35 +263,17 @@ public class JScreen {
       close();
     return t;
   }
-  //
-  //  private void performPaint(JWindow w, boolean validFlag) {
-  //    if (validFlag && w.paintValid())
-  //      return;
-  //    w.setPaintValid(true);
-  //    var h = w.handler();
-  //    h.paint(w);
-  //    for (var c : w.children()) {
-  //      performPaint(c, false);
-  //    }
-  //  }
-
-  private void layoutViews(IPoint screenSize) {
-    var m = winMgr();
-    var c = m.topLevelContainer();
-    c.layout(new IRect(screenSize));
-  }
-
-  private void updateViews() {
-    var m = winMgr();
-    var c = m.topLevelContainer();
-    updateViewsAux(c);
-  }
 
   private void updateViewsAux(JWindow w) {
-    todo("give windows a chance to perform updates even if their paint is valid");
     if (!w.layoutValid()) {
+      w.setPaintValid(false);
       w.layout(w.bounds());
+      
+      // Invalidate layout of any child views as well
+      for (var c : w.children())
+        c.setLayoutInvalid();
     }
+
     if (!w.paintValid()) {
       w.render();
       w.setPaintValid(true);

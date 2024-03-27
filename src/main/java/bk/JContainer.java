@@ -41,84 +41,80 @@ public class JContainer extends JWindow {
 
     super.layout(boundsWithinScreen);
 
-    // Layout any children
-    if (!children().isEmpty()) {
+    if (children().isEmpty())
+      return;
 
-      if (db)
-        pr(VERT_SP, "layout:", name(), " for children:", children().size());
+    // Calculate bounds of children
 
-      // True if we need to exchange x<->y and w<->h so we can always deal with x being the dynamic dimension
-      boolean swap = !mHorzFlag;
+    if (db)
+      pr(VERT_SP, "layout:", name(), " for children:", children().size());
 
-      // The size of the container (normalized so windows are stacked horizontally)
+    // True if we need to exchange x<->y and w<->h so we can always deal with x being the dynamic dimension
+    boolean swap = !mHorzFlag;
 
-      var normSize = swapIf(boundsWithinScreen.size(), swap);
+    // The size of the container (normalized so windows are stacked horizontally)
 
-      // The position of the next child
-      var normNextPosition = swapIf(boundsWithinScreen.location(), swap);
+    var normSize = swapIf(boundsWithinScreen.size(), swap);
 
-      // Determine the space to distribute to the fixed-width windows,
-      // as well as the sum of the percentages of the dynamic-width windows
+    // The position of the next child
+    var normNextPosition = swapIf(boundsWithinScreen.location(), swap);
 
-      int pctSum = 0;
-      int charsSum = 0;
-      for (var child : children()) {
-        var sizeExpr = child.getSizeExpr();
-        if (sizeExpr > 0)
-          charsSum += sizeExpr;
-        else
-          pctSum += -sizeExpr;
-      }
-      pctSum = Math.max(1, pctSum);
+    // Determine the space to distribute to the fixed-width windows,
+    // as well as the sum of the percentages of the dynamic-width windows
 
-      var charsDynamicTotal = Math.max(0, normSize.x - charsSum);
-      //      var excess = Math.max(0, normSize.x - charsSum);
-
-      if (db)
-        pr("charsSum:", charsSum, "pctSum:", pctSum, "charsDynamic:", charsDynamicTotal);
-
-      var staticCharsAllotted = 0;
-
-      for (JWindow c : children()) {
-        if (db)
-          pr(VERT_SP, "layout out next child");
-        var sizeExpr = c.getSizeExpr();
-
-        int chars;
-        if (sizeExpr > 0)
-          chars = sizeExpr;
-        else
-          chars = (charsDynamicTotal * -sizeExpr) / pctSum;
-        if (db)
-          pr("sizeExpr:", sizeExpr, "chars:", chars);
-        chars = MyMath.clamp(chars, 0, normSize.x - staticCharsAllotted);
-        if (db)
-          pr("charsDynamicTotal:", charsDynamicTotal, "clamped chars:", chars);
-        if (chars == 0) {
-          alert("problem fitting window");
-        }
-
-        if (sizeExpr > 0)
-          staticCharsAllotted += chars;
-
-        var ourNormSize = new IPoint(chars, normSize.y);
-        var ourNormBounds = IRect.withLocAndSize(normNextPosition, ourNormSize);
-        if (db)
-          pr("ourNormSize:", ourNormSize, "ourNormBounds:", ourNormBounds);
-
-        var ourBounds = swapIf(ourNormBounds, swap);
-        c.setBounds(ourBounds);
-        if (db)
-          pr("...child bounds:", ourBounds);
-        normNextPosition = normNextPosition.sumWith(ourNormSize.x, 0);
-
-        // Layout the children as well
-        c.setLayoutInvalid();
-        c.layout(ourBounds);
-      }
-      if (problem)
-        alert("there was a layout problem");
+    int pctSum = 0;
+    int charsSum = 0;
+    for (var child : children()) {
+      var sizeExpr = child.getSizeExpr();
+      if (sizeExpr > 0)
+        charsSum += sizeExpr;
+      else
+        pctSum += -sizeExpr;
     }
+    pctSum = Math.max(1, pctSum);
+
+    var charsDynamicTotal = Math.max(0, normSize.x - charsSum);
+
+    if (db)
+      pr("charsSum:", charsSum, "pctSum:", pctSum, "charsDynamic:", charsDynamicTotal);
+
+    var staticCharsAllotted = 0;
+
+    for (JWindow c : children()) {
+      if (db)
+        pr(VERT_SP, "layout next child");
+      var sizeExpr = c.getSizeExpr();
+
+      int chars;
+      if (sizeExpr > 0)
+        chars = sizeExpr;
+      else
+        chars = (charsDynamicTotal * -sizeExpr) / pctSum;
+      if (db)
+        pr("sizeExpr:", sizeExpr, "chars:", chars);
+      chars = MyMath.clamp(chars, 0, normSize.x - staticCharsAllotted);
+      if (db)
+        pr("charsDynamicTotal:", charsDynamicTotal, "clamped chars:", chars);
+      if (chars == 0) {
+        alert("problem fitting window");
+      }
+
+      if (sizeExpr > 0)
+        staticCharsAllotted += chars;
+
+      var ourNormSize = new IPoint(chars, normSize.y);
+      var ourNormBounds = IRect.withLocAndSize(normNextPosition, ourNormSize);
+      if (db)
+        pr("ourNormSize:", ourNormSize, "ourNormBounds:", ourNormBounds);
+
+      var ourBounds = swapIf(ourNormBounds, swap);
+      c.setBounds(ourBounds);
+      if (db)
+        pr("...child bounds:", ourBounds);
+      normNextPosition = normNextPosition.sumWith(ourNormSize.x, 0);
+    }
+    if (problem)
+      alert("there was a layout problem");
   }
 
   boolean mHorzFlag;
