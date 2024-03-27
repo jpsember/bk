@@ -6,7 +6,6 @@ import static js.base.Tools.*;
 import bk.gen.BkConfig;
 import js.app.AppOper;
 import js.base.BasePrinter;
-import js.geometry.IRect;
 
 public class BkOper extends AppOper {
 
@@ -62,11 +61,10 @@ public class BkOper extends AppOper {
             mgr.roundedBorder();
             mgr.pct(80).window();
             mgr.thinBorder();
-            todo("perhaps we should not convert to and from local coord system?");
             mgr.handler(new WindowHandler() {
               @Override
               public void paint(JWindow w) {
-                var r = new IRect(w.bounds().size()).withInset(2);
+                var r = w.bounds().withInset(2);
                 pr(w.name(), "painting rect:", r);
                 if (r.isValid())
                   w.drawRect(r, BORDER_ROUNDED);

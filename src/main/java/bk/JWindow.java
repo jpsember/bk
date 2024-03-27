@@ -45,7 +45,6 @@ public class JWindow extends BaseObject {
 
   void setBounds(IRect bounds) {
     mBounds = bounds;
-    todo("Resize any child windows as well");
   }
 
   boolean paintValid() {
@@ -107,48 +106,39 @@ public class JWindow extends BaseObject {
    * Render the window onto the screen
    */
   public void render() {
-    todo("support optional borders, and render within it");
-
     var origBounds = bounds();
     try {
-      var b = new IRect(origBounds.size());
+      var b = origBounds;
       int btype = mFlags & FLG_BORDER;
-      pr("render", name(), "btype:", btype);
       if (btype != BORDER_NONE) {
         drawRect(b, btype);
         mBounds = origBounds.withInset(1);
       }
-      clearRect(new IRect(mBounds.size()));
-      pr("render",name(),"handler:",handler());
+      clearRect(mBounds);
       handler().paint(this);
     } finally {
       mBounds = origBounds;
     }
-
     mBounds = origBounds;
   }
 
   /**
-   * Translate a point from window space to screen space, and clamp to screen
+   * Clamp a point to be within the bounds of the window
    */
-  private IPoint translateAndClampToScreen(int wx, int wy) {
-    var wb = bounds();
-    var sx = wx + wb.x;
-    var sy = wy + wb.y;
-
-    var cx1 = clampToWindowBoundsX(sx);
-    var cy1 = clampToWindowBoundsY(sy);
+  private IPoint clampToWindow(int wx, int wy) {
+    var cx1 = clampToWindowBoundsX(wx);
+    var cy1 = clampToWindowBoundsY(wy);
     return new IPoint(cx1, cy1);
   }
 
-  private IRect translateAndClampToScreen(IRect r) {
-    var p1 = translateAndClampToScreen(r.x, r.y);
-    var p2 = translateAndClampToScreen(r.endX(), r.endY());
+  private IRect clampToWindow(IRect r) {
+    var p1 = clampToWindow(r.x, r.y);
+    var p2 = clampToWindow(r.endX(), r.endY());
     return IRect.rectContainingPoints(p1, p2);
   }
 
   public void clearRect(IRect bounds) {
-    var p = translateAndClampToScreen(bounds);
+    var p = clampToWindow(bounds);
     if (p.isDegenerate())
       return;
     var tg = textGraphics();
@@ -170,7 +160,7 @@ public class JWindow extends BaseObject {
   public void drawRect(IRect bounds, int type) {
     checkArgument(type >= 1 && type < BORDER_TOTAL, "unsupported border type:", type);
     int ci = (type - 1) * 6;
-    var p = translateAndClampToScreen(bounds);
+    var p = clampToWindow(bounds);
     if (p.width < 2 || p.height < 2)
       return;
     var tg = textGraphics();
