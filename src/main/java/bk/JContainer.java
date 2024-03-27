@@ -28,12 +28,12 @@ public class JContainer extends JWindow {
     return new IRect(r.y, r.x, r.height, r.width);
   }
 
-  public void layout(IPoint containerLocation, IPoint containerSize) {
+  public void layout(IPoint containerScreenLocation, IPoint containerSize) {
     final boolean db = true;
 
     var problem = false;
 
-    var b = IRect.withLocAndSize(containerLocation, containerSize);
+    var b = IRect.withLocAndSize(containerScreenLocation, containerSize);
     setBounds(b);
 
     // Layout any children
@@ -50,7 +50,7 @@ public class JContainer extends JWindow {
       var normSize = swapIf(containerSize, swap);
 
       // The position of the next child
-      var normNextPosition = swapIf(containerLocation, swap);
+      var normNextPosition = swapIf(containerScreenLocation, swap);
 
       // Determine the space to distribute to the fixed-width windows,
       // as well as the sum of the percentages of the dynamic-width windows
@@ -101,7 +101,7 @@ public class JContainer extends JWindow {
         if (db)
           pr("ourNormSize:", ourNormSize, "ourNormBounds:", ourNormBounds);
 
-        var ourBounds = swapIf(ourNormBounds, swap).translatedBy(containerLocation);
+        var ourBounds = swapIf(ourNormBounds, swap);
         c.setBounds(ourBounds);
         if (db)
           pr("...child bounds:", ourBounds);
