@@ -11,6 +11,14 @@ import js.base.BasePrinter;
 import js.base.DateTimeTools;
 
 public final class Util {
+  
+  public static final int BORDER_NONE = 0;
+  public static final int BORDER_THIN = 1;
+  public static final int BORDER_THICK = 2 ;
+  public static final int BORDER_ROUNDED = 3 ;
+  public static final int BORDER_TOTAL = 4;
+  
+  
   public final static void loadUtil() {
   }
 

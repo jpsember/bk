@@ -3,6 +3,7 @@ package bk;
 import java.util.Stack;
 
 import static js.base.Tools.*;
+import static bk.Util.*;
 
 import js.base.BaseObject;
 import js.base.Pair;
@@ -13,7 +14,6 @@ public class WinMgr extends BaseObject {
   private static final int S_TYPE_CONTAINER = 1;
 
   private WinMgr() {
-    // pushContainer();
   }
 
   public JContainer rootContainer() {
@@ -24,7 +24,7 @@ public class WinMgr extends BaseObject {
 
   public WinMgr pushContainer() {
     var container = new JContainer();
-    
+
     container.mHorzFlag = mHorzFlag;
     mHorzFlag = false;
 
@@ -69,15 +69,31 @@ public class WinMgr extends BaseObject {
     return this;
   }
 
+  public WinMgr roundedBorder() {
+    mBorderType = BORDER_ROUNDED;
+    return this;
+  }
+
+  public WinMgr thickBorder() {
+    mBorderType = BORDER_THICK;
+    return this;
+  }
+
+  public WinMgr thinBorder() {
+    mBorderType = BORDER_THIN;
+    return this;
+  }
+
+  public WinMgr handler(WindowHandler handler) {
+    mHandler = handler;
+    return this;
+  }
+
   private <T> T pop(int type) {
     if (mStack.size() <= 1)
       badState("attempt to pop the outermost container");
     var x = (T) peek(type);
     mStack.pop();
-
-    if (type == S_TYPE_CONTAINER) {
-      todo("layout the container");
-    }
     return x;
   }
 
@@ -104,20 +120,17 @@ public class WinMgr extends BaseObject {
   }
 
   private void applyParam(JWindow w) {
-    pr("setting size of window:", w.name(), "to:", mSizeExpr);
     w.setSize(mSizeExpr);
+    w.setBorder(mBorderType);
+    w.setHandler(mHandler);
     resetPendingWindowVars();
   }
 
   private void resetPendingWindowVars() {
     mHorzFlag = false;
     mSizeExpr = -100;
-  }
-
-  private Stack<Pair<Integer, Object>> mStack = new Stack();
-
-  static {
-    SHARED_INSTANCE = new WinMgr();
+    mBorderType = BORDER_NONE;
+    mHandler = null;
   }
 
   public JContainer topLevelContainer() {
@@ -125,8 +138,11 @@ public class WinMgr extends BaseObject {
     return peek(S_TYPE_CONTAINER);
   }
 
+  private Stack<Pair<Integer, Object>> mStack = new Stack();
   private boolean mHorzFlag;
+  private int mBorderType;
   private int mSizeExpr; // 0: unknown > 1: number of chars < 1: -percentage
+  private WindowHandler mHandler;
   private JContainer mRootContainer;
 
   public void doneConstruction() {
@@ -136,4 +152,7 @@ public class WinMgr extends BaseObject {
           "or doesn't have top-level container at bottom");
   }
 
+  static {
+    SHARED_INSTANCE = new WinMgr();
+  }
 }

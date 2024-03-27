@@ -3,10 +3,7 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
-import java.awt.event.ActionEvent;
 import java.util.List;
-
-import javax.swing.JComponent;
 
 import com.googlecode.lanterna.Symbols;
 import com.googlecode.lanterna.TerminalPosition;
@@ -30,11 +27,11 @@ public class JWindow extends BaseObject {
 
   private WindowHandler mHandler;
 
-  public void setHandler(WindowHandler h) {
+  void setHandler(WindowHandler h) {
     mHandler = h;
   }
 
-  public WindowHandler handler() {
+  WindowHandler handler() {
     return nullTo(mHandler, DEFAULT_HANDLER);
   }
 
@@ -42,16 +39,16 @@ public class JWindow extends BaseObject {
     return mBounds;
   }
 
-  public List<JWindow> children() {
+  List<JWindow> children() {
     return mChildren;
   }
 
-  public void setBounds(IRect bounds) {
+  void setBounds(IRect bounds) {
     mBounds = bounds;
     todo("Resize any child windows as well");
   }
 
-  public boolean paintValid() {
+  boolean paintValid() {
     return hasFlag(FLG_PAINTVALID);
   }
 
@@ -68,11 +65,11 @@ public class JWindow extends BaseObject {
     setFlag(FLG_PAINTVALID, valid);
   }
 
-  public boolean layoutValid() {
+  boolean layoutValid() {
     return hasFlag(FLG_LAYOUTVALID);
   }
 
-  public void setLayoutInvalid() {
+  void setLayoutInvalid() {
     clearFlag(FLG_LAYOUTVALID);
   }
 
@@ -103,19 +100,32 @@ public class JWindow extends BaseObject {
     setPaintValid(false);
   }
 
-  public void layout() {
+  void layout() {
   }
 
   /**
    * Render the window onto the screen
    */
   public void render() {
-    todo("for now, just drawing a rectangle");
-    pr("rendering bounds:", bounds(), "for:", name());
-    // Get rectangle with origin at this window's top left
-    var b = new IRect(bounds().size());
-    clearRect(b.withInset(1));
-    drawRect(b);
+    todo("support optional borders, and render within it");
+
+    var origBounds = bounds();
+    try {
+      var b = new IRect(origBounds.size());
+      int btype = mFlags & FLG_BORDER;
+      pr("render", name(), "btype:", btype);
+      if (btype != BORDER_NONE) {
+        drawRect(b, btype);
+        mBounds = origBounds.withInset(1);
+      }
+      clearRect(new IRect(mBounds.size()));
+      pr("render",name(),"handler:",handler());
+      handler().paint(this);
+    } finally {
+      mBounds = origBounds;
+    }
+
+    mBounds = origBounds;
   }
 
   /**
@@ -145,56 +155,50 @@ public class JWindow extends BaseObject {
     tg.fillRectangle(new TerminalPosition(p.x, p.y), new TerminalSize(p.width, p.height), ' ');
   }
 
-  public void drawRect(IRect bounds) {
+  private static final char[] sBorderChars = { //
+      Symbols.SINGLE_LINE_HORIZONTAL, Symbols.SINGLE_LINE_VERTICAL, Symbols.SINGLE_LINE_TOP_LEFT_CORNER,
+      Symbols.SINGLE_LINE_BOTTOM_LEFT_CORNER, Symbols.SINGLE_LINE_TOP_RIGHT_CORNER,
+      Symbols.SINGLE_LINE_BOTTOM_RIGHT_CORNER, //
+
+      Symbols.DOUBLE_LINE_HORIZONTAL, Symbols.DOUBLE_LINE_VERTICAL, Symbols.DOUBLE_LINE_TOP_LEFT_CORNER,
+      Symbols.DOUBLE_LINE_BOTTOM_LEFT_CORNER, Symbols.DOUBLE_LINE_TOP_RIGHT_CORNER,
+      Symbols.DOUBLE_LINE_BOTTOM_RIGHT_CORNER, //
+
+      '╴', Symbols.SINGLE_LINE_VERTICAL, '╭', '╰', '╮', '╯', //
+  };
+
+  public void drawRect(IRect bounds, int type) {
+    checkArgument(type >= 1 && type < BORDER_TOTAL, "unsupported border type:", type);
+    int ci = (type - 1) * 6;
     var p = translateAndClampToScreen(bounds);
     if (p.width < 2 || p.height < 2)
       return;
-
     var tg = textGraphics();
-    //    var min = new IPoint(cb.x, cb.y); //toTerm(cb.x, cb.y);
-    //    var max = toTerm(cb.endX(), cb.endY());
     var x1 = p.x;
     var y1 = p.y;
     var x2 = p.endX();
     var y2 = p.endY();
     if (p.width > 2) {
-      tg.drawLine(x1 + 1, y1, x2 - 2, y1, Symbols.DOUBLE_LINE_HORIZONTAL);
-      tg.drawLine(x1 + 1, y2 - 1, x2 - 2, y2 - 1, Symbols.DOUBLE_LINE_HORIZONTAL);
+      tg.drawLine(x1 + 1, y1, x2 - 2, y1, sBorderChars[ci + 0]);
+      tg.drawLine(x1 + 1, y2 - 1, x2 - 2, y2 - 1, sBorderChars[ci + 0]);
     }
     if (p.height >= 2) {
-      tg.drawLine(x1, y1 + 1, x1, y2 - 2, Symbols.DOUBLE_LINE_VERTICAL);
-      tg.drawLine(x2 - 1, y1 + 1, x2 - 1, y2 - 2, Symbols.DOUBLE_LINE_VERTICAL);
+      tg.drawLine(x1, y1 + 1, x1, y2 - 2, sBorderChars[ci + 1]);
+      tg.drawLine(x2 - 1, y1 + 1, x2 - 1, y2 - 2, sBorderChars[ci + 1]);
     }
-    tg.setCharacter(x1, y1, Symbols.DOUBLE_LINE_TOP_LEFT_CORNER);
-    tg.setCharacter(x1, y2 - 1, Symbols.DOUBLE_LINE_BOTTOM_LEFT_CORNER);
-    tg.setCharacter(x2 - 1, y1, Symbols.DOUBLE_LINE_TOP_RIGHT_CORNER);
-    tg.setCharacter(x2 - 1, y2 - 1, Symbols.DOUBLE_LINE_BOTTOM_RIGHT_CORNER);
+    tg.setCharacter(x1, y1, sBorderChars[ci + 2]);
+    tg.setCharacter(x1, y2 - 1, sBorderChars[ci + 3]);
+    tg.setCharacter(x2 - 1, y1, sBorderChars[ci + 4]);
+    tg.setCharacter(x2 - 1, y2 - 1, sBorderChars[ci + 5]);
   }
 
-  public IPoint toTerm(int wx, int wy) {
-    return new IPoint(wx + mBounds.x, wy + mBounds.y);
-  }
-
-  public IPoint clampToWindowBounds(IPoint pt) {
+  IPoint clampToWindowBounds(IPoint pt) {
     var x = MyMath.clamp(pt.x, 0, mBounds.width);
     var y = MyMath.clamp(pt.y, 0, mBounds.height);
     if (x != pt.x || y != pt.y)
       pt = new IPoint(x, y);
     return pt;
   }
-
-  //  private IRect clipToWindowBounds(IRect bounds) {
-  //    var min = clampToWindowBounds(bounds.bottomLeft());
-  //    var max = clampToWindowBounds(bounds.topRight());
-  //    return new IRect(min, max);
-  //  }
-  //
-  //  private IRect clipToWindowBounds(int x, int y, int w, int h) {
-  //    var x1 = clampToWindowBoundsX(x);
-  //    var min = clampToWindowBounds(bounds.bottomLeft());
-  //    var max = clampToWindowBounds(bounds.topRight());
-  //    return new IRect(min, max);
-  //  }
 
   private int clampToWindowBoundsX(int x) {
     return MyMath.clamp(x, mBounds.x, mBounds.endX());
@@ -208,144 +212,11 @@ public class JWindow extends BaseObject {
   private List<JWindow> mChildren = arrayList();
 
   private static final WindowHandler DEFAULT_HANDLER = new WindowHandler() {
-
     @Override
     public void paint(JWindow window) {
 
     }
   };
-  //
-  //  public final JWindow setId(String id) {
-  //    checkState(!hasId(), "already has an id");
-  //    // If id is not null, it cannot be empty
-  //    checkArgument(!"".equals(id));
-  //    mId = id;
-  //    return this;
-  //  }
-  //
-  //  public final boolean hasId() {
-  //    return mId != null;
-  //  }
-  //
-  //  public final String id() {
-  //    if (mId == null)
-  //      throw badState("window has no id");
-  //    return mId;
-  //  }
-  //
-  //  public final String optionalId() {
-  //    return ifNullOrEmpty(mId, "<no id>");
-  //  }
-  //
-  //  private String mId;
-
-  //  protected final void registerListener(WidgetListener listener) {
-  //    mListener = listener;
-  //  }
-
-  /**
-   * Notify WidgetListener, if there is one, of an event involving this widget
-   */
-  protected final void notifyListener() {
-    notFinished("notifyListener");
-    //    if (mListener != null)
-    //      widgets().notifyWidgetListener(this, mListener);
-  }
-  //
-  //  @Override
-  //  public String toString() {
-  //    return id() + ":" + getClass().getSimpleName();
-  //  }
-
-  public void displayKeyboard() {
-    throw new UnsupportedOperationException();
-  }
-
-  public void hideKeyboard() {
-    throw new UnsupportedOperationException();
-  }
-
-  public void setInputType(int inputType) {
-    throw new UnsupportedOperationException();
-  }
-
-  public void setEnabled(boolean enabled) {
-    throw notSupported(className());
-  }
-
-  public boolean enabled() {
-    throw notSupported(className());
-  }
-
-  public void setVisible(boolean visible) {
-    todo("setVisible not implemented for:", className());
-  }
-
-  public void doClick() {
-    throw new UnsupportedOperationException();
-  }
-
-  public void setChecked(boolean state) {
-    throw new UnsupportedOperationException();
-  }
-
-  public boolean isChecked() {
-    throw new UnsupportedOperationException();
-  }
-
-  public void setValue(Number number) {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Replace this widget in its view hierarchy with another
-   */
-  public void replaceWith(JWindow other) {
-    throw new UnsupportedOperationException();
-  }
-
-  public void actionPerformed(ActionEvent e) {
-    notifyListener();
-  }
-
-  public void setComponent(JComponent component) {
-    mWrappedComponent = component;
-  }
-
-  public final JComponent component() {
-    return mWrappedComponent;
-  }
-
-  public final <T extends JComponent> T swingComponent() {
-    return (T) component();
-  }
-
-  /**
-   * Get component to attach tooltip to (if there is one). Default
-   * implementation returns swingComponent()
-   */
-  public JComponent componentForTooltip() {
-    return swingComponent();
-  }
-
-  public void setText(String text) {
-    throw new UnsupportedOperationException();
-  }
-
-  public String getText() {
-    throw new UnsupportedOperationException();
-  }
-
-  public void setHint(String hint) {
-    throw new UnsupportedOperationException();
-  }
-
-  private String className() {
-    return getClass().getSimpleName();
-  }
-
-  //  private WidgetListener mListener;
-  private JComponent mWrappedComponent;
 
   final void setSize(int sizeExpr) {
     mSizeExpr = sizeExpr;
@@ -357,11 +228,19 @@ public class JWindow extends BaseObject {
     return mSizeExpr;
   }
 
+  void setBorder(int type) {
+    checkArgument(type >= 0 && type < BORDER_TOTAL);
+    mFlags = (mFlags & ~FLG_BORDER) | type;
+  }
+
   int mSizeExpr;
 
   private int mFlags;
-  private static final int FLG_PAINTVALID = 1 << 0;
-  private static final int FLG_LAYOUTVALID = 1 << 1;
+  private static final int FLG_BORDER = 0x3;
+  private static final int FLG_PAINTVALID = 1 << 2;
+  private static final int FLG_LAYOUTVALID = 1 << 3;
+
   private static int sUniqueId = 100;
   private int mId;
+
 }

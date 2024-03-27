@@ -283,7 +283,7 @@ public class JScreen {
     if (!w.layoutValid()) {
       if (db)
         pr("...window", w.name(), "layout is invalid");
-      w.setPaintValid(false);
+      w.repaint();
       w.layout();
       w.setLayoutValid();
 
