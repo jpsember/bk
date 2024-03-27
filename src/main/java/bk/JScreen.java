@@ -20,6 +20,7 @@ import com.googlecode.lanterna.terminal.Terminal;
 
 import js.file.Files;
 import js.geometry.IPoint;
+import js.geometry.IRect;
 
 /**
  * Wrapper for lanterna terminal / screen
@@ -245,23 +246,22 @@ public class JScreen {
       close();
     return t;
   }
-
-  private void performPaint(JWindow w, boolean validFlag) {
-    if (validFlag && w.paintValid())
-      return;
-    w.setPaintValid(true);
-    var h = w.handler();
-    h.paint(w);
-    for (var c : w.children()) {
-      performPaint(c, false);
-    }
-  }
+  //
+  //  private void performPaint(JWindow w, boolean validFlag) {
+  //    if (validFlag && w.paintValid())
+  //      return;
+  //    w.setPaintValid(true);
+  //    var h = w.handler();
+  //    h.paint(w);
+  //    for (var c : w.children()) {
+  //      performPaint(c, false);
+  //    }
+  //  }
 
   private void layoutViews(IPoint screenSize) {
     var m = winMgr();
     var c = m.topLevelContainer();
-    c.repaint();
-    c.layout(IPoint.ZERO, screenSize);
+    c.layout(new IRect(screenSize));
   }
 
   private void updateViews() {
@@ -272,6 +272,9 @@ public class JScreen {
 
   private void updateViewsAux(JWindow w) {
     todo("give windows a chance to perform updates even if their paint is valid");
+    if (!w.layoutValid()) {
+      w.layout(w.bounds());
+    }
     if (!w.paintValid()) {
       w.render();
       w.setPaintValid(true);

@@ -12,6 +12,10 @@ import js.geometry.MyMath;
  */
 public class JContainer extends JWindow {
 
+  @Override
+  public void render() {
+    
+  }
   //  private static int getComponent(IPoint pt, boolean horzFlag) {
   //    return horzFlag ? pt.x : pt.y;
   //  }
@@ -28,13 +32,13 @@ public class JContainer extends JWindow {
     return new IRect(r.y, r.x, r.height, r.width);
   }
 
-  public void layout(IPoint containerScreenLocation, IPoint containerSize) {
+  @Override
+  public void layout(IRect boundsWithinScreen) {
     final boolean db = true;
 
     var problem = false;
 
-    var b = IRect.withLocAndSize(containerScreenLocation, containerSize);
-    setBounds(b);
+    super.layout(boundsWithinScreen);
 
     // Layout any children
     if (!children().isEmpty()) {
@@ -47,10 +51,10 @@ public class JContainer extends JWindow {
 
       // The size of the container (normalized so windows are stacked horizontally)
 
-      var normSize = swapIf(containerSize, swap);
+      var normSize = swapIf(boundsWithinScreen.size(), swap);
 
       // The position of the next child
-      var normNextPosition = swapIf(containerScreenLocation, swap);
+      var normNextPosition = swapIf(boundsWithinScreen.location(), swap);
 
       // Determine the space to distribute to the fixed-width windows,
       // as well as the sum of the percentages of the dynamic-width windows
@@ -58,6 +62,7 @@ public class JContainer extends JWindow {
       int pctSum = 0;
       int charsSum = 0;
       for (var child : children()) {
+        child.setLayoutInvalid();
         var sizeExpr = child.getSizeExpr();
         if (sizeExpr > 0)
           charsSum += sizeExpr;
@@ -106,6 +111,9 @@ public class JContainer extends JWindow {
         if (db)
           pr("...child bounds:", ourBounds);
         normNextPosition = normNextPosition.sumWith(ourNormSize.x, 0);
+
+        // Layout the children as well
+        c.layout(ourBounds);
       }
       if (problem)
         alert("there was a layout problem");
