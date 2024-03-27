@@ -350,16 +350,17 @@ public class JWindow extends BaseObject {
   //  private WidgetListener mListener;
   private JComponent mWrappedComponent;
 
-  void setSize(int sizeExpr) {
-    mSizer = sizeExpr;
+  final void setSize(int sizeExpr) {
+    mSizeExpr = sizeExpr;
+    pr("window", name(), "set size expr to:", sizeExpr);
   }
 
   int getSizeExpr() {
-    checkArgument(mSizer != 0, "size expression must not be zero");
-    return mSizer;
+    checkArgument(mSizeExpr != 0, "size expression must not be zero");
+    return mSizeExpr;
   }
 
-  int mSizer;
+  int mSizeExpr;
 
   private int mFlags;
   private static final int FLG_PAINTVALID = 1 << 0;

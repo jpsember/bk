@@ -23,14 +23,15 @@ public class WinMgr extends BaseObject {
   }
 
   public WinMgr pushContainer() {
+    pr("pushing container...");
     var con = new JContainer();
     con.mHorzFlag = mHorzFlag;
     mHorzFlag = false;
-
     if (mRootContainer == null)
       mRootContainer = con;
+    applyParam(con);
     push(S_TYPE_CONTAINER, con);
-    resetPendingWindowVars();
+    pr("...done pushing container",VERT_SP);
     return this;
   }
 
@@ -90,10 +91,15 @@ public class WinMgr extends BaseObject {
   public WinMgr window() {
     var c = container();
     var w = new JWindow();
+    c.children().add(w);
+    applyParam(w);
+    return this;
+  }
+
+  private void applyParam(JWindow w) {
+    pr("setting size of window:", w.name(), "to:", mSizeExpr);
     w.setSize(mSizeExpr);
     resetPendingWindowVars();
-    c.children().add(w);
-    return this;
   }
 
   private void resetPendingWindowVars() {
@@ -115,5 +121,12 @@ public class WinMgr extends BaseObject {
   private boolean mHorzFlag;
   private int mSizeExpr; // 0: unknown > 1: number of chars < 1: -percentage
   private JContainer mRootContainer;
+
+  public void doneConstruction() {
+    // Ensure that only the root container remains on the stack
+    if (mStack.size() != 1 || mStack.peek().first != S_TYPE_CONTAINER)
+      badState("window stack size is unexpected:", mStack.size(),
+          "or doesn't have top-level container at bottom");
+  }
 
 }

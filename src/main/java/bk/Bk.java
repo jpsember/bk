@@ -42,7 +42,7 @@ public class Bk extends App {
       try {
         var fw = new FileWriter("_SKIP_log.txt");
         mWriter = new BufferedWriter(fw);
-        mWriter.append("\n\n\n\n\n\n\nBk Writer opened at: " + DateTimeTools.humanTimeString()
+        mWriter.append("\n\nBk Writer opened at: " + DateTimeTools.humanTimeString()
             + "\n--------------------------------------------------\n");
       } catch (Throwable t) {
         throw asRuntimeException(t);

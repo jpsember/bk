@@ -45,7 +45,7 @@ public class JContainer extends JWindow {
     if (!children().isEmpty()) {
 
       if (db)
-        pr(VERT_SP, "layout for children:", children().size());
+        pr(VERT_SP, "layout:", name(), " for children:", children().size());
 
       // True if we need to exchange x<->y and w<->h so we can always deal with x being the dynamic dimension
       boolean swap = !mHorzFlag;
@@ -63,7 +63,6 @@ public class JContainer extends JWindow {
       int pctSum = 0;
       int charsSum = 0;
       for (var child : children()) {
-        child.setLayoutInvalid();
         var sizeExpr = child.getSizeExpr();
         if (sizeExpr > 0)
           charsSum += sizeExpr;
@@ -114,6 +113,7 @@ public class JContainer extends JWindow {
         normNextPosition = normNextPosition.sumWith(ourNormSize.x, 0);
 
         // Layout the children as well
+        c.setLayoutInvalid();
         c.layout(ourBounds);
       }
       if (problem)
