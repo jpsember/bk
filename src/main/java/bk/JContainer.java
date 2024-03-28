@@ -96,11 +96,12 @@ public class JContainer extends JWindow {
         chars = (int) Math.round(target);
         chars = MyMath.clamp(chars, 0, charsDynamicTotal - dynamicCharsAllotted);
         dynamicCharsAllotted += chars;
-        pr("...pct:", -sizeExpr, "dynamicTot:", charsDynamicTotal, "target:", target);
+        if (db)
+          pr("...pct:", -sizeExpr, "dynamicTot:", charsDynamicTotal, "target:", target);
       }
       if (db)
         pr("sizeExpr:", sizeExpr, "chars:", chars);
-      if ( db)
+      if (db)
         pr("charsDynamicTotal:", charsDynamicTotal, "clamped chars:", chars);
       if (chars == 0) {
         alert("problem fitting window");

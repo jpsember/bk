@@ -1,0 +1,6 @@
+enum {
+  text,
+  currency,
+  account_number,
+  date,
+}

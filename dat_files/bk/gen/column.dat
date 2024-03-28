@@ -1,0 +1,6 @@
+fields {
+  string name;
+  enum Alignment alignment;
+  int width;
+  enum Datatype datatype;
+}

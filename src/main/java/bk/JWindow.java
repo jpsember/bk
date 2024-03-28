@@ -157,6 +157,20 @@ public class JWindow extends BaseObject {
       '╴', Symbols.SINGLE_LINE_VERTICAL, '╭', '╰', '╮', '╯', //
   };
 
+  public void drawString(int x, int y, int maxLength, String s) {
+    var b = bounds();
+    if (y < b.y || y >= b.endY())
+      return;
+    var x1 = x;
+    var x2 = x + s.length();
+    x1 = MyMath.clamp(x1, b.x, b.endX() - 1);
+    x2 = MyMath.clamp(x2, b.x, b.endX());
+    if (x1 >= x2)
+      return;
+    var tg = textGraphics();
+    tg.putString(x1, y, s.substring(x1 - x, x2 - x));
+  }
+
   public void drawRect(IRect bounds, int type) {
     checkArgument(type >= 1 && type < BORDER_TOTAL, "unsupported border type:", type);
     int ci = (type - 1) * 6;
@@ -210,7 +224,6 @@ public class JWindow extends BaseObject {
 
   final void setSize(int sizeExpr) {
     mSizeExpr = sizeExpr;
-    pr("window", name(), "set size expr to:", sizeExpr);
   }
 
   int getSizeExpr() {

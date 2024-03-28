@@ -1,0 +1,7 @@
+fields {
+  int date;
+  int amount;
+  int debit;
+  int credit;
+  string description;
+}
