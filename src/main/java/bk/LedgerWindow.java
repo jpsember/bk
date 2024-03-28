@@ -18,7 +18,7 @@ public class LedgerWindow implements WindowHandler {
 
     todo("we need an ability to paint parts of a window even when the whole window is not invalid?");
 
-    var b = window.bounds();
+    var b = window.clipBounds();
 
     // Determine the starting offset, to keep the cursor row near the center of the window
     int ledgerRowNumAtTopOfWindow = 0;
@@ -83,8 +83,7 @@ public class LedgerWindow implements WindowHandler {
     //    pr(VERT_SP, "ledger keystroke:", k);
 
     Integer targetEntry = null;
-    // Subtract border size
-    int pageSize = Math.max(1, window.bounds().height - 2);
+    int pageSize = window.clipBounds().height;
     switch (k.getKeyType()) {
     case ArrowUp:
       targetEntry = mCursorRow - 1;
@@ -119,7 +118,7 @@ public class LedgerWindow implements WindowHandler {
   }
 
   private void plotString(String text, int x, int y, Alignment alignment, int width) {
-    var b = mWindow.bounds();
+    var b = mWindow.clipBounds();
     var diff = width - text.length();
     if (diff > 0) {
       switch (alignment) {

@@ -14,11 +14,6 @@ public class JContainer extends JWindow {
 
   @Override
   public void render() {
-    // The child views will render themselves.
-
-    // Special case: if this is the top level container, clear its bounds.
-    if (this == WinMgr.SHARED_INSTANCE.rootContainer())
-      clearRect(bounds().withLocation(IPoint.ZERO));
   }
 
   private static IPoint swapIf(IPoint pt, boolean swap) {
@@ -50,7 +45,7 @@ public class JContainer extends JWindow {
     // True if we need to exchange x<->y and w<->h so we can always deal with x being the dynamic dimension
     boolean swap = !mHorzFlag;
 
-    var boundsWithinScreen = bounds();
+    var boundsWithinScreen = layoutBounds();
 
     // The size of the container (normalized so windows are stacked horizontally)
 
@@ -113,7 +108,7 @@ public class JContainer extends JWindow {
         pr("ourNormSize:", ourNormSize, "ourNormBounds:", ourNormBounds);
 
       var ourBounds = swapIf(ourNormBounds, swap);
-      c.setBounds(ourBounds);
+      c.setLayoutBounds(ourBounds);
       if (db)
         pr("...child bounds:", ourBounds);
       normNextPosition = normNextPosition.sumWith(ourNormSize.x, 0);

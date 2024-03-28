@@ -39,16 +39,20 @@ public class JWindow extends BaseObject {
     return nullTo(mHandler, DEFAULT_HANDLER);
   }
 
-  public IRect bounds() {
-    return mBounds;
+  public IRect layoutBounds() {
+    return mLayoutBounds;
+  }
+
+  public IRect clipBounds() {
+    return mClipBounds;
   }
 
   List<JWindow> children() {
     return mChildren;
   }
 
-  void setBounds(IRect bounds) {
-    mBounds = bounds;
+  void setLayoutBounds(IRect bounds) {
+    mLayoutBounds = bounds;
   }
 
   boolean paintValid() {
@@ -110,36 +114,35 @@ public class JWindow extends BaseObject {
    * Render the window onto the screen
    */
   public void render() {
-    var origBounds = bounds();
-    try {
-      var b = origBounds;
-      int btype = mFlags & FLG_BORDER;
+    var layoutBounds = layoutBounds();
+    var clipBounds = layoutBounds;
+    // Set clip to include the border region; later we might inset it to exclude the border
+    mClipBounds = layoutBounds;
+    clearRect(layoutBounds);
+    int btype = mFlags & FLG_BORDER;
 
-      if (btype != BORDER_NONE) {
-        if (alert("experimenting with focus")) {
-          if (hasFocus()) {
-            btype = BORDER_THICK;
-          } else
-            btype = BORDER_THIN;
-        }
-        drawRect(b, btype);
-        // We inset an extra character horizontally
-        mBounds = origBounds.withInset(2, 1);
+    if (btype != BORDER_NONE) {
+      if (alert("experimenting with focus")) {
+        if (hasFocus()) {
+          btype = BORDER_THICK;
+        } else
+          btype = BORDER_THIN;
       }
-      clearRect(mBounds);
-      handler().paint(this);
-    } finally {
-      mBounds = origBounds;
+      drawRect(layoutBounds, btype);
+      // Now set the clip bounds to exclude the border
+      // We inset an extra character horizontally
+      clipBounds = clipBounds.withInset(2, 1);
     }
-    mBounds = origBounds;
+    mClipBounds = clipBounds;
+    handler().paint(this);
   }
 
   /**
    * Clamp a point to be within the bounds of the window
    */
   private IPoint clampToWindow(int wx, int wy) {
-    var cx1 = clampToWindowBoundsX(wx);
-    var cy1 = clampToWindowBoundsY(wy);
+    var cx1 = MyMath.clamp(wx, mClipBounds.x, mClipBounds.endX());
+    var cy1 = MyMath.clamp(wy, mClipBounds.y, mClipBounds.endY());
     return new IPoint(cx1, cy1);
   }
 
@@ -174,7 +177,7 @@ public class JWindow extends BaseObject {
   };
 
   public void drawString(int x, int y, int maxLength, String s) {
-    var b = bounds();
+    var b = clipBounds();
 
     // Determine which substring is within the window bounds
     if (y < b.y || y >= b.endY())
@@ -220,23 +223,18 @@ public class JWindow extends BaseObject {
     tg.setCharacter(x2 - 1, y2 - 1, sBorderChars[ci + 5]);
   }
 
-  IPoint clampToWindowBounds(IPoint pt) {
-    var x = MyMath.clamp(pt.x, 0, mBounds.width);
-    var y = MyMath.clamp(pt.y, 0, mBounds.height);
-    if (x != pt.x || y != pt.y)
-      pt = new IPoint(x, y);
-    return pt;
-  }
+  //  IPoint clampToClip(IPoint pt) {
+  //    var r = clipBounds();
+  //    var x = MyMath.clamp(pt.x, 0, r.width);
+  //    var y = MyMath.clamp(pt.y, 0, r.height);
+  //    if (x != pt.x || y != pt.y)
+  //      pt = new IPoint(x, y);
+  //    return pt;
+  //  }
 
-  private int clampToWindowBoundsX(int x) {
-    return MyMath.clamp(x, mBounds.x, mBounds.endX());
-  }
+  private IRect mLayoutBounds;
+  private IRect mClipBounds;
 
-  private int clampToWindowBoundsY(int y) {
-    return MyMath.clamp(y, mBounds.y, mBounds.endY());
-  }
-
-  private IRect mBounds;
   private List<JWindow> mChildren = arrayList();
 
   private static final WindowHandler DEFAULT_HANDLER = new WindowHandler() {

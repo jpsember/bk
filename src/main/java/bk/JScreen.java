@@ -88,7 +88,7 @@ public class JScreen {
       if (!currSize.equals(mPrevLayoutScreenSize)) {
         mTextGraphics = null;
         mPrevLayoutScreenSize = currSize;
-        c.setBounds(new IRect(currSize));
+        c.setLayoutBounds(new IRect(currSize));
         c.setLayoutInvalid();
       }
       updateView(c);
@@ -175,7 +175,7 @@ public class JScreen {
 
     if (!w.paintValid()) {
       if (db)
-        pr("...window", w.name(), "paint is invalid; rendering; bounds:", w.bounds());
+        pr("...window", w.name(), "paint is invalid; rendering; bounds:", w.layoutBounds());
       w.render();
       w.setPaintValid(true);
     }

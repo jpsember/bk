@@ -92,7 +92,7 @@ public class BkOper extends AppOper {
             mgr.handler(new WindowHandler() {
               @Override
               public void paint(JWindow w) {
-                var r = w.bounds().withInset(2);
+                var r = w.clipBounds().withInset(2);
                 if (r.isValid())
                   w.drawRect(r, BORDER_ROUNDED);
               }
