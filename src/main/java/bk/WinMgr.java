@@ -1,9 +1,10 @@
 package bk;
 
-import java.util.Stack;
-
-import static js.base.Tools.*;
 import static bk.Util.*;
+import static js.base.Tools.*;
+
+import java.util.Map;
+import java.util.Stack;
 
 import js.base.BaseObject;
 import js.base.Pair;
@@ -44,6 +45,11 @@ public class WinMgr extends BaseObject {
 
   public WinMgr popContainer() {
     pop(S_TYPE_CONTAINER);
+    return this;
+  }
+
+  public WinMgr id(int nextId) {
+    mPendingId = nextId;
     return this;
   }
 
@@ -116,6 +122,8 @@ public class WinMgr extends BaseObject {
     var w = new JWindow();
     c.children().add(w);
     applyParam(w);
+    checkState(!mWindowMap.containsKey(w.id()));
+    mWindowMap.put(w.id(), w);
     return this;
   }
 
@@ -123,6 +131,10 @@ public class WinMgr extends BaseObject {
     w.setSize(mSizeExpr);
     w.setBorder(mBorderType);
     w.setHandler(mHandler);
+    if (mPendingId == 0) {
+      mPendingId = mUniqueId++;
+    }
+    w.setId(mPendingId);
     resetPendingWindowVars();
   }
 
@@ -131,6 +143,7 @@ public class WinMgr extends BaseObject {
     mSizeExpr = -100;
     mBorderType = BORDER_NONE;
     mHandler = null;
+    mPendingId = 0;
   }
 
   public JContainer topLevelContainer() {
@@ -138,12 +151,39 @@ public class WinMgr extends BaseObject {
     return peek(S_TYPE_CONTAINER);
   }
 
+  public JWindow focusWindow() {
+    return mFocusWindow;
+  }
+
+  public JWindow get(int id) {
+    var w = mWindowMap.get(id);
+    if (w == null)
+      badArg("no window found with id:", id);
+    return w;
+  }
+
+  public void setFocusWindow(JWindow window) {
+    if (window == mFocusWindow)
+      return;
+    // If focus window is changing, repaint both old and new, in case we're highlighting things to 
+    // emphasize the focus
+    if (mFocusWindow != null)
+      mFocusWindow.repaint();
+    window.repaint();
+    mFocusWindow = window;
+  }
+
+  private JWindow mFocusWindow;
+
   private Stack<Pair<Integer, Object>> mStack = new Stack();
   private boolean mHorzFlag;
   private int mBorderType;
   private int mSizeExpr; // 0: unknown > 1: number of chars < 1: -percentage
   private WindowHandler mHandler;
   private JContainer mRootContainer;
+  private int mPendingId;
+  private int mUniqueId = -10000;
+  private Map<Integer, JWindow> mWindowMap = hashMap();
 
   public void doneConstruction() {
     // Ensure that only the root container remains on the stack

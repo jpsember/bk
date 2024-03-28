@@ -31,6 +31,10 @@ public class JWindow extends BaseObject {
     mHandler = h;
   }
 
+  void setId(int id) {
+    mId = id;
+  }
+
   WindowHandler handler() {
     return nullTo(mHandler, DEFAULT_HANDLER);
   }
@@ -110,7 +114,14 @@ public class JWindow extends BaseObject {
     try {
       var b = origBounds;
       int btype = mFlags & FLG_BORDER;
+
       if (btype != BORDER_NONE) {
+        if (alert("experimenting with focus")) {
+          if (hasFocus()) {
+            btype = BORDER_THICK;
+          } else
+            btype = BORDER_THIN;
+        }
         drawRect(b, btype);
         // We inset an extra character horizontally
         mBounds = origBounds.withInset(2, 1);
@@ -136,6 +147,10 @@ public class JWindow extends BaseObject {
     var p1 = clampToWindow(r.x, r.y);
     var p2 = clampToWindow(r.endX(), r.endY());
     return IRect.rectContainingPoints(p1, p2);
+  }
+
+  public final boolean hasFocus() {
+    return winMgr().focusWindow() == this;
   }
 
   public void clearRect(IRect bounds) {
@@ -254,5 +269,9 @@ public class JWindow extends BaseObject {
 
   private static int sUniqueId = 100;
   private int mId;
+
+  public int id() {
+    return mId;
+  }
 
 }

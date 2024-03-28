@@ -86,6 +86,7 @@ public class BkOper extends AppOper {
             mgr.chars(15).window();
             mgr.roundedBorder();
             mgr.handler(ourLedger);
+            mgr.id(WID_LEDGER);
             mgr.pct(80).window();
             mgr.thinBorder();
             mgr.handler(new WindowHandler() {
@@ -102,6 +103,7 @@ public class BkOper extends AppOper {
         }
       }
       mgr.doneConstruction();
+      mgr.setFocusWindow(mgr.get(WID_LEDGER));
       screen.mainLoop();
     } catch (Throwable t) {
       setError(screen.closeIfError(t));

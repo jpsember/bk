@@ -109,4 +109,6 @@ public final class Util {
 
   private static Random sRandom = new Random(1965);
 
+  public static final int WID_LEDGER = 500;
+
 }

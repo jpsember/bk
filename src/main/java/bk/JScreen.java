@@ -68,6 +68,7 @@ public class JScreen {
       if (keyStroke != null) {
         pr("got:", keyStroke);
         if (keyStroke.getKeyType() == KeyType.Escape) {
+          todo("Have a special key, like ctrl q, to quit");
           quit();
           return;
         }
