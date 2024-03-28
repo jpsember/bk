@@ -61,14 +61,13 @@ public class BkOper extends AppOper {
 
         for (var i = 0; i < 10; i++) {
           var t = generateTransaction();
-          List<Object> v = arrayList();
-          v.add(t.date());
-          v.add(t.amount());
-          v.add(t.credit());
-          v.add("account name");
-          v.add(t.description());
+          List<LedgerField> v = arrayList();
+          v.add(buildDate(t.date()));
+          v.add(buildCurrency(t.amount()));
+          v.add(buildAccountNumber(t.credit()));
+          v.add(buildAccountName("account name"));
+          v.add(buildTransactionDescription(t.description()));
           x.addEntry(v);
-pr("trans:",INDENT,t);
         }
       }
 
@@ -78,13 +77,14 @@ pr("trans:",INDENT,t);
         // Construct two windows; the second has some horizontal panels
         mgr.pct(75);
         mgr.thickBorder();
-        mgr.handler(ourLedger).window();
+        mgr.window();
         mgr.pct(25);
         {
           mgr.horz().pushContainer();
           {
             mgr.chars(15).window();
             mgr.roundedBorder();
+            mgr.handler(ourLedger);
             mgr.pct(80).window();
             mgr.thinBorder();
             mgr.handler(new WindowHandler() {

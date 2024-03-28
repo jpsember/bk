@@ -2,6 +2,7 @@ package bk;
 
 import static js.base.Tools.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -87,7 +88,12 @@ public final class Util {
 
   private static DateTimeFormatter sDateFormatter = new DateTimeFormatterBuilder().appendPattern("yyyy/MM/dd")
       .parseDefaulting(ChronoField.HOUR_OF_DAY, 0).parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
-      .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0).toFormatter();
+      .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0).toFormatter().withZone(ZoneId.systemDefault());
+
+  public static String formatDate(int epochSeconds) {
+    var inst = Instant.ofEpochSecond(epochSeconds);
+    return sDateFormatter.format(inst);
+  }
 
   public static int generateDate() {
     var r = random();
@@ -110,4 +116,27 @@ public final class Util {
   }
 
   private static Random sRandom = new Random(1965);
+
+  public static LedgerField buildAccountName(String name) {
+    todo("we could just use the various constructors");
+    todo("also, the width fields are not necessary");
+    return new AccountName(name);
+  }
+
+  public static LedgerField buildAccountNumber(int number) {
+    return new AccountNumber(number);
+  }
+
+  public static LedgerField buildCurrency(int amount) {
+    return new CurrencyField(amount);
+  }
+
+  public static LedgerField buildDate(int date) {
+    return new DateField(date);
+  }
+
+  public static LedgerField buildTransactionDescription(String description) {
+    return new TransactionDescriptionField(description);
+  }
+
 }

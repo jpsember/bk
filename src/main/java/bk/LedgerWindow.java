@@ -23,7 +23,7 @@ public class LedgerWindow implements WindowHandler {
 
       if (i == 0) {
         // Render the headings
-        int x = 0;
+        int x = b.x;
         for (var col : mColumns) {
           plotString(col.name(), x, i, col.alignment(), col.width());
           x += col.width() + 1;
@@ -36,12 +36,12 @@ public class LedgerWindow implements WindowHandler {
         var entries = mEntries.get(entNum);
 
         // Render the fields
-        int x = 0;
+        int x = b.x;
         var j = INIT_INDEX;
         for (var col : mColumns) {
           j++;
           var data = entries.get(j);
-          pr("plot column, width:", col.width(), "x:", x, "y:", i);
+          pr("plot column, width:", col.width(), "x:", x, "y:", i,"data string:",data.toString());
           plotString(data, x, i, col.alignment(), col.width());
           x += col.width() + 1;
         }
@@ -60,13 +60,14 @@ public class LedgerWindow implements WindowHandler {
     mColumns.add(column.build());
   }
 
-  public void addEntry(List<Object> fields) {
+  public void addEntry(List<LedgerField> fields) {
     checkArgument(fields.size() == mColumns.size(), "expected", mColumns.size(), "entries, got",
         fields.size());
     mEntries.add(fields);
   }
 
   private static Column adjustColumn(Column c) {
+    todo("this is unnecessary?");
     var b = c.build().toBuilder();
     if (b.width() == 0) {
       switch (b.datatype()) {
@@ -88,7 +89,7 @@ public class LedgerWindow implements WindowHandler {
   }
 
   private List<Column> mColumns = arrayList();
-  private List<List<Object>> mEntries = arrayList();
+  private List<List<LedgerField>> mEntries = arrayList();
   private StringBuilder msb = new StringBuilder();
   private JWindow mWindow;
 }
