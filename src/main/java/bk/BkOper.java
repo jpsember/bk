@@ -51,6 +51,8 @@ public class BkOper extends AppOper {
 
       var mgr = winMgr();
 
+      var genLedger = buildGeneralLedger();
+
       var ourLedger = new LedgerWindow();
       {
         var x = ourLedger;
@@ -78,6 +80,8 @@ public class BkOper extends AppOper {
         // Construct two windows; the second has some horizontal panels
         mgr.pct(25);
         mgr.thickBorder();
+        mgr.id(WID_GENERAL_LEDGER);
+        mgr.handler(genLedger);
         mgr.window();
         mgr.pct(75);
         {
@@ -89,26 +93,51 @@ public class BkOper extends AppOper {
             mgr.id(WID_LEDGER);
             mgr.pct(80).window();
             mgr.thinBorder();
-            mgr.handler(new WindowHandler() {
-              @Override
-              public void paint() {
-                var r = Render.SHARED_INSTANCE;
-                var rect = r.clipBounds().withInset(2);
-                if (rect.isValid())
-                  r.drawRect(rect, BORDER_ROUNDED);
-              }
-            });
             mgr.pct(20).window();
           }
           mgr.popContainer();
         }
       }
       mgr.doneConstruction();
-      mgr.setFocusWindow(mgr.get(WID_LEDGER));
+      mgr.setFocusWindow(mgr.get(WID_GENERAL_LEDGER));
       screen.mainLoop();
     } catch (Throwable t) {
       setError(screen.closeIfError(t));
     }
+  }
+
+  private WindowHandler buildGeneralLedger() {
+    var lg = new LedgerWindow();
+    {
+      final int NAMED_ACCOUNT_WIDTH = 25;
+      var x = lg;
+      x.addColumn(Column.newBuilder().name("Date").datatype(Datatype.DATE));
+      x.addColumn(VERT_SEP);
+      x.addColumn(Column.newBuilder().name("Amount").datatype(Datatype.CURRENCY));
+      x.addColumn(VERT_SEP);
+      x.addColumn(Column.newBuilder().name("Dr").datatype(Datatype.TEXT).width(NAMED_ACCOUNT_WIDTH));
+      x.addColumn(VERT_SEP);
+      x.addColumn(Column.newBuilder().name("Cr").datatype(Datatype.TEXT).width(NAMED_ACCOUNT_WIDTH));
+      x.addColumn(VERT_SEP);
+      x.addColumn(Column.newBuilder().name("Description").datatype(Datatype.TEXT).width(40));
+
+      for (var i = 0; i < 20; i++) {
+        var t = generateTransaction();
+        List<LedgerField> v = arrayList();
+        v.add(new DateField(t.date()));
+        v.add(VERT_SEP_FLD);
+        v.add(new CurrencyField(t.amount()));
+        v.add(VERT_SEP_FLD);
+        v.add(new AccountNameField(t.debit(), randomText(20, false)));
+        v.add(VERT_SEP_FLD);
+        v.add(new AccountNameField(t.credit(), randomText(20, false)));
+        v.add(VERT_SEP_FLD);
+        v.add(new TransactionDescriptionField(t.description()));
+        x.addEntry(v);
+      }
+    }
+    return lg;
+
   }
 
   private BkConfig mConfig;

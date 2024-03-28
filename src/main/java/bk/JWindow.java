@@ -137,25 +137,6 @@ public class JWindow extends BaseObject {
     r.unprepare();
   }
 
-//  /**
-//   * Let client perform partial rendering of the window
-//   */
-//  void renderPartial() {
-//    var r = Render.SHARED_INSTANCE;
-//    r.prepare(this);
-//
-//    var layoutBounds = layoutBounds();
-//    var clipBounds = layoutBounds;
-//    int btype = mFlags & FLG_BORDER;
-//    if (btype != BORDER_NONE) {
-//      clipBounds = clipBounds.withInset(2, 1);
-//      r.setClipBounds(clipBounds);
-//    }
-//
-//    handler().paintPartial();
-//    r.unprepare();
-//  }
-
   public final boolean hasFocus() {
     return winMgr().focusWindow() == this;
   }

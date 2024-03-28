@@ -17,7 +17,6 @@ public class LedgerWindow implements WindowHandler {
   public void paint() {
 
     var r = Render.SHARED_INSTANCE;
-    todo("we need an ability to paint parts of a window even when the whole window is not invalid?");
 
     var b = r.clipBounds();
     if (r.partial()) {
@@ -42,7 +41,7 @@ public class LedgerWindow implements WindowHandler {
       msb.setLength(0);
 
       int x = 0;
-      var hl = ledgerRowNum == mCursorRow;
+      var hl = r.hasFocus() && ledgerRowNum == mCursorRow;
       r.pushStyle(hl ? STYLE_INVERSE : STYLE_NORMAL);
       if (hl)
         r.clearRow(b.y + windowRowNum, ' ');
@@ -112,7 +111,6 @@ public class LedgerWindow implements WindowHandler {
         window.repaint();
       }
     }
-
     else if (alert("experiment with partial repaint")) {
       pr("triggering partial repaint");
       window.repaintPartial();

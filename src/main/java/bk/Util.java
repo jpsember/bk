@@ -9,8 +9,11 @@ import java.time.temporal.ChronoField;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
+import com.googlecode.lanterna.Symbols;
 import com.googlecode.lanterna.graphics.TextGraphics;
 
+import bk.gen.Column;
+import bk.gen.Datatype;
 import bk.gen.Transaction;
 import js.base.DateTimeTools;
 
@@ -115,5 +118,14 @@ public final class Util {
   private static Random sRandom = new Random(1965);
 
   public static final int WID_LEDGER = 500;
+  public static final int WID_GENERAL_LEDGER = 501;
+  public static final Column VERT_SEP = Column.newBuilder().datatype(Datatype.TEXT).name("").width(1).build();
+  public static final LedgerField VERT_SEP_FLD = new LedgerField() {
+    @Override
+    public String toString() {
+      return SIN;
+    }
 
+    private String SIN = Character.toString(Symbols.SINGLE_LINE_VERTICAL);
+  };
 }

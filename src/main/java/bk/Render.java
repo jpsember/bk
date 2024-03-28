@@ -44,7 +44,8 @@ public final class Render {
   public Render clearRect(IRect bounds, char character) {
     var p = clampToClip(bounds);
     if (!p.isDegenerate()) {
-     mTextGraphics.fillRectangle(new TerminalPosition(p.x, p.y), new TerminalSize(p.width, p.height), character);
+      mTextGraphics.fillRectangle(new TerminalPosition(p.x, p.y), new TerminalSize(p.width, p.height),
+          character);
     }
     return this;
   }
@@ -182,13 +183,17 @@ public final class Render {
   public boolean partial() {
     return mPartial;
   }
-  
+
+  public boolean hasFocus() {
+    return window().hasFocus();
+  }
+
   private Stack<TextGraphics> mStack = new Stack<>();
   private IRect mLayoutBounds;
   private IRect mClipBounds;
   private JWindow mWindow;
   private Screen mScreen;
   private TextGraphics mTextGraphics;
-  private  boolean mPartial;
+  private boolean mPartial;
 
 }
