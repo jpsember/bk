@@ -179,12 +179,12 @@ public class JScreen {
       w.setPartialPaintValid(true);
       if (db)
         pr("...window", w.name(), "paint is invalid; rendering; bounds:", w.layoutBounds());
-      w.render();
+      w.render(false);
       w.setPaintValid(true);
     } else if (!w.partialPaintValid()) {
       if (db)
         pr("...window", w.name(), "partial paint is invalid");
-      w.renderPartial();
+      w.render(true);
       w.setPartialPaintValid(true);
     }
 

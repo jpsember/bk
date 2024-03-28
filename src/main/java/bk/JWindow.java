@@ -115,23 +115,19 @@ public class JWindow extends BaseObject {
   /**
    * Render the window onto the screen
    */
-  void render() {
+  void render(boolean partial) {
     var r = Render.SHARED_INSTANCE;
-    r.prepare(this);
+    r.prepare(this, partial);
 
     var layoutBounds = layoutBounds();
     var clipBounds = layoutBounds;
-    r.clearRect(layoutBounds);
+    if (!partial)
+      r.clearRect(layoutBounds);
     int btype = mFlags & FLG_BORDER;
 
     if (btype != BORDER_NONE) {
-      if (alert("experimenting with focus")) {
-        if (hasFocus()) {
-          btype = BORDER_THICK;
-        } else
-          btype = BORDER_THIN;
-      }
-      r.drawRect(layoutBounds, btype);
+      if (!partial)
+        r.drawRect(layoutBounds, btype);
       // Now set the clip bounds to exclude the border
       // We inset an extra character horizontally
       clipBounds = clipBounds.withInset(2, 1);
@@ -141,23 +137,24 @@ public class JWindow extends BaseObject {
     r.unprepare();
   }
 
-  /**
-   * Let client perform partial rendering of the window
-   */
-  void renderPartial() {
-    var r = Render.SHARED_INSTANCE;
-    r.prepare(this);
-
-    var layoutBounds = layoutBounds();
-    var clipBounds = layoutBounds;
-    int btype = mFlags & FLG_BORDER;
-    if (btype != BORDER_NONE) {
-      clipBounds = clipBounds.withInset(2, 1);
-      r.setClipBounds(clipBounds);
-    }
-    handler().paintPartial();
-    r.unprepare();
-  }
+//  /**
+//   * Let client perform partial rendering of the window
+//   */
+//  void renderPartial() {
+//    var r = Render.SHARED_INSTANCE;
+//    r.prepare(this);
+//
+//    var layoutBounds = layoutBounds();
+//    var clipBounds = layoutBounds;
+//    int btype = mFlags & FLG_BORDER;
+//    if (btype != BORDER_NONE) {
+//      clipBounds = clipBounds.withInset(2, 1);
+//      r.setClipBounds(clipBounds);
+//    }
+//
+//    handler().paintPartial();
+//    r.unprepare();
+//  }
 
   public final boolean hasFocus() {
     return winMgr().focusWindow() == this;

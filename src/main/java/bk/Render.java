@@ -124,13 +124,14 @@ public final class Render {
   /**
    * Prepare for subsequent operations to occur with a particular window
    */
-  void prepare(JWindow window) {
+  void prepare(JWindow window, boolean partial) {
     mScreen = screen().screen();
     mWindow = window;
     mLayoutBounds = window.layoutBounds();
     mClipBounds = mLayoutBounds;
     mStack = new Stack<>();
     mTextGraphics = mScreen.newTextGraphics();
+    mPartial = partial;
   }
 
   void unprepare() {
@@ -178,11 +179,16 @@ public final class Render {
     return this;
   }
 
+  public boolean partial() {
+    return mPartial;
+  }
+  
   private Stack<TextGraphics> mStack = new Stack<>();
   private IRect mLayoutBounds;
   private IRect mClipBounds;
   private JWindow mWindow;
   private Screen mScreen;
   private TextGraphics mTextGraphics;
+  private  boolean mPartial;
 
 }

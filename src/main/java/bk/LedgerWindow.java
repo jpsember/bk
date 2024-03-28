@@ -13,18 +13,6 @@ import js.geometry.MyMath;
 
 public class LedgerWindow implements WindowHandler {
 
-  int count;
-
-  @Override
-  public void paintPartial() {
-    var r = Render.SHARED_INSTANCE;
-    var b = r.clipBounds();
-    var rn = MyMath.random();
-    r.pushStyle(STYLE_INVERSE);
-    r.clearRow(b.y + rn.nextInt(20), (char) (rn.nextInt(26)+'A'));
-    r.pop();
-  }
-
   @Override
   public void paint() {
 
@@ -32,6 +20,13 @@ public class LedgerWindow implements WindowHandler {
     todo("we need an ability to paint parts of a window even when the whole window is not invalid?");
 
     var b = r.clipBounds();
+    if (r.partial()) {
+      var rn = MyMath.random();
+      r.pushStyle(STYLE_INVERSE);
+      r.clearRow(b.y + rn.nextInt(20), (char) (rn.nextInt(26) + 'A'));
+      r.pop();
+      return;
+    }
 
     // Determine the starting offset, to keep the cursor row near the center of the window
     int ledgerRowNumAtTopOfWindow = 0;
@@ -129,13 +124,9 @@ public class LedgerWindow implements WindowHandler {
       }
     }
 
-    else {
-
-      if (MyMath.random().nextInt(5) == 0) {
-        pr("triggering partial repaint");
-        window.repaintPartial();
-      }
-
+    else if (alert("experiment with partial repaint")) {
+      pr("triggering partial repaint");
+      window.repaintPartial();
     }
   }
 
