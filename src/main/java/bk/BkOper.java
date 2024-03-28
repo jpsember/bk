@@ -43,6 +43,12 @@ public class BkOper extends AppOper {
 
   @Override
   public void perform() {
+
+    if (false) {
+      var z = new CurrencyField(9_234_567_89);
+      halt("currency:", z);
+    }
+
     var screen = screen();
     try {
       loadUtil();
@@ -54,18 +60,18 @@ public class BkOper extends AppOper {
       {
         var x = ourLedger;
         x.addColumn(Column.newBuilder().name("Date").datatype(Datatype.DATE));
-        x.addColumn(Column.newBuilder().name("Amount").datatype(Datatype.CURRENCY));
         x.addColumn(Column.newBuilder().name("Acct").datatype(Datatype.ACCOUNT_NUMBER));
-        x.addColumn(Column.newBuilder().name("").datatype(Datatype.TEXT).width(25));
+        x.addColumn(Column.newBuilder().name("Name").datatype(Datatype.TEXT).width(25));
+        x.addColumn(Column.newBuilder().name("Amount").datatype(Datatype.CURRENCY));
         x.addColumn(Column.newBuilder().name("Description").datatype(Datatype.TEXT).width(40));
 
-        for (var i = 0; i < 10; i++) {
+        for (var i = 0; i < 1; i++) {
           var t = generateTransaction();
           List<LedgerField> v = arrayList();
           v.add(buildDate(t.date()));
-          v.add(buildCurrency(t.amount()));
           v.add(buildAccountNumber(t.credit()));
           v.add(buildAccountName("account name"));
+          v.add(buildCurrency(t.amount()));
           v.add(buildTransactionDescription(t.description()));
           x.addEntry(v);
         }

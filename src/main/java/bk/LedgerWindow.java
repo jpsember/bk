@@ -16,17 +16,18 @@ public class LedgerWindow implements WindowHandler {
     pr("painting ledger window; # columns:", mColumns.size());
     todo("we need an ability to paint parts of a window even when the whole window is not invalid?");
 
+    final int SPACES_BETWEEN_COLUMNS = 2;
     var b = window.bounds();
     int rows = b.height;
     for (int i = 0; i < rows; i++) {
       msb.setLength(0);
 
+      int x = 0;
       if (i == 0) {
         // Render the headings
-        int x = b.x;
         for (var col : mColumns) {
           plotString(col.name(), x, i, col.alignment(), col.width());
-          x += col.width() + 1;
+          x += col.width() + SPACES_BETWEEN_COLUMNS;
         }
       } else {
         int entNum = i - 1;
@@ -36,23 +37,38 @@ public class LedgerWindow implements WindowHandler {
         var entries = mEntries.get(entNum);
 
         // Render the fields
-        int x = b.x;
         var j = INIT_INDEX;
         for (var col : mColumns) {
           j++;
           var data = entries.get(j);
-          pr("plot column, width:", col.width(), "x:", x, "y:", i,"data string:",data.toString());
+          pr("plot column, width:", col.width(), "x:", x, "y:", i, "data string:", data.toString());
           plotString(data, x, i, col.alignment(), col.width());
-          x += col.width() + 1;
+          x += col.width() + SPACES_BETWEEN_COLUMNS;
         }
       }
     }
-
   }
 
   private void plotString(Object data, int x, int y, Alignment alignment, int width) {
+
     var text = data.toString();
-    mWindow.drawString(x, y, width, text);
+    var b = mWindow.bounds();
+
+    var diff = width - text.length();
+    if (diff > 0) {
+      switch (alignment) {
+      case CENTER:
+        x += diff >> 1;
+        break;
+      case RIGHT:
+        x += diff;
+        break;
+      default:
+        break;
+      }
+    }
+    mWindow.drawString(x + b.x, y + b.y, width, text);
+
   }
 
   public void addColumn(Column column) {
@@ -75,6 +91,7 @@ public class LedgerWindow implements WindowHandler {
         b.width(4);
         break;
       case CURRENCY:
+        b.alignment(Alignment.RIGHT);
         b.width(12);
         break;
       case DATE:
