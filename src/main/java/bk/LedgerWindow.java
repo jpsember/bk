@@ -36,7 +36,6 @@ public class LedgerWindow implements WindowHandler {
     }
 
     final int SPACES_BETWEEN_COLUMNS = 2;
-    String blockText = null;
     int rows = b.height;
     for (int windowRowNum = 0; windowRowNum < rows; windowRowNum++) {
       int ledgerRowNum = windowRowNum + ledgerRowNumAtTopOfWindow;
@@ -45,10 +44,8 @@ public class LedgerWindow implements WindowHandler {
       int x = 0;
       var hl = ledgerRowNum == mCursorRow;
       r.pushStyle(hl ? STYLE_INVERSE : STYLE_NORMAL);
-      if (hl) {
+      if (hl)
         r.clearRow(b.y + windowRowNum, ' ');
-        //        plotString(spaces(b.width), 0, windowRowNum, Alignment.LEFT, -1);
-      }
       if (ledgerRowNum == -1) {
         // Render the headings
         for (var col : mColumns) {
@@ -59,12 +56,7 @@ public class LedgerWindow implements WindowHandler {
         int entNum = ledgerRowNum;
         if (entNum >= mEntries.size()) {
           // Plot a row of grey to indicate we're off the ledger
-          if (blockText == null) {
-            for (int j = 0; j < b.width; j++)
-              msb.append('░');
-            blockText = msb.toString();
-          }
-          plotString(blockText, 0, windowRowNum, Alignment.LEFT, blockText.length());
+          r.clearRow(b.y + windowRowNum, '░');
         } else {
 
           var entries = mEntries.get(entNum);
@@ -75,8 +67,6 @@ public class LedgerWindow implements WindowHandler {
             j++;
             var data = entries.get(j);
             var text = data.toString();
-            if (false && alert("printing really long stuff"))
-              text = "abcdefghijklmnopqrstuvwxyz_abcdefghijklmnopqrstuvwxyz_abcdefghijklmnopqrstuvwxyz";
             plotString(text, x, windowRowNum, col.alignment(), col.width());
             x += col.width() + SPACES_BETWEEN_COLUMNS;
           }
@@ -118,7 +108,6 @@ public class LedgerWindow implements WindowHandler {
       int sz = mEntries.size();
       if (sz != 0) {
         int t = MyMath.clamp(targetEntry, 0, sz - 1);
-        todo("have ability to repaint specific rows");
         mCursorRow = t;
         window.repaint();
       }
