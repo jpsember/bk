@@ -22,6 +22,10 @@ public final class Util {
   public static final int BORDER_ROUNDED = 3;
   public static final int BORDER_TOTAL = 4;
 
+  public static final int STYLE_NORMAL = 0;
+  public static final int STYLE_INVERSE = 1;
+  public static final int STYLE_TOTAL = 2;
+
   public final static void loadUtil() {
   }
 
@@ -33,6 +37,7 @@ public final class Util {
     return JScreen.sharedInstance();
   }
 
+  @Deprecated
   public static TextGraphics textGraphics() {
     return screen().textGraphics();
   }

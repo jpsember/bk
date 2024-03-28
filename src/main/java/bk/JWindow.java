@@ -126,6 +126,7 @@ public class JWindow extends BaseObject {
       r.setClipBounds(clipBounds);
     }
     handler().paint();
+    r.unprepare();
   }
 
   public final boolean hasFocus() {

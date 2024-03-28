@@ -1,5 +1,6 @@
 package bk;
 
+import static bk.Util.*;
 import static js.base.Tools.*;
 
 import java.util.List;
@@ -32,14 +33,14 @@ public class LedgerWindow implements WindowHandler {
     int rows = b.height;
     for (int windowRowNum = 0; windowRowNum < rows; windowRowNum++) {
       int ledgerRowNum = windowRowNum + ledgerRowNumAtTopOfWindow;
-
       msb.setLength(0);
 
       int x = 0;
-      if (ledgerRowNum == mCursorRow) {
-        todo("just plotting >>> for cursor");
-        plotString(">>>", x, windowRowNum, Alignment.LEFT, 3);
-        x += 4;
+      var hl = ledgerRowNum == mCursorRow;
+      r.pushStyle(hl ? STYLE_INVERSE : STYLE_NORMAL);
+      if (hl) {
+        r.clearRow(b.y + windowRowNum, ' ');
+         //        plotString(spaces(b.width), 0, windowRowNum, Alignment.LEFT, -1);
       }
       if (ledgerRowNum == -1) {
         // Render the headings
@@ -57,23 +58,24 @@ public class LedgerWindow implements WindowHandler {
             blockText = msb.toString();
           }
           plotString(blockText, 0, windowRowNum, Alignment.LEFT, blockText.length());
-          continue;
-        }
+        } else {
 
-        var entries = mEntries.get(entNum);
+          var entries = mEntries.get(entNum);
 
-        // Render the fields
-        var j = INIT_INDEX;
-        for (var col : mColumns) {
-          j++;
-          var data = entries.get(j);
-          var text = data.toString();
-          if (false && alert("printing really long stuff"))
-            text = "abcdefghijklmnopqrstuvwxyz_abcdefghijklmnopqrstuvwxyz_abcdefghijklmnopqrstuvwxyz";
-          plotString(text, x, windowRowNum, col.alignment(), col.width());
-          x += col.width() + SPACES_BETWEEN_COLUMNS;
+          // Render the fields
+          var j = INIT_INDEX;
+          for (var col : mColumns) {
+            j++;
+            var data = entries.get(j);
+            var text = data.toString();
+            if (false && alert("printing really long stuff"))
+              text = "abcdefghijklmnopqrstuvwxyz_abcdefghijklmnopqrstuvwxyz_abcdefghijklmnopqrstuvwxyz";
+            plotString(text, x, windowRowNum, col.alignment(), col.width());
+            x += col.width() + SPACES_BETWEEN_COLUMNS;
+          }
         }
       }
+      r.pop();
     }
   }
 
@@ -117,6 +119,8 @@ public class LedgerWindow implements WindowHandler {
   }
 
   private void plotString(String text, int x, int y, Alignment alignment, int width) {
+    if (width < 0)
+      width = text.length();
     var r = Render.SHARED_INSTANCE;
     var b = r.clipBounds();
     var diff = width - text.length();

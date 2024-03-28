@@ -105,6 +105,7 @@ public class JScreen {
     return mScreen;
   }
 
+  @Deprecated
   public TextGraphics textGraphics() {
     if (mTextGraphics == null) {
       todo("add support for inverse, bold text styles");
