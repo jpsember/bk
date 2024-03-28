@@ -91,10 +91,11 @@ public class BkOper extends AppOper {
             mgr.thinBorder();
             mgr.handler(new WindowHandler() {
               @Override
-              public void paint(JWindow w) {
-                var r = w.clipBounds().withInset(2);
-                if (r.isValid())
-                  w.drawRect(r, BORDER_ROUNDED);
+              public void paint() {
+                var r = Render.SHARED_INSTANCE;
+                var rect = r.clipBounds().withInset(2);
+                if (rect.isValid())
+                  r.drawRect(rect, BORDER_ROUNDED);
               }
             });
             mgr.pct(20).window();

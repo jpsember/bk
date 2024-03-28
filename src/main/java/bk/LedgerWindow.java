@@ -13,12 +13,12 @@ import js.geometry.MyMath;
 public class LedgerWindow implements WindowHandler {
 
   @Override
-  public void paint(JWindow window) {
-    mWindow = window;
+  public void paint() {
 
+    var r = Render.SHARED_INSTANCE;
     todo("we need an ability to paint parts of a window even when the whole window is not invalid?");
 
-    var b = window.clipBounds();
+    var b = r.clipBounds();
 
     // Determine the starting offset, to keep the cursor row near the center of the window
     int ledgerRowNumAtTopOfWindow = 0;
@@ -79,11 +79,10 @@ public class LedgerWindow implements WindowHandler {
 
   @Override
   public void processKeyStroke(JWindow window, KeyStroke k) {
-    mWindow = window;
     //    pr(VERT_SP, "ledger keystroke:", k);
 
     Integer targetEntry = null;
-    int pageSize = window.clipBounds().height;
+    int pageSize = window.layoutBounds().height - 2; // Assume a boundary
     switch (k.getKeyType()) {
     case ArrowUp:
       targetEntry = mCursorRow - 1;
@@ -118,7 +117,8 @@ public class LedgerWindow implements WindowHandler {
   }
 
   private void plotString(String text, int x, int y, Alignment alignment, int width) {
-    var b = mWindow.clipBounds();
+    var r = Render.SHARED_INSTANCE;
+    var b = r.clipBounds();
     var diff = width - text.length();
     if (diff > 0) {
       switch (alignment) {
@@ -132,7 +132,7 @@ public class LedgerWindow implements WindowHandler {
         break;
       }
     }
-    mWindow.drawString(x + b.x, y + b.y, width, text);
+    r.drawString(x + b.x, y + b.y, width, text);
   }
 
   public void addColumn(Column column) {
@@ -171,6 +171,5 @@ public class LedgerWindow implements WindowHandler {
   private List<Column> mColumns = arrayList();
   private List<List<LedgerField>> mEntries = arrayList();
   private StringBuilder msb = new StringBuilder();
-  private JWindow mWindow;
   private int mCursorRow;
 }
