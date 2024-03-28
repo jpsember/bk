@@ -4,8 +4,11 @@ import static js.base.Tools.*;
 
 import java.util.List;
 
+import com.googlecode.lanterna.input.KeyStroke;
+
 import bk.gen.Alignment;
 import bk.gen.Column;
+import js.geometry.MyMath;
 
 public class LedgerWindow implements WindowHandler {
 
@@ -14,24 +17,48 @@ public class LedgerWindow implements WindowHandler {
     mWindow = window;
 
     todo("we need an ability to paint parts of a window even when the whole window is not invalid?");
-    todo("print row of blocks for lines that are above or below the entries");
-    final int SPACES_BETWEEN_COLUMNS = 2;
+
     var b = window.bounds();
+
+    // Determine the starting offset, to keep the cursor row near the center of the window
+    int ledgerRowNumAtTopOfWindow = 0;
+    {
+      int vis = b.height;
+      ledgerRowNumAtTopOfWindow = Math.max(-1, (mCursorRow - vis / 2));
+    }
+
+    final int SPACES_BETWEEN_COLUMNS = 2;
+    String blockText = null;
     int rows = b.height;
-    for (int i = 0; i < rows; i++) {
+    for (int windowRowNum = 0; windowRowNum < rows; windowRowNum++) {
+      int ledgerRowNum = windowRowNum + ledgerRowNumAtTopOfWindow;
+
       msb.setLength(0);
 
       int x = 0;
-      if (i == 0) {
+      if (ledgerRowNum == mCursorRow) {
+        todo("just plotting >>> for cursor");
+        plotString(">>>", x, windowRowNum, Alignment.LEFT, 3);
+        x += 4;
+      }
+      if (ledgerRowNum == -1) {
         // Render the headings
         for (var col : mColumns) {
-          plotString(col.name(), x, i, col.alignment(), col.width());
+          plotString(col.name(), x, windowRowNum, col.alignment(), col.width());
           x += col.width() + SPACES_BETWEEN_COLUMNS;
         }
       } else {
-        int entNum = i - 1;
-        if (entNum >= mEntries.size())
+        int entNum = ledgerRowNum;
+        if (entNum >= mEntries.size()) {
+          // Plot a row of grey to indicate we're off the ledger
+          if (blockText == null) {
+            for (int j = 0; j < b.width; j++)
+              msb.append('░');
+            blockText = msb.toString();
+          }
+          plotString(blockText, 0, windowRowNum, Alignment.LEFT, blockText.length());
           continue;
+        }
 
         var entries = mEntries.get(entNum);
 
@@ -43,9 +70,50 @@ public class LedgerWindow implements WindowHandler {
           var text = data.toString();
           if (false && alert("printing really long stuff"))
             text = "abcdefghijklmnopqrstuvwxyz_abcdefghijklmnopqrstuvwxyz_abcdefghijklmnopqrstuvwxyz";
-          plotString(text, x, i, col.alignment(), col.width());
+          plotString(text, x, windowRowNum, col.alignment(), col.width());
           x += col.width() + SPACES_BETWEEN_COLUMNS;
         }
+      }
+    }
+  }
+
+  @Override
+  public void processKeyStroke(JWindow window, KeyStroke k) {
+    mWindow = window;
+    //    pr(VERT_SP, "ledger keystroke:", k);
+
+    Integer targetEntry = null;
+    // Subtract border size
+    int pageSize = Math.max(1, window.bounds().height - 2);
+    switch (k.getKeyType()) {
+    case ArrowUp:
+      targetEntry = mCursorRow - 1;
+      break;
+    case ArrowDown:
+      targetEntry = mCursorRow + 1;
+      break;
+    case PageUp:
+      targetEntry = mCursorRow - pageSize;
+      break;
+    case PageDown:
+      targetEntry = mCursorRow + pageSize;
+      break;
+    case Home:
+      targetEntry = 0;
+      break;
+    case End:
+      targetEntry = mEntries.size();
+      break;
+    default:
+      break;
+    }
+    if (targetEntry != null) {
+      int sz = mEntries.size();
+      if (sz != 0) {
+        int t = MyMath.clamp(targetEntry, 0, sz - 1);
+        todo("have ability to repaint specific rows");
+        mCursorRow = t;
+        window.repaint();
       }
     }
   }
@@ -105,4 +173,5 @@ public class LedgerWindow implements WindowHandler {
   private List<List<LedgerField>> mEntries = arrayList();
   private StringBuilder msb = new StringBuilder();
   private JWindow mWindow;
+  private int mCursorRow;
 }

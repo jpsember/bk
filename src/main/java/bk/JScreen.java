@@ -64,18 +64,22 @@ public class JScreen {
 
   public void update() {
     try {
+      var m = winMgr();
       KeyStroke keyStroke = mScreen.pollInput();
       if (keyStroke != null) {
-        pr("got:", keyStroke);
         if (keyStroke.getKeyType() == KeyType.Escape) {
           todo("Have a special key, like ctrl q, to quit");
           quit();
           return;
         }
-        todo("send key event to the window that has focus");
+        var w = m.focusWindow();
+        if (w == null) {
+          todo("#10no window has focus");
+        } else {
+          w.handler().processKeyStroke(w, keyStroke);
+        }
       }
 
-      var m = winMgr();
       var c = m.topLevelContainer();
 
       // Update size of terminal
