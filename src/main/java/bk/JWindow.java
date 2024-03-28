@@ -113,7 +113,7 @@ public class JWindow extends BaseObject {
       if (btype != BORDER_NONE) {
         drawRect(b, btype);
         // We inset an extra character horizontally
-        mBounds = origBounds.withInset(2,1);
+        mBounds = origBounds.withInset(2, 1);
       }
       clearRect(mBounds);
       handler().paint(this);
@@ -158,10 +158,9 @@ public class JWindow extends BaseObject {
       '╴', Symbols.SINGLE_LINE_VERTICAL, '╭', '╰', '╮', '╯', //
   };
 
-  public void drawString(int x, int y, int maxLengthUNUSED, String s) {
+  public void drawString(int x, int y, int maxLength, String s) {
     var b = bounds();
 
-    pr("drawString x:", x, "y:", y, "string:", quote(s), "bounds:", b);
     // Determine which substring is within the window bounds
     if (y < b.y || y >= b.endY())
       return;
@@ -169,22 +168,15 @@ public class JWindow extends BaseObject {
     var x2 = x + s.length();
     x1 = MyMath.clamp(x1, b.x, b.endX());
     x2 = MyMath.clamp(x2, b.x, b.endX());
-    pr("...clamped x1,x2:", x1, x2);
-    if (x1 >= x2) {
+    if (x1 >= x2)
       return;
-    }
 
     int sStart = x1 - x;
-    int sEnd = Math.min(s.length(), x2 - x);
-    pr("sStart:", sStart, "sEnd:", sEnd);
+    int sEnd = Math.min(maxLength, x2 - x);
     if (sEnd <= sStart) {
       return;
     }
-
-    pr("drawString x:", x, "s length:", s.length(), "window x:", b.x, "end x:", b.endX(), "sStart:", sStart,
-        "sEnd:", sEnd);
     var tg = textGraphics();
-
     tg.putString(x1, y, s.substring(sStart, sEnd));
   }
 

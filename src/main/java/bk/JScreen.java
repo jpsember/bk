@@ -49,7 +49,6 @@ public class JScreen {
   public void close() {
     if (mScreen == null)
       return;
-    msg("closing screen");
     Files.close(mScreen);
     // There seems to be a problem with restoring the cursor position; it positions the cursor at the end of the last line.
     // Probably because our logging doesn't print a linefeed until necessary.
@@ -103,6 +102,7 @@ public class JScreen {
 
   public TextGraphics textGraphics() {
     if (mTextGraphics == null) {
+      todo("add support for inverse, bold text styles");
       mTextGraphics = screen().newTextGraphics();
     }
     return mTextGraphics;
@@ -121,14 +121,12 @@ public class JScreen {
   }
 
   public void mainLoop() {
-    msg("mainLoop start");
     while (isOpen()) {
       update();
       sleepMs(10);
       if (quitRequested())
         close();
     }
-    msg("done main loop");
   }
 
   /**

@@ -13,9 +13,8 @@ public class LedgerWindow implements WindowHandler {
   public void paint(JWindow window) {
     mWindow = window;
 
-    pr("painting ledger window; # columns:", mColumns.size());
     todo("we need an ability to paint parts of a window even when the whole window is not invalid?");
-
+    todo("print row of blocks for lines that are above or below the entries");
     final int SPACES_BETWEEN_COLUMNS = 2;
     var b = window.bounds();
     int rows = b.height;
@@ -41,19 +40,18 @@ public class LedgerWindow implements WindowHandler {
         for (var col : mColumns) {
           j++;
           var data = entries.get(j);
-          pr("plot column, width:", col.width(), "x:", x, "y:", i, "data string:", data.toString());
-          plotString(data, x, i, col.alignment(), col.width());
+          var text = data.toString();
+          if (false && alert("printing really long stuff"))
+            text = "abcdefghijklmnopqrstuvwxyz_abcdefghijklmnopqrstuvwxyz_abcdefghijklmnopqrstuvwxyz";
+          plotString(text, x, i, col.alignment(), col.width());
           x += col.width() + SPACES_BETWEEN_COLUMNS;
         }
       }
     }
   }
 
-  private void plotString(Object data, int x, int y, Alignment alignment, int width) {
-
-    var text = data.toString();
+  private void plotString(String text, int x, int y, Alignment alignment, int width) {
     var b = mWindow.bounds();
-
     var diff = width - text.length();
     if (diff > 0) {
       switch (alignment) {
@@ -68,7 +66,6 @@ public class LedgerWindow implements WindowHandler {
       }
     }
     mWindow.drawString(x + b.x, y + b.y, width, text);
-
   }
 
   public void addColumn(Column column) {
@@ -83,7 +80,6 @@ public class LedgerWindow implements WindowHandler {
   }
 
   private static Column adjustColumn(Column c) {
-    todo("this is unnecessary?");
     var b = c.build().toBuilder();
     if (b.width() == 0) {
       switch (b.datatype()) {

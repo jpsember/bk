@@ -1,24 +1,16 @@
 package bk;
 
-import static js.base.Tools.*;
-
 public class TransactionDescriptionField implements LedgerField {
 
   public TransactionDescriptionField(String desc) {
-    loadTools();
-    mDesc = desc;
+    mText = desc;
   }
 
   @Override
   public String toString() {
-    return mDesc;
+    return mText;
   }
 
-  @Override
-  public int width() {
-    return 25;
-  }
-
-  private String mDesc;
+  private String mText;
 
 }

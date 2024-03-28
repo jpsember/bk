@@ -7,24 +7,18 @@ public class DateField implements LedgerField {
 
   public DateField(int epochSeconds) {
     loadTools();
-    mEpochSec = epochSeconds;
+    mEpochSeconds = epochSeconds;
   }
 
   @Override
   public String toString() {
-    if (mStr == null) {
-      mStr = formatDate(mEpochSec);
-      pr("formatted date", mEpochSec, "to:", mStr);
+    if (mString == null) {
+      mString = formatDate(mEpochSeconds);
     }
-    return mStr;
+    return mString;
   }
 
-  @Override
-  public int width() {
-    return 10;
-  }
-
-  private int mEpochSec;
-  private String mStr;
+  private int mEpochSeconds;
+  private String mString;
 
 }

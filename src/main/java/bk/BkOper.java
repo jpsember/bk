@@ -44,11 +44,6 @@ public class BkOper extends AppOper {
   @Override
   public void perform() {
 
-    if (false) {
-      var z = new CurrencyField(9_234_567_89);
-      halt("currency:", z);
-    }
-
     var screen = screen();
     try {
       loadUtil();
@@ -65,14 +60,14 @@ public class BkOper extends AppOper {
         x.addColumn(Column.newBuilder().name("Amount").datatype(Datatype.CURRENCY));
         x.addColumn(Column.newBuilder().name("Description").datatype(Datatype.TEXT).width(40));
 
-        for (var i = 0; i < 1; i++) {
+        for (var i = 0; i < 20; i++) {
           var t = generateTransaction();
           List<LedgerField> v = arrayList();
-          v.add(buildDate(t.date()));
-          v.add(buildAccountNumber(t.credit()));
-          v.add(buildAccountName("account name"));
-          v.add(buildCurrency(t.amount()));
-          v.add(buildTransactionDescription(t.description()));
+          v.add(new DateField(t.date()));
+          v.add(new AccountNumberField(t.credit()));
+          v.add(new AccountNameField(randomText(15, false)));
+          v.add(new CurrencyField(t.amount()));
+          v.add(new TransactionDescriptionField(t.description()));
           x.addEntry(v);
         }
       }
@@ -81,10 +76,10 @@ public class BkOper extends AppOper {
       mgr.pushContainer();
       {
         // Construct two windows; the second has some horizontal panels
-        mgr.pct(75);
+        mgr.pct(25);
         mgr.thickBorder();
         mgr.window();
-        mgr.pct(25);
+        mgr.pct(75);
         {
           mgr.horz().pushContainer();
           {

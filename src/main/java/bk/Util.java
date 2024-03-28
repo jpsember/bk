@@ -1,7 +1,5 @@
 package bk;
 
-import static js.base.Tools.*;
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -14,14 +12,9 @@ import java.util.concurrent.ThreadLocalRandom;
 import com.googlecode.lanterna.graphics.TextGraphics;
 
 import bk.gen.Transaction;
-import js.base.BasePrinter;
 import js.base.DateTimeTools;
 
 public final class Util {
-
-  public static final int ALIGN_LEFT = 0;
-  public static final int ALIGN_CENTER = 1;
-  public static final int ALIGN_RIGHT = 2;
 
   public static final int BORDER_NONE = 0;
   public static final int BORDER_THIN = 1;
@@ -34,10 +27,6 @@ public final class Util {
 
   public static void sleepMs(int ms) {
     DateTimeTools.sleepForRealMs(ms);
-  }
-
-  public static void msg(Object... args) {
-    pr(">>>", BasePrinter.toString(args));
   }
 
   public static JScreen screen() {
@@ -77,7 +66,10 @@ public final class Util {
   public static Transaction generateTransaction() {
     var t = Transaction.newBuilder();
     t.date(generateDate());
-    t.amount(random().nextInt(3000000));
+    int amount = random().nextInt(20000);
+    if (random().nextInt(8) < 1)
+      amount = random().nextInt(3000000);
+    t.amount(amount);
     t.debit(random().nextInt(5000) + 1000);
     t.credit(random().nextInt(5000) + 1000);
     t.description(randomText(30, false));
@@ -116,27 +108,5 @@ public final class Util {
   }
 
   private static Random sRandom = new Random(1965);
-
-  public static LedgerField buildAccountName(String name) {
-    todo("we could just use the various constructors");
-    todo("also, the width fields are not necessary");
-    return new AccountName(name);
-  }
-
-  public static LedgerField buildAccountNumber(int number) {
-    return new AccountNumber(number);
-  }
-
-  public static LedgerField buildCurrency(int amount) {
-    return new CurrencyField(amount);
-  }
-
-  public static LedgerField buildDate(int date) {
-    return new DateField(date);
-  }
-
-  public static LedgerField buildTransactionDescription(String description) {
-    return new TransactionDescriptionField(description);
-  }
 
 }
