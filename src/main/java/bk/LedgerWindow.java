@@ -13,6 +13,18 @@ import js.geometry.MyMath;
 
 public class LedgerWindow implements WindowHandler {
 
+  int count;
+
+  @Override
+  public void paintPartial() {
+    var r = Render.SHARED_INSTANCE;
+    var b = r.clipBounds();
+    var rn = MyMath.random();
+    r.pushStyle(STYLE_INVERSE);
+    r.clearRow(b.y + rn.nextInt(20), (char) (rn.nextInt(26)+'A'));
+    r.pop();
+  }
+
   @Override
   public void paint() {
 
@@ -40,7 +52,7 @@ public class LedgerWindow implements WindowHandler {
       r.pushStyle(hl ? STYLE_INVERSE : STYLE_NORMAL);
       if (hl) {
         r.clearRow(b.y + windowRowNum, ' ');
-         //        plotString(spaces(b.width), 0, windowRowNum, Alignment.LEFT, -1);
+        //        plotString(spaces(b.width), 0, windowRowNum, Alignment.LEFT, -1);
       }
       if (ledgerRowNum == -1) {
         // Render the headings
@@ -115,6 +127,15 @@ public class LedgerWindow implements WindowHandler {
         mCursorRow = t;
         window.repaint();
       }
+    }
+
+    else {
+
+      if (MyMath.random().nextInt(5) == 0) {
+        pr("triggering partial repaint");
+        window.repaintPartial();
+      }
+
     }
   }
 

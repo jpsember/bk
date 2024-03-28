@@ -175,11 +175,19 @@ public class JScreen {
     }
 
     if (!w.paintValid()) {
+      // We are repainting everything, so make the partial valid as well
+      w.setPartialPaintValid(true);
       if (db)
         pr("...window", w.name(), "paint is invalid; rendering; bounds:", w.layoutBounds());
       w.render();
       w.setPaintValid(true);
+    } else if (!w.partialPaintValid()) {
+      if (db)
+        pr("...window", w.name(), "partial paint is invalid");
+      w.renderPartial();
+      w.setPartialPaintValid(true);
     }
+
     for (var c : w.children())
       updateView(c);
   }

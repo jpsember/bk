@@ -49,6 +49,10 @@ public class JWindow extends BaseObject {
     return hasFlag(FLG_PAINTVALID);
   }
 
+  boolean partialPaintValid() {
+    return hasFlag(FLG_PARTIALPAINTVALID);
+  }
+
   void setPaintValid(boolean valid) {
     if (!valid) {
       if (!paintValid())
@@ -60,6 +64,10 @@ public class JWindow extends BaseObject {
     }
 
     setFlag(FLG_PAINTVALID, valid);
+  }
+
+  void setPartialPaintValid(boolean valid) {
+    setFlag(FLG_PARTIALPAINTVALID, valid);
   }
 
   boolean layoutValid() {
@@ -97,6 +105,10 @@ public class JWindow extends BaseObject {
     setPaintValid(false);
   }
 
+  public void repaintPartial() {
+    setPartialPaintValid(false);
+  }
+
   void layout() {
   }
 
@@ -126,6 +138,24 @@ public class JWindow extends BaseObject {
       r.setClipBounds(clipBounds);
     }
     handler().paint();
+    r.unprepare();
+  }
+
+  /**
+   * Let client perform partial rendering of the window
+   */
+  void renderPartial() {
+    var r = Render.SHARED_INSTANCE;
+    r.prepare(this);
+
+    var layoutBounds = layoutBounds();
+    var clipBounds = layoutBounds;
+    int btype = mFlags & FLG_BORDER;
+    if (btype != BORDER_NONE) {
+      clipBounds = clipBounds.withInset(2, 1);
+      r.setClipBounds(clipBounds);
+    }
+    handler().paintPartial();
     r.unprepare();
   }
 
@@ -159,6 +189,7 @@ public class JWindow extends BaseObject {
   private static final int FLG_BORDER = 0x3;
   private static final int FLG_PAINTVALID = 1 << 2;
   private static final int FLG_LAYOUTVALID = 1 << 3;
+  private static final int FLG_PARTIALPAINTVALID = 1 << 4;
 
   private static int sUniqueId = 100;
   private int mId;
