@@ -13,6 +13,10 @@ import js.geometry.MyMath;
 
 public class LedgerWindow implements WindowHandler {
 
+  public boolean includesHeaderFields() {
+    return true;
+  }
+
   @Override
   public void paint() {
 
@@ -31,7 +35,7 @@ public class LedgerWindow implements WindowHandler {
     int ledgerRowNumAtTopOfWindow = 0;
     {
       int vis = b.height;
-      ledgerRowNumAtTopOfWindow = Math.max(-1, (mCursorRow - vis / 2));
+      ledgerRowNumAtTopOfWindow = Math.max(includesHeaderFields() ? -1 : 0, (mCursorRow - vis / 2));
     }
 
     final int SPACES_BETWEEN_COLUMNS = 2;
@@ -45,7 +49,7 @@ public class LedgerWindow implements WindowHandler {
       r.pushStyle(hl ? STYLE_INVERSE : STYLE_NORMAL);
       if (hl)
         r.clearRow(b.y + windowRowNum, ' ');
-      if (ledgerRowNum == -1) {
+      if (includesHeaderFields() && ledgerRowNum == -1) {
         // Render the headings
         for (var col : mColumns) {
           plotString(col.name(), x, windowRowNum, col.alignment(), col.width());
@@ -54,8 +58,10 @@ public class LedgerWindow implements WindowHandler {
       } else {
         int entNum = ledgerRowNum;
         if (entNum >= mEntries.size()) {
-          // Plot a row of grey to indicate we're off the ledger
-          r.clearRow(b.y + windowRowNum, '░');
+          if (includesHeaderFields()) {
+            // Plot a row of grey to indicate we're off the ledger
+            r.clearRow(b.y + windowRowNum, '░');
+          }
         } else {
 
           var entries = mEntries.get(entNum);
@@ -110,8 +116,7 @@ public class LedgerWindow implements WindowHandler {
         mCursorRow = t;
         window.repaint();
       }
-    }
-    else if (alert("experiment with partial repaint")) {
+    } else if (alert("experiment with partial repaint")) {
       pr("triggering partial repaint");
       window.repaintPartial();
     }

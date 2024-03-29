@@ -1,5 +1,6 @@
 package bk;
 
+@Deprecated // Use TextField
 public class TransactionDescriptionField implements LedgerField {
 
   public TransactionDescriptionField(String desc) {

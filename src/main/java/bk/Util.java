@@ -128,4 +128,5 @@ public final class Util {
 
     private String SIN = Character.toString(Symbols.SINGLE_LINE_VERTICAL);
   };
+  public static final LedgerField EMPTY_FIELD = new TextField("");
 }

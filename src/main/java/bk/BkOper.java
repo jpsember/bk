@@ -52,7 +52,7 @@ public class BkOper extends AppOper {
       var mgr = winMgr();
 
       var genLedger = buildGeneralLedger();
-
+      var form = buildForm();
       var ourLedger = new LedgerWindow();
       {
         var x = ourLedger;
@@ -69,7 +69,7 @@ public class BkOper extends AppOper {
           v.add(new AccountNumberField(t.credit()));
           v.add(new AccountNameField(randomText(15, false)));
           v.add(new CurrencyField(t.amount()));
-          v.add(new TransactionDescriptionField(t.description()));
+          v.add(new TextField(t.description()));
           x.addEntry(v);
         }
       }
@@ -89,7 +89,9 @@ public class BkOper extends AppOper {
           {
             mgr.chars(15).window();
             mgr.roundedBorder();
-            mgr.handler(ourLedger);
+            if (false)
+              mgr.handler(ourLedger);
+            mgr.handler(form);
             mgr.id(WID_LEDGER);
             mgr.pct(80).window();
             mgr.thinBorder();
@@ -99,7 +101,7 @@ public class BkOper extends AppOper {
         }
       }
       mgr.doneConstruction();
-      mgr.setFocusWindow(mgr.get(WID_GENERAL_LEDGER));
+      mgr.setFocusWindow(mgr.get(WID_LEDGER));
       screen.mainLoop();
     } catch (Throwable t) {
       setError(screen.closeIfError(t));
@@ -132,12 +134,20 @@ public class BkOper extends AppOper {
         v.add(VERT_SEP_FLD);
         v.add(new AccountNameField(t.credit(), randomText(20, false)));
         v.add(VERT_SEP_FLD);
-        v.add(new TransactionDescriptionField(t.description()));
+        v.add(new TextField(t.description()));
         x.addEntry(v);
       }
     }
     return lg;
 
+  }
+
+  private FormWindow buildForm() {
+    var f = new FormWindow();
+    f.addField("Number:", new AccountNumberField(1000));
+    f.addField("Name:", new TextField("xxxxxx"));
+    f.addOkCancel();
+    return f;
   }
 
   private BkConfig mConfig;
