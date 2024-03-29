@@ -79,6 +79,16 @@ public class LedgerWindow implements WindowHandler {
       }
       r.pop();
     }
+
+    if (false && alert("experimenting with blinking cursors")) {
+     screen().setCursorPosition(b.x+3, b.y+4);
+      
+//      getTerminal().setCursorVisible(true);
+//      getTerminal().setCursorPosition(cursorPosition.getColumn(), cursorPosition.getRow());
+      
+      plotString("hello█there", b.x + 3, b.y + 3, Alignment.LEFT, 20);
+    }
+
   }
 
   @Override

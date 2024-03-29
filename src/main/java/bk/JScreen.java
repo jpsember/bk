@@ -3,6 +3,7 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
+import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.input.KeyStroke;
@@ -39,8 +40,7 @@ public class JScreen {
       mTerminal = defaultTerminalFactory.createTerminal();
       mScreen = new TerminalScreen(mTerminal);
       mScreen.startScreen();
-      // Turn off cursor for now
-      mScreen.setCursorPosition(null);
+      hideCursor();
     } catch (Throwable t) {
       throw asRuntimeException(t);
     }
@@ -190,6 +190,14 @@ public class JScreen {
 
     for (var c : w.children())
       updateView(c);
+  }
+
+  public void setCursorPosition(int x, int y) {
+    mScreen.setCursorPosition(new TerminalPosition(x, y));
+  }
+
+  public void hideCursor() {
+    mScreen.setCursorPosition(null);
   }
 
   private Terminal mTerminal;

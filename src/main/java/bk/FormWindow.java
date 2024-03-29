@@ -9,6 +9,7 @@ import bk.gen.Alignment;
 import bk.gen.Column;
 import bk.gen.Datatype;
 
+@Deprecated
 public class FormWindow extends LedgerWindow {
 
   public FormWindow() {
