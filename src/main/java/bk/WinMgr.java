@@ -151,8 +151,8 @@ public class WinMgr extends BaseObject {
     return peek(S_TYPE_CONTAINER);
   }
 
-  public JWindow focusWindow() {
-    return mFocusWindow;
+  public FocusHandler focus() {
+    return mFocus;
   }
 
   public JWindow get(int id) {
@@ -162,19 +162,16 @@ public class WinMgr extends BaseObject {
     return w;
   }
 
-  public void setFocusWindow(JWindow window) {
-    if (window == mFocusWindow)
+  public void setFocus(FocusHandler h) {
+    h = nullTo(h, FOCUS_NONE);
+    if (h == mFocus)
       return;
-    // If focus window is changing, repaint both old and new, in case we're highlighting things to 
-    // emphasize the focus
-    if (mFocusWindow != null)
-      mFocusWindow.repaint();
-    window.repaint();
-    mFocusWindow = window;
+    mFocus.loseFocus();
+    mFocus = h;
+    h.gainFocus();
   }
 
-  private JWindow mFocusWindow;
-
+  private FocusHandler mFocus = FOCUS_NONE;
   private Stack<Pair<Integer, Object>> mStack = new Stack();
   private boolean mHorzFlag;
   private int mBorderType;
@@ -192,6 +189,8 @@ public class WinMgr extends BaseObject {
           "or doesn't have top-level container at bottom");
   }
 
+  public static final FocusHandler FOCUS_NONE = new FocusHandler() {
+  };
   static {
     SHARED_INSTANCE = new WinMgr();
   }

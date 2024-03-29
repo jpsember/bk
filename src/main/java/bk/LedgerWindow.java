@@ -11,7 +11,12 @@ import bk.gen.Alignment;
 import bk.gen.Column;
 import js.geometry.MyMath;
 
-public class LedgerWindow implements WindowHandler {
+public class LedgerWindow implements WindowHandler, FocusHandler {
+
+  @Override
+  public void setWindow(JWindow window) {
+    mWindow = window;
+  }
 
   public boolean includesHeaderFields() {
     return true;
@@ -45,7 +50,8 @@ public class LedgerWindow implements WindowHandler {
       msb.setLength(0);
 
       int x = 0;
-      var hl = r.hasFocus() && ledgerRowNum == mCursorRow;
+      
+      var hl = winMgr().focus() == this && ledgerRowNum == mCursorRow;
       r.pushStyle(hl ? STYLE_INVERSE : STYLE_NORMAL);
       if (hl)
         r.clearRow(b.y + windowRowNum, ' ');
@@ -81,22 +87,19 @@ public class LedgerWindow implements WindowHandler {
     }
 
     if (false && alert("experimenting with blinking cursors")) {
-     screen().setCursorPosition(b.x+3, b.y+4);
-      
-//      getTerminal().setCursorVisible(true);
-//      getTerminal().setCursorPosition(cursorPosition.getColumn(), cursorPosition.getRow());
-      
+      screen().setCursorPosition(b.x + 3, b.y + 4);
       plotString("hello█there", b.x + 3, b.y + 3, Alignment.LEFT, 20);
     }
 
   }
 
   @Override
-  public void processKeyStroke(JWindow window, KeyStroke k) {
+  public void processKeyStroke(KeyStroke k) {
     //    pr(VERT_SP, "ledger keystroke:", k);
 
     Integer targetEntry = null;
-    int pageSize = window.layoutBounds().height - 2; // Assume a boundary
+    todo("avoid calling handler if window hasn't been defined yet");
+    int pageSize = mWindow.layoutBounds().height - 2; // Assume a boundary
     switch (k.getKeyType()) {
     case ArrowUp:
       targetEntry = mCursorRow - 1;
@@ -124,11 +127,11 @@ public class LedgerWindow implements WindowHandler {
       if (sz != 0) {
         int t = MyMath.clamp(targetEntry, 0, sz - 1);
         mCursorRow = t;
-        window.repaint();
+        mWindow.repaint();
       }
     } else if (alert("experiment with partial repaint")) {
       pr("triggering partial repaint");
-      window.repaintPartial();
+      mWindow.repaintPartial();
     }
   }
 
@@ -190,4 +193,5 @@ public class LedgerWindow implements WindowHandler {
   private List<List<LedgerField>> mEntries = arrayList();
   private StringBuilder msb = new StringBuilder();
   private int mCursorRow;
+  private JWindow mWindow;
 }

@@ -184,10 +184,6 @@ public final class Render {
     return mPartial;
   }
 
-  public boolean hasFocus() {
-    return window().hasFocus();
-  }
-
   private Stack<TextGraphics> mStack = new Stack<>();
   private IRect mLayoutBounds;
   private IRect mClipBounds;

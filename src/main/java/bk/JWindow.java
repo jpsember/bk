@@ -19,10 +19,10 @@ public class JWindow extends BaseObject {
     return "{W: " + mId + "}";
   }
 
-  private WindowHandler mHandler;
+  private WindowHandler mHandler = DEFAULT_HANDLER;
 
   void setHandler(WindowHandler h) {
-    mHandler = h;
+    mHandler = nullTo(h, DEFAULT_HANDLER);
   }
 
   void setId(int id) {
@@ -30,7 +30,7 @@ public class JWindow extends BaseObject {
   }
 
   WindowHandler handler() {
-    return nullTo(mHandler, DEFAULT_HANDLER);
+    return mHandler;
   }
 
   public IRect layoutBounds() {
@@ -135,10 +135,6 @@ public class JWindow extends BaseObject {
     }
     handler().paint();
     r.unprepare();
-  }
-
-  public final boolean hasFocus() {
-    return winMgr().focusWindow() == this;
   }
 
   private IRect mLayoutBounds;

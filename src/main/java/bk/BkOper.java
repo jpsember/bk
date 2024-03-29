@@ -51,7 +51,6 @@ public class BkOper extends AppOper {
 
       var mgr = winMgr();
 
-      var genLedger = buildGeneralLedger();
       var form = new TextFieldHandler();
       var ourLedger = new LedgerWindow();
       {
@@ -81,7 +80,7 @@ public class BkOper extends AppOper {
         mgr.pct(25);
         mgr.thickBorder();
         mgr.id(WID_GENERAL_LEDGER);
-        mgr.handler(genLedger);
+        mgr.handler(buildGeneralLedger());
         mgr.window();
         mgr.pct(75);
         {
@@ -101,7 +100,7 @@ public class BkOper extends AppOper {
         }
       }
       mgr.doneConstruction();
-      mgr.setFocusWindow(mgr.get(WID_LEDGER));
+      mgr.setFocus(form);
       screen.mainLoop();
     } catch (Throwable t) {
       setError(screen.closeIfError(t));
@@ -145,12 +144,21 @@ public class BkOper extends AppOper {
   private BkConfig mConfig;
 
   private static class TextFieldHandler implements TextEditHandler {
+
     @Override
     public void paint() {
       pr("TextFieldHandler, paint...");
-      var r = Render.SHARED_INSTANCE;
-
       te().render();
+    }
+
+    @Override
+    public void loseFocus() {
+      screen().hideCursor();
+    }
+
+    @Override
+    public void gainFocus() {
+      todo("gainFocus");
     }
 
     private TextEdit te() {

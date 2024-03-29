@@ -72,12 +72,9 @@ public class JScreen {
           quit();
           return;
         }
-        var w = m.focusWindow();
-        if (w == null) {
-          todo("#10no window has focus");
-        } else {
-          w.handler().processKeyStroke(w, keyStroke);
-        }
+        var w = m.focus();
+        todo("do we need to prepare handler?");
+        w.processKeyStroke(keyStroke);
       }
 
       var c = m.topLevelContainer();
