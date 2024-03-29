@@ -51,7 +51,7 @@ public class BkOper extends AppOper {
 
       var mgr = winMgr();
 
-      var form = new TextFieldHandler();
+      var form = new SampleForm();
       var ourLedger = new LedgerWindow();
       {
         var x = ourLedger;
@@ -142,38 +142,5 @@ public class BkOper extends AppOper {
   }
 
   private BkConfig mConfig;
-
-  private static class TextFieldHandler implements TextEditHandler {
-
-    @Override
-    public void paint() {
-      pr("TextFieldHandler, paint...");
-      te().render();
-    }
-
-    @Override
-    public void loseFocus() {
-      screen().hideCursor();
-    }
-
-    @Override
-    public void gainFocus() {
-      todo("gainFocus");
-    }
-
-    private TextEdit te() {
-      if (mt == null) {
-        var r = Render.SHARED_INSTANCE;
-        var wb = r.clipBounds();
-        mt = new TextEdit().location(wb.x + 8, wb.y + 3).width(8).handler(this);
-        mt.content("Hello").active(true);
-        mt.cursor(-1);
-        mt.cursor(5);
-      }
-      return mt;
-    }
-
-    private TextEdit mt;
-  }
 
 }
