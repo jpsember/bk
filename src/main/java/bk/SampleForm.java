@@ -12,13 +12,9 @@ import static js.base.Tools.*;
 public class SampleForm implements WindowHandler, FocusHandler {
 
   @Override
-  public void setWindow(JWindow window) {
-    mWindow = window;
-  }
-
-  @Override
   public void paint() {
     var r = Render.SHARED_INSTANCE;
+    mWind = r.window();
     pr("TextFieldHandler, paint, partial:", r.partial());
     te().render();
   }
@@ -30,9 +26,13 @@ public class SampleForm implements WindowHandler, FocusHandler {
 
   @Override
   public void gainFocus() {
+    if (mWind == null) {
+      alert("gainFocus: window hasn't been rendered yet");
+      return;
+    }
     var s = screen();
     todo("gainFocus");
-    mWindow.repaintPartial();
+    mWind.repaintPartial();
   }
 
   private TextEdit te() {
@@ -48,5 +48,5 @@ public class SampleForm implements WindowHandler, FocusHandler {
   }
 
   public TextEdit mt;
-  private JWindow mWindow;
+  private JWindow mWind;
 }

@@ -13,19 +13,14 @@ import js.geometry.MyMath;
 
 public class LedgerWindow implements WindowHandler, FocusHandler {
 
-  @Override
-  public void setWindow(JWindow window) {
-    mWindow = window;
-  }
-
   public boolean includesHeaderFields() {
     return true;
   }
 
   @Override
   public void paint() {
-
     var r = Render.SHARED_INSTANCE;
+    mWindow = r.window();
 
     var b = r.clipBounds();
     if (r.partial()) {
@@ -50,7 +45,7 @@ public class LedgerWindow implements WindowHandler, FocusHandler {
       msb.setLength(0);
 
       int x = 0;
-      
+
       var hl = winMgr().focus() == this && ledgerRowNum == mCursorRow;
       r.pushStyle(hl ? STYLE_INVERSE : STYLE_NORMAL);
       if (hl)
@@ -96,10 +91,15 @@ public class LedgerWindow implements WindowHandler, FocusHandler {
   @Override
   public void processKeyStroke(KeyStroke k) {
     //    pr(VERT_SP, "ledger keystroke:", k);
+    var w = mWindow;
+    if (w == null) {
+      alert("can't process KeyStroke; window has never been rendered");
+      return;
+    }
 
     Integer targetEntry = null;
     todo("avoid calling handler if window hasn't been defined yet");
-    int pageSize = mWindow.layoutBounds().height - 2; // Assume a boundary
+    int pageSize = w.layoutBounds().height - 2; // Assume a boundary
     switch (k.getKeyType()) {
     case ArrowUp:
       targetEntry = mCursorRow - 1;
@@ -127,11 +127,11 @@ public class LedgerWindow implements WindowHandler, FocusHandler {
       if (sz != 0) {
         int t = MyMath.clamp(targetEntry, 0, sz - 1);
         mCursorRow = t;
-        mWindow.repaint();
+        w.repaint();
       }
     } else if (alert("experiment with partial repaint")) {
       pr("triggering partial repaint");
-      mWindow.repaintPartial();
+      w.repaintPartial();
     }
   }
 
@@ -194,4 +194,5 @@ public class LedgerWindow implements WindowHandler, FocusHandler {
   private StringBuilder msb = new StringBuilder();
   private int mCursorRow;
   private JWindow mWindow;
+
 }
