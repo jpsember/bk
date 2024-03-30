@@ -18,6 +18,9 @@ import js.geometry.MyMath;
 
 public final class Render {
 
+  /**
+   * This is only valid during prepare() and unprepare() calls
+   */
   public static Render SHARED_INSTANCE;
 
   private Render() {
@@ -135,8 +138,7 @@ public final class Render {
   private void auxPrepare(JWindow window, boolean partial) {
     mScreen = screen().screen();
     mWindow = window;
-    mLayoutBounds = window.layoutBounds();
-    mClipBounds = mLayoutBounds;
+    mClipBounds = window.layoutBounds();
     mStack = new Stack<>();
     mTextGraphics = mScreen.newTextGraphics();
     mPartial = partial;
@@ -153,7 +155,6 @@ public final class Render {
     mStack = null;
     mScreen = null;
     mWindow = null;
-    mLayoutBounds = null;
     mClipBounds = null;
     mTextGraphics = null;
     SHARED_INSTANCE = null;
@@ -198,7 +199,6 @@ public final class Render {
   }
 
   private Stack<TextGraphics> mStack = new Stack<>();
-  private IRect mLayoutBounds;
   private IRect mClipBounds;
   private JWindow mWindow;
   private Screen mScreen;
