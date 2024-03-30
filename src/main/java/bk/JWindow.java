@@ -10,6 +10,13 @@ import js.geometry.IRect;
 
 public class JWindow extends BaseObject {
 
+  /**
+   * Subclasses should override this to supply custom painting. Default does
+   * nothing
+   */
+  public void paint() {
+  }
+
   public JWindow() {
     mId = sUniqueId++;
   }
@@ -18,20 +25,20 @@ public class JWindow extends BaseObject {
   protected String supplyName() {
     return "{W: " + mId + "}";
   }
-
-  private WindowHandler mHandler = DEFAULT_HANDLER;
-
-  void setHandler(WindowHandler h) {
-    mHandler = nullTo(h, DEFAULT_HANDLER);
-  }
+  //
+  //  private WindowHandler mHandler = DEFAULT_HANDLER;
+  //
+  //  void setHandler(WindowHandler h) {
+  //    mHandler = nullTo(h, DEFAULT_HANDLER);
+  //  }
 
   void setId(int id) {
     mId = id;
   }
-
-  WindowHandler handler() {
-    return mHandler;
-  }
+  //
+  //  WindowHandler handler() {
+  //    return mHandler;
+  //  }
 
   public IRect layoutBounds() {
     return mLayoutBounds;
@@ -116,8 +123,7 @@ public class JWindow extends BaseObject {
    * Render the window onto the screen
    */
   void render(boolean partial) {
-    var r =  
-      Render.prepare(this, partial);
+    var r = Render.prepare(this, partial);
 
     var layoutBounds = layoutBounds();
     var clipBounds = layoutBounds;
@@ -133,7 +139,7 @@ public class JWindow extends BaseObject {
       clipBounds = clipBounds.withInset(2, 1);
       r.setClipBounds(clipBounds);
     }
-    handler().paint();
+    paint();
     r = Render.unprepare();
   }
 

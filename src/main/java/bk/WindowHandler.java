@@ -1,5 +1,6 @@
 package bk;
 
+@Deprecated
 public interface WindowHandler {
 
 //  

@@ -82,16 +82,16 @@ public class BkOper extends AppOper {
         mgr.thickBorder();
         mgr.id(WID_GENERAL_LEDGER);
         genLedger = buildGeneralLedger();
-        mgr.handler(genLedger);
-        mgr.window();
+//        mgr.handler(genLedger);
+        mgr.window(genLedger);
         mgr.pct(75);
         {
           mgr.horz().pushContainer();
           {
             mgr.chars(15).window();
             mgr.roundedBorder();
-            if (false)
-              mgr.handler(ourLedger);
+//            if (false)
+//              mgr.handler(ourLedger);
             mgr.handler(form);
             mgr.id(WID_LEDGER);
             mgr.pct(80).window();

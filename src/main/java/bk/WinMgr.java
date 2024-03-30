@@ -118,19 +118,33 @@ public class WinMgr extends BaseObject {
    * Construct a window and add it to the current container
    */
   public WinMgr window() {
+    return window(new JWindow());
+    //    var c = container();
+    //    var w = new JWindow();
+    //    c.children().add(w);
+    //    applyParam(w);
+    //    checkState(!mWindowMap.containsKey(w.id()));
+    //    mWindowMap.put(w.id(), w);
+    //    return this;
+  }
+
+  /**
+   * Add a window to the current container
+   */
+  public WinMgr window(JWindow window) {
+    checkArgument(window != null, "no window supplied");
     var c = container();
-    var w = new JWindow();
-    c.children().add(w);
-    applyParam(w);
-    checkState(!mWindowMap.containsKey(w.id()));
-    mWindowMap.put(w.id(), w);
+    c.children().add(window);
+    applyParam(window);
+    checkState(!mWindowMap.containsKey(window.id()));
+    mWindowMap.put(window.id(), window);
     return this;
   }
 
   private void applyParam(JWindow w) {
     w.setSize(mSizeExpr);
     w.setBorder(mBorderType);
-    w.setHandler(mHandler);
+    //w.setHandler(mHandler);
     if (mPendingId == 0) {
       mPendingId = mUniqueId++;
     }

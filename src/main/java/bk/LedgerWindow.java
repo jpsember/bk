@@ -12,7 +12,7 @@ import bk.gen.Column;
 import js.geometry.IRect;
 import js.geometry.MyMath;
 
-public class LedgerWindow implements WindowHandler, FocusHandler {
+public class LedgerWindow extends JWindow implements FocusHandler {
 
   public boolean includesHeaderFields() {
     return true;
@@ -130,11 +130,11 @@ public class LedgerWindow implements WindowHandler, FocusHandler {
       if (sz != 0) {
         int t = MyMath.clamp(targetEntry, 0, sz - 1);
         mCursorRow = t;
-        w.repaint();
+        repaint();
       }
     } else if (alert("experiment with partial repaint")) {
       pr("triggering partial repaint");
-      w.repaintPartial();
+       repaintPartial();
     }
   }
 
