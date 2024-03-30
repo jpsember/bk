@@ -116,8 +116,8 @@ public class JWindow extends BaseObject {
    * Render the window onto the screen
    */
   void render(boolean partial) {
-    var r = Render.SHARED_INSTANCE;
-    r.prepare(this, partial);
+    var r =  
+      Render.prepare(this, partial);
 
     var layoutBounds = layoutBounds();
     var clipBounds = layoutBounds;
@@ -134,7 +134,7 @@ public class JWindow extends BaseObject {
       r.setClipBounds(clipBounds);
     }
     handler().paint();
-    r.unprepare();
+    r = Render.unprepare();
   }
 
   private IRect mLayoutBounds;

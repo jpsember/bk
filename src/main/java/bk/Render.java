@@ -18,7 +18,7 @@ import js.geometry.MyMath;
 
 public final class Render {
 
-  public static final Render SHARED_INSTANCE = new Render();
+  public static Render SHARED_INSTANCE;
 
   private Render() {
   }
@@ -125,7 +125,14 @@ public final class Render {
   /**
    * Prepare for subsequent operations to occur with a particular window
    */
-  void prepare(JWindow window, boolean partial) {
+  static Render prepare(JWindow window, boolean partial) {
+    var r = sShared;
+    SHARED_INSTANCE = r;
+    r.auxPrepare(window, partial);
+    return r;
+  }
+
+  private void auxPrepare(JWindow window, boolean partial) {
     mScreen = screen().screen();
     mWindow = window;
     mLayoutBounds = window.layoutBounds();
@@ -135,7 +142,12 @@ public final class Render {
     mPartial = partial;
   }
 
-  void unprepare() {
+  static Render unprepare() {
+    SHARED_INSTANCE.auxUnprepare();
+    return null;
+  }
+
+  private void auxUnprepare() {
     if (!mStack.isEmpty())
       alert("Render.stack isn't empty");
     mStack = null;
@@ -144,6 +156,7 @@ public final class Render {
     mLayoutBounds = null;
     mClipBounds = null;
     mTextGraphics = null;
+    SHARED_INSTANCE = null;
   }
 
   /**
@@ -191,5 +204,5 @@ public final class Render {
   private Screen mScreen;
   private TextGraphics mTextGraphics;
   private boolean mPartial;
-
+  private static final Render sShared = new Render();
 }
