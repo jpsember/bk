@@ -30,6 +30,7 @@ public class FormWindow extends JContainer implements FocusHandler {
 
     // Add a horizontal container for this entry
     var c = new JContainer();
+    c.mSizeExpr = 1;
     c.mHorzFlag = true;
     {
       var w = new JWindow() {
@@ -38,6 +39,7 @@ public class FormWindow extends JContainer implements FocusHandler {
           var r = Render.SHARED_INSTANCE;
           var b = r.clipBounds();
           var s = name;
+          pr("rendering label, bounds:", b, "name:", s);
           r.drawString(b.endX() - s.length(), b.y, s.length(), s);
         }
       };
@@ -48,6 +50,7 @@ public class FormWindow extends JContainer implements FocusHandler {
       widget.mSizeExpr = 50;
       c.children().add(widget);
     }
+    children().add(c);
     return this;
   }
 

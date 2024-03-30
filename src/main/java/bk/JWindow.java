@@ -18,13 +18,12 @@ public class JWindow extends BaseObject {
   }
 
   public JWindow() {
-    mId = sUniqueId++;
   }
 
-  @Override
-  protected String supplyName() {
-    return "{W: " + mId + "}";
-  }
+  //  @Override
+  //  protected String supplyName() {
+  //    return "{W: " + mId + "}";
+  //  }
   //
   //  private WindowHandler mHandler = DEFAULT_HANDLER;
   //
@@ -32,9 +31,9 @@ public class JWindow extends BaseObject {
   //    mHandler = nullTo(h, DEFAULT_HANDLER);
   //  }
 
-  void setId(int id) {
-    mId = id;
-  }
+  //  void setId(int id) {
+  //    mId = id;
+  //  }
   //
   //  WindowHandler handler() {
   //    return mHandler;
@@ -157,12 +156,6 @@ public class JWindow extends BaseObject {
     mFlags = (mFlags & ~FLG_BORDER) | type;
   }
 
-  private static int sUniqueId = 100;
-
-  public int id() {
-    return mId;
-  }
-
   int mSizeExpr;
 
   private int mFlags;
@@ -172,6 +165,5 @@ public class JWindow extends BaseObject {
   private static final int FLG_PARTIALPAINTVALID = 1 << 4;
   private IRect mLayoutBounds;
   private List<JWindow> mChildren = arrayList();
-  private int mId;
 
 }

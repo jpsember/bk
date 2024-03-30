@@ -3,7 +3,6 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
-import java.util.Map;
 import java.util.Stack;
 
 import js.base.BaseObject;
@@ -44,10 +43,6 @@ public class WinMgr extends BaseObject {
     return this;
   }
 
-  public WinMgr id(int nextId) {
-    mPendingId = nextId;
-    return this;
-  }
 
   private void push(int type, Object object) {
     checkState(mStack.size() < 100, "stack is too large");
@@ -125,18 +120,12 @@ public class WinMgr extends BaseObject {
     var c = container();
     c.children().add(window);
     applyParam(window);
-    checkState(!mWindowMap.containsKey(window.id()));
-    mWindowMap.put(window.id(), window);
     return this;
   }
 
   private void applyParam(JWindow w) {
     w.setSize(mSizeExpr);
     w.setBorder(mBorderType);
-    if (mPendingId == 0) {
-      mPendingId = mUniqueId++;
-    }
-    w.setId(mPendingId);
     resetPendingWindowVars();
   }
 
@@ -144,7 +133,6 @@ public class WinMgr extends BaseObject {
     mHorzFlag = false;
     mSizeExpr = -100;
     mBorderType = BORDER_NONE;
-    mPendingId = 0;
   }
 
   public JContainer topLevelContainer() {
@@ -156,13 +144,6 @@ public class WinMgr extends BaseObject {
     return mFocus;
   }
 
-  public JWindow get(int id) {
-    todo("window ids are not used! better to just use a name");
-    var w = mWindowMap.get(id);
-    if (w == null)
-      badArg("no window found with id:", id);
-    return w;
-  }
 
   public void setFocus(FocusHandler h) {
     h = nullTo(h, FOCUS_NONE);
@@ -178,9 +159,6 @@ public class WinMgr extends BaseObject {
   private boolean mHorzFlag;
   private int mBorderType;
   private int mSizeExpr; // 0: unknown > 1: number of chars < 1: -percentage
-  private int mPendingId;
-  private int mUniqueId = -10000;
-  private Map<Integer, JWindow> mWindowMap = hashMap();
 
   public void doneConstruction() {
     // Ensure that only the root container remains on the stack

@@ -117,8 +117,6 @@ public final class Util {
 
   private static Random sRandom = new Random(1965);
 
-  public static final int WID_LEDGER = 500;
-  public static final int WID_GENERAL_LEDGER = 501;
   public static final Column VERT_SEP = Column.newBuilder().datatype(Datatype.TEXT).name("").width(1).build();
   public static final LedgerField VERT_SEP_FLD = new LedgerField() {
     @Override
