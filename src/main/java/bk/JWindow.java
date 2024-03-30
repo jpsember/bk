@@ -20,25 +20,6 @@ public class JWindow extends BaseObject {
   public JWindow() {
   }
 
-  //  @Override
-  //  protected String supplyName() {
-  //    return "{W: " + mId + "}";
-  //  }
-  //
-  //  private WindowHandler mHandler = DEFAULT_HANDLER;
-  //
-  //  void setHandler(WindowHandler h) {
-  //    mHandler = nullTo(h, DEFAULT_HANDLER);
-  //  }
-
-  //  void setId(int id) {
-  //    mId = id;
-  //  }
-  //
-  //  WindowHandler handler() {
-  //    return mHandler;
-  //  }
-
   public IRect layoutBounds() {
     return mLayoutBounds;
   }
@@ -129,7 +110,7 @@ public class JWindow extends BaseObject {
     if (!partial)
       r.clearRect(layoutBounds);
     int btype = mFlags & FLG_BORDER;
-
+    pr("rendering", this, "btype:", btype, "layoutBounds:", layoutBounds);
     if (btype != BORDER_NONE) {
       if (!partial)
         r.drawRect(layoutBounds, btype);
@@ -137,6 +118,7 @@ public class JWindow extends BaseObject {
       // We inset an extra character horizontally
       clipBounds = clipBounds.withInset(2, 1);
       r.setClipBounds(clipBounds);
+      pr("clip bounds set to:",clipBounds);
     }
     paint();
     r = Render.unprepare();

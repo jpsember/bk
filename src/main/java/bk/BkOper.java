@@ -52,7 +52,7 @@ public class BkOper extends AppOper {
       var mgr = winMgr();
 
       var form = new FormWindow(); //SampleForm();
-      form.addField("Description", new StringWidget());
+      form.addField("Description");
 
       LedgerWindow genLedger = null;
 
