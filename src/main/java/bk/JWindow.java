@@ -143,12 +143,6 @@ public class JWindow extends BaseObject {
     r = Render.unprepare();
   }
 
-  private IRect mLayoutBounds;
-  private List<JWindow> mChildren = arrayList();
-
-  private static final WindowHandler DEFAULT_HANDLER = new WindowHandler() {
-  };
-
   final void setSize(int sizeExpr) {
     mSizeExpr = sizeExpr;
   }
@@ -163,6 +157,12 @@ public class JWindow extends BaseObject {
     mFlags = (mFlags & ~FLG_BORDER) | type;
   }
 
+  private static int sUniqueId = 100;
+
+  public int id() {
+    return mId;
+  }
+
   int mSizeExpr;
 
   private int mFlags;
@@ -170,12 +170,8 @@ public class JWindow extends BaseObject {
   private static final int FLG_PAINTVALID = 1 << 2;
   private static final int FLG_LAYOUTVALID = 1 << 3;
   private static final int FLG_PARTIALPAINTVALID = 1 << 4;
-
-  private static int sUniqueId = 100;
+  private IRect mLayoutBounds;
+  private List<JWindow> mChildren = arrayList();
   private int mId;
-
-  public int id() {
-    return mId;
-  }
 
 }

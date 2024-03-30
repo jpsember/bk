@@ -16,18 +16,15 @@ public class WinMgr extends BaseObject {
 
   private WinMgr() {
   }
+//
+//  public JWindow rootContainer() {
+//    if (mRootContainer == null)
+//      throw badState("no root container defined");
+//    return mRootContainer;
+//  }
 
-  public JContainer rootContainer() {
-    if (mRootContainer == null)
-      throw badState("no root container defined");
-    return mRootContainer;
-  }
-
-  public WinMgr pushContainer() {
-    var container = new JContainer();
-
-    container.mHorzFlag = mHorzFlag;
-    mHorzFlag = false;
+  public WinMgr pushContainer(JWindow container) {
+    checkNotNull(container, "expected container");
 
     // If this is not going to be the top-level window, add it as a child to the current parent.
 
@@ -41,6 +38,13 @@ public class WinMgr extends BaseObject {
     applyParam(container);
     push(S_TYPE_CONTAINER, container);
     return this;
+  }
+
+  public WinMgr pushContainer() {
+    var container = new JContainer();
+    container.mHorzFlag = mHorzFlag;
+    mHorzFlag = false;
+    return pushContainer(container);
   }
 
   public WinMgr popContainer() {
@@ -90,10 +94,10 @@ public class WinMgr extends BaseObject {
     return this;
   }
 
-  public WinMgr handler(WindowHandler handler) {
-    mHandler = handler;
-    return this;
-  }
+  //  public WinMgr handler(WindowHandler handler) {
+  //    mHandler = handler;
+  //    return this;
+  //  }
 
   private <T> T pop(int type) {
     if (mStack.size() <= 1)
@@ -119,13 +123,6 @@ public class WinMgr extends BaseObject {
    */
   public WinMgr window() {
     return window(new JWindow());
-    //    var c = container();
-    //    var w = new JWindow();
-    //    c.children().add(w);
-    //    applyParam(w);
-    //    checkState(!mWindowMap.containsKey(w.id()));
-    //    mWindowMap.put(w.id(), w);
-    //    return this;
   }
 
   /**
@@ -156,7 +153,6 @@ public class WinMgr extends BaseObject {
     mHorzFlag = false;
     mSizeExpr = -100;
     mBorderType = BORDER_NONE;
-    mHandler = null;
     mPendingId = 0;
   }
 
@@ -170,6 +166,7 @@ public class WinMgr extends BaseObject {
   }
 
   public JWindow get(int id) {
+    todo("window ids are not used! better to just use a name");
     var w = mWindowMap.get(id);
     if (w == null)
       badArg("no window found with id:", id);
@@ -190,8 +187,7 @@ public class WinMgr extends BaseObject {
   private boolean mHorzFlag;
   private int mBorderType;
   private int mSizeExpr; // 0: unknown > 1: number of chars < 1: -percentage
-  private WindowHandler mHandler;
-  private JContainer mRootContainer;
+  private JWindow mRootContainer;
   private int mPendingId;
   private int mUniqueId = -10000;
   private Map<Integer, JWindow> mWindowMap = hashMap();

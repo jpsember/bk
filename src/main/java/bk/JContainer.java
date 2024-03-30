@@ -12,10 +12,6 @@ import js.geometry.MyMath;
  */
 public class JContainer extends JWindow {
 
-//  @Override
-//  public void render() {
-//  }
-
   private static IPoint swapIf(IPoint pt, boolean swap) {
     if (!swap)
       return pt;
