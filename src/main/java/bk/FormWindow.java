@@ -5,39 +5,62 @@ import static js.base.Tools.*;
 
 import java.util.List;
 
-import bk.gen.Alignment;
-import bk.gen.Column;
-import bk.gen.Datatype;
-
-public class FormWindow extends JWindow {
+/**
+ * A container that represents a form
+ */
+public class FormWindow extends JContainer implements FocusHandler {
 
   public FormWindow() {
+    todo("incorporate this into WinMgr");
+
     todo("highlight only the value field of the current line");
     todo("have cursor keys skip empty fields");
     todo("have blinking cursor on active field somehow");
     loadUtil();
-//    addColumn(Column.newBuilder().name("Label").datatype(Datatype.TEXT).width(14).alignment(Alignment.RIGHT));
-//    addColumn(Column.newBuilder().name("Value").datatype(Datatype.TEXT).width(50));
+    //    addColumn(Column.newBuilder().name("Label").datatype(Datatype.TEXT).width(14).alignment(Alignment.RIGHT));
+    //    addColumn(Column.newBuilder().name("Value").datatype(Datatype.TEXT).width(50));
   }
-//
-//  public void addField(String name, LedgerField value) {
-//    List<LedgerField> lst = arrayList();
-//    lst.add(new TextField(name));
-//    lst.add(value);
-//    addEntry(lst);
-//  }
-//
-//  public void addOkCancel() {
-//    addField("", EMPTY_FIELD);
-//     addField("", new TextField("OK"));
-//    addField("", EMPTY_FIELD);
-//    addField("", EMPTY_FIELD);
-//    addField("",new TextField("Cancel"));
-//  }
-//
-//  @Override
-//  public boolean includesHeaderFields() {
-//    return false;
-//  }
 
+  public FormWindow addField(String name, WidgetWindow widget) {
+    var e = new WidgetEntry();
+    e.name = name;
+    e.widget = widget;
+
+    mEntries.add(e);
+
+    // Add a horizontal container for this entry
+    var c = new JContainer();
+    c.mHorzFlag = true;
+    {
+      var w = new JWindow() {
+        @Override
+        public void paint() {
+          var r = Render.SHARED_INSTANCE;
+          var b = r.clipBounds();
+          var s = name;
+          r.drawString(b.endX() - s.length(), b.y, s.length(), s);
+        }
+      };
+      w.mSizeExpr = 50;
+      c.children().add(w);
+    }
+    {
+      widget.mSizeExpr = 50;
+      c.children().add(widget);
+    }
+    return this;
+  }
+
+  private static class WidgetEntry {
+    String name;
+    WidgetWindow widget;
+  }
+
+  //  
+  //  @Override
+  //  public void layout() {
+  //     // Construct a horizontal container for each field
+  //    
+  //  }
+  private List<WidgetEntry> mEntries = arrayList();
 }

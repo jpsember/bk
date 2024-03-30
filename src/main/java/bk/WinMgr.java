@@ -16,21 +16,13 @@ public class WinMgr extends BaseObject {
 
   private WinMgr() {
   }
-//
-//  public JWindow rootContainer() {
-//    if (mRootContainer == null)
-//      throw badState("no root container defined");
-//    return mRootContainer;
-//  }
 
   public WinMgr pushContainer(JWindow container) {
     checkNotNull(container, "expected container");
 
     // If this is not going to be the top-level window, add it as a child to the current parent.
 
-    if (mRootContainer == null) {
-      mRootContainer = container;
-    } else {
+    if (!mStack.isEmpty()) {
       var parent = container();
       parent.children().add(container);
     }
@@ -141,7 +133,6 @@ public class WinMgr extends BaseObject {
   private void applyParam(JWindow w) {
     w.setSize(mSizeExpr);
     w.setBorder(mBorderType);
-    //w.setHandler(mHandler);
     if (mPendingId == 0) {
       mPendingId = mUniqueId++;
     }
@@ -187,7 +178,6 @@ public class WinMgr extends BaseObject {
   private boolean mHorzFlag;
   private int mBorderType;
   private int mSizeExpr; // 0: unknown > 1: number of chars < 1: -percentage
-  private JWindow mRootContainer;
   private int mPendingId;
   private int mUniqueId = -10000;
   private Map<Integer, JWindow> mWindowMap = hashMap();

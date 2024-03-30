@@ -8,7 +8,6 @@ import js.geometry.MyMath;
 
 /**
  * A window that contains other windows
- *
  */
 public class JContainer extends JWindow {
 
@@ -26,7 +25,7 @@ public class JContainer extends JWindow {
 
   @Override
   public void layout() {
-    final boolean db = false;
+    final boolean db = true;
 
     var problem = false;
 

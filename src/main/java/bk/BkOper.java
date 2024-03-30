@@ -51,39 +51,44 @@ public class BkOper extends AppOper {
 
       var mgr = winMgr();
 
-      var form = new SampleForm();
-      var ourLedger = new LedgerWindow();
-      LedgerWindow genLedger;
-      {
-        var x = ourLedger;
-        x.addColumn(Column.newBuilder().name("Date").datatype(Datatype.DATE));
-        x.addColumn(Column.newBuilder().name("Acct").datatype(Datatype.ACCOUNT_NUMBER));
-        x.addColumn(Column.newBuilder().name("Name").datatype(Datatype.TEXT).width(25));
-        x.addColumn(Column.newBuilder().name("Amount").datatype(Datatype.CURRENCY));
-        x.addColumn(Column.newBuilder().name("Description").datatype(Datatype.TEXT).width(40));
+      var form = new FormWindow(); //SampleForm();
+      form.addField("Description", new StringWidget());
 
-        for (var i = 0; i < 20; i++) {
-          var t = generateTransaction();
-          List<LedgerField> v = arrayList();
-          v.add(new DateField(t.date()));
-          v.add(new AccountNumberField(t.credit()));
-          v.add(new AccountNameField(randomText(15, false)));
-          v.add(new CurrencyField(t.amount()));
-          v.add(new TextField(t.description()));
-          x.addEntry(v);
-        }
-      }
+      LedgerWindow genLedger = null;
+      //      var ourLedger = new LedgerWindow();
+      //      {
+      //        var x = ourLedger;
+      //        x.addColumn(Column.newBuilder().name("Date").datatype(Datatype.DATE));
+      //        x.addColumn(Column.newBuilder().name("Acct").datatype(Datatype.ACCOUNT_NUMBER));
+      //        x.addColumn(Column.newBuilder().name("Name").datatype(Datatype.TEXT).width(25));
+      //        x.addColumn(Column.newBuilder().name("Amount").datatype(Datatype.CURRENCY));
+      //        x.addColumn(Column.newBuilder().name("Description").datatype(Datatype.TEXT).width(40));
+      //
+      //        for (var i = 0; i < 20; i++) {
+      //          var t = generateTransaction();
+      //          List<LedgerField> v = arrayList();
+      //          v.add(new DateField(t.date()));
+      //          v.add(new AccountNumberField(t.credit()));
+      //          v.add(new AccountNameField(randomText(15, false)));
+      //          v.add(new CurrencyField(t.amount()));
+      //          v.add(new TextField(t.description()));
+      //          x.addEntry(v);
+      //        }
+      //      }
 
       // Create a root container
       mgr.pushContainer();
       {
-        // Construct two windows; the second has some horizontal panels
-        mgr.pct(25);
-        mgr.thickBorder();
-        mgr.id(WID_GENERAL_LEDGER);
-        genLedger = buildGeneralLedger();
-        //        mgr.handler(genLedger);
-        mgr.window(genLedger);
+
+        if (false) {
+          // Construct two windows; the second has some horizontal panels
+          mgr.pct(25);
+          mgr.thickBorder();
+          mgr.id(WID_GENERAL_LEDGER);
+          genLedger = buildGeneralLedger();
+          //        mgr.handler(genLedger);
+          mgr.window(genLedger);
+        }
         mgr.pct(75);
         {
           mgr.horz().pushContainer();
@@ -102,7 +107,7 @@ public class BkOper extends AppOper {
         }
       }
       mgr.doneConstruction();
-      if (false)
+      if (form != null)
         mgr.setFocus(form);
       else
         mgr.setFocus(genLedger);
