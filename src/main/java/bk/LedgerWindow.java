@@ -9,6 +9,7 @@ import com.googlecode.lanterna.input.KeyStroke;
 
 import bk.gen.Alignment;
 import bk.gen.Column;
+import js.geometry.IRect;
 import js.geometry.MyMath;
 
 public class LedgerWindow implements WindowHandler, FocusHandler {
@@ -20,9 +21,11 @@ public class LedgerWindow implements WindowHandler, FocusHandler {
   @Override
   public void paint() {
     var r = Render.SHARED_INSTANCE;
-    mWindow = r.window();
+    //    mWindow = r.window();
 
     var b = r.clipBounds();
+    mLastRenderedClipBounds = b;
+    todo("this is the clip bounds, but not necessarily the window bounds... maybe we want to subclass JWindow?");
     if (r.partial()) {
       var rn = MyMath.random();
       r.pushStyle(STYLE_INVERSE);
@@ -91,15 +94,15 @@ public class LedgerWindow implements WindowHandler, FocusHandler {
   @Override
   public void processKeyStroke(KeyStroke k) {
     //    pr(VERT_SP, "ledger keystroke:", k);
-    var w = mWindow;
-    if (w == null) {
+    //    var w = mWindow;
+    if (mLastRenderedClipBounds == null) {
       alert("can't process KeyStroke; window has never been rendered");
       return;
     }
 
     Integer targetEntry = null;
     todo("avoid calling handler if window hasn't been defined yet");
-    int pageSize = w.layoutBounds().height - 2; // Assume a boundary
+    int pageSize = mLastRenderedClipBounds.height - 2; // Assume a boundary
     switch (k.getKeyType()) {
     case ArrowUp:
       targetEntry = mCursorRow - 1;
@@ -193,6 +196,7 @@ public class LedgerWindow implements WindowHandler, FocusHandler {
   private List<List<LedgerField>> mEntries = arrayList();
   private StringBuilder msb = new StringBuilder();
   private int mCursorRow;
-  private JWindow mWindow;
+  private IRect mLastRenderedClipBounds;
+  //  private JWindow mWindow;
 
 }

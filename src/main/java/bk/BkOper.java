@@ -53,6 +53,7 @@ public class BkOper extends AppOper {
 
       var form = new SampleForm();
       var ourLedger = new LedgerWindow();
+      LedgerWindow genLedger;
       {
         var x = ourLedger;
         x.addColumn(Column.newBuilder().name("Date").datatype(Datatype.DATE));
@@ -80,7 +81,8 @@ public class BkOper extends AppOper {
         mgr.pct(25);
         mgr.thickBorder();
         mgr.id(WID_GENERAL_LEDGER);
-        mgr.handler(buildGeneralLedger());
+        genLedger = buildGeneralLedger();
+        mgr.handler(genLedger);
         mgr.window();
         mgr.pct(75);
         {
@@ -100,14 +102,17 @@ public class BkOper extends AppOper {
         }
       }
       mgr.doneConstruction();
-      mgr.setFocus(form);
+      if (false)
+        mgr.setFocus(form);
+      else
+        mgr.setFocus(genLedger);
       screen.mainLoop();
     } catch (Throwable t) {
       setError(screen.closeIfError(t));
     }
   }
 
-  private WindowHandler buildGeneralLedger() {
+  private LedgerWindow buildGeneralLedger() {
     var lg = new LedgerWindow();
     {
       final int NAMED_ACCOUNT_WIDTH = 25;

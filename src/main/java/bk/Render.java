@@ -35,6 +35,7 @@ public final class Render {
     return this;
   }
 
+  @Deprecated
   public JWindow window() {
     return mWindow;
   }

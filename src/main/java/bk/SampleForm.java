@@ -14,7 +14,7 @@ public class SampleForm implements WindowHandler, FocusHandler {
   @Override
   public void paint() {
     var r = Render.SHARED_INSTANCE;
-    mWind = r.window();
+//    mWind = r.window();
     pr("TextFieldHandler, paint, partial:", r.partial());
     te().render();
   }
@@ -26,13 +26,14 @@ public class SampleForm implements WindowHandler, FocusHandler {
 
   @Override
   public void gainFocus() {
-    if (mWind == null) {
-      alert("gainFocus: window hasn't been rendered yet");
-      return;
-    }
+//    if (mWind == null) {
+//      alert("gainFocus: window hasn't been rendered yet");
+//      return;
+//    }
     var s = screen();
     todo("gainFocus");
-    mWind.repaintPartial();
+    todo("repaint the window containing the sample form?");
+    //mWind.repaintPartial();
   }
 
   private TextEdit te() {
@@ -48,5 +49,5 @@ public class SampleForm implements WindowHandler, FocusHandler {
   }
 
   public TextEdit mt;
-  private JWindow mWind;
+//  private JWindow mWind;
 }
