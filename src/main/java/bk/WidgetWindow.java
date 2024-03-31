@@ -35,7 +35,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     b = b.withInset(1, 0);
     var SEP = 1;
     var labelWidth = b.width / 2;
-    //    var valueWidth = b.width - SEP - labelWidth;
+    var valueWidth = mWidth; // - SEP - labelWidth;
 
     boolean hf = hasFocus();
     r.pushStyle(hf ? STYLE_INVERSE : STYLE_NORMAL);
@@ -59,7 +59,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
           curPos = s.length();
         } else {
           int i = MyMath.clamp(mCursorPos, 0, s.length());
-          s = s.substring(0, i) + " " + s.substring(i);
+          s = s.substring(0, i) /*+ " "*/ + s.substring(i);
           s = truncate(s, mWidth);
         }
 
@@ -67,7 +67,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
           screen().setCursorPosition(lx + curPos, ly);
       }
       r.pushStyle(style);
-      r.drawString(lx, ly, mWidth, s);
+      r.drawString(lx, ly, valueWidth, s);
       r.pop();
     }
     r.pop();
@@ -76,6 +76,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   @Override
   public void processKeyStroke(KeyStroke k) {
     var m = winMgr();
+    pr("keyType:",k.getKeyType(),k);
     switch (k.getKeyType()) {
     case ArrowDown:
     case Tab:
@@ -84,10 +85,57 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     case ArrowUp:
       m.moveFocus(-1);
       break;
+    case ArrowLeft:
+      if (mCursorPos > 0)
+        mCursorPos--;
+      break;
+    case ArrowRight:
+      if (mCursorPos < mContent.length())
+        mCursorPos++;
+      break;
+    case Backspace:
+      if (mCursorPos > 0) {
+//        if (mContent.length() > mCursorPos) 
+        {
+          mContent = mContent.substring(0, mCursorPos - 1) + mContent.substring(mCursorPos);
+          mCursorPos--;
+        }
+      } else {
+        mCursorPos = 0;
+        mContent = "";
+      }
+      break;
+    case Delete:
+      if (mCursorPos < 0) {
+        mContent = "";
+        mCursorPos = 0;
+      } else {
+        if (mCursorPos < mContent.length())
+          mContent = mContent.substring(0, mCursorPos) + mContent.substring(mCursorPos + 1);
+      }
+      break;
+    case Character: {
+      var c = k.getCharacter();
+      insertChar(c);
+    }
+      break;
     default:
+
       todo("have some sort of fallback");
       break;
     }
+    mContent = truncate(mContent, mWidth);
+    mCursorPos = MyMath.clamp(mCursorPos, -1, mWidth);
+    repaint();
+  }
+
+  private void insertChar(char c) {
+    if (mCursorPos < 0) {
+      mContent = "";
+      mCursorPos = 0;
+    }
+    mContent = mContent.substring(0, mCursorPos) + Character.toString(c) + mContent.substring(mCursorPos);
+    mCursorPos++;
   }
 
   private static String truncate(String s, int maxWidth) {
