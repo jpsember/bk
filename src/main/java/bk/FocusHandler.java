@@ -12,4 +12,8 @@ public interface FocusHandler {
 
   default void processKeyStroke(KeyStroke k) {
   }
+
+  default void repaint() {
+  }
+
 }

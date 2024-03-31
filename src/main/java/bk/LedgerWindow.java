@@ -49,7 +49,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
 
       int x = 0;
 
-      var hl = winMgr().focus() == this && ledgerRowNum == mCursorRow;
+      var hl = hasFocus() && ledgerRowNum == mCursorRow;
       r.pushStyle(hl ? STYLE_INVERSE : STYLE_NORMAL);
       if (hl)
         r.clearRow(b.y + windowRowNum, ' ');

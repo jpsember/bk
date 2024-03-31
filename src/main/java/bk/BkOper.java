@@ -53,6 +53,9 @@ public class BkOper extends AppOper {
 
       var form = new FormWindow(); //SampleForm();
       form.addField("Description");
+      form.addField("Age");
+      form.addField("Dr");
+      form.addField("Cr");
 
       LedgerWindow genLedger = null;
 
@@ -85,10 +88,6 @@ public class BkOper extends AppOper {
         }
       }
       mgr.doneConstruction();
-      if (form != null)
-        mgr.setFocus(form);
-      else
-        mgr.setFocus(genLedger);
       screen.mainLoop();
     } catch (Throwable t) {
       setError(screen.closeIfError(t));

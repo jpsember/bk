@@ -20,16 +20,20 @@ public class JWindow extends BaseObject {
   public JWindow() {
   }
 
-  public IRect layoutBounds() {
-    return mLayoutBounds;
+  public final boolean hasFocus() {
+    return winMgr().focus() == this;
+  }
+
+  public IRect totalBounds() {
+    return mWindowBounds;
   }
 
   List<JWindow> children() {
     return mChildren;
   }
 
-  void setLayoutBounds(IRect bounds) {
-    mLayoutBounds = bounds;
+  void setTotalBounds(IRect bounds) {
+    mWindowBounds = bounds;
   }
 
   boolean paintValid() {
@@ -105,23 +109,29 @@ public class JWindow extends BaseObject {
   void render(boolean partial) {
     var r = Render.prepare(this, partial);
 
-    var layoutBounds = layoutBounds();
-    var clipBounds = layoutBounds;
+    var totalBounds = totalBounds();
+    var clipBounds = totalBounds;
     if (!partial)
-      r.clearRect(layoutBounds);
+      r.clearRect(totalBounds);
     int btype = mFlags & FLG_BORDER;
-    pr("rendering", this, "btype:", btype, "layoutBounds:", layoutBounds);
     if (btype != BORDER_NONE) {
       if (!partial)
-        r.drawRect(layoutBounds, btype);
-      // Now set the clip bounds to exclude the border
-      // We inset an extra character horizontally
-      clipBounds = clipBounds.withInset(2, 1);
-      r.setClipBounds(clipBounds);
-      pr("clip bounds set to:",clipBounds);
+        r.drawRect(totalBounds, btype);
+      r.setClipBounds(calcContentBounds());
+
+      pr("clip bounds set to:", clipBounds);
     }
     paint();
     r = Render.unprepare();
+  }
+
+  IRect calcContentBounds() {
+    var g = totalBounds();
+    int btype = mFlags & FLG_BORDER;
+    if (btype != BORDER_NONE) {
+      g = g.withInset(2, 1);
+    }
+    return g;
   }
 
   final void setSize(int sizeExpr) {
@@ -145,7 +155,8 @@ public class JWindow extends BaseObject {
   private static final int FLG_PAINTVALID = 1 << 2;
   private static final int FLG_LAYOUTVALID = 1 << 3;
   private static final int FLG_PARTIALPAINTVALID = 1 << 4;
-  private IRect mLayoutBounds;
+  private IRect mWindowBounds;
+  //  private IRect mContentBounds;
   private List<JWindow> mChildren = arrayList();
 
 }

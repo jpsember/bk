@@ -85,11 +85,14 @@ public class JScreen {
       if (!currSize.equals(mPrevLayoutScreenSize)) {
         mTextGraphics = null;
         mPrevLayoutScreenSize = currSize;
-        c.setLayoutBounds(new IRect(currSize));
+        c.setTotalBounds(new IRect(currSize));
         c.setLayoutInvalid();
       }
-      updateView(c);
 
+      todo("?should a lot of this be moved to WinMgr?");
+      m.chooseFocus();
+      updateView(c);
+     
       // Make changes visible
       mScreen.refresh();
     } catch (Throwable t) {
@@ -154,6 +157,8 @@ public class JScreen {
   private void updateView(JWindow w) {
     final boolean db = false && alert("logging is on");
 
+    winMgr().addFocus(w);
+
     if (db) {
       if (!w.layoutValid() || !w.paintValid())
         pr(VERT_SP, "updateViews");
@@ -175,7 +180,7 @@ public class JScreen {
       // We are repainting everything, so make the partial valid as well
       w.setPartialPaintValid(true);
       if (db)
-        pr("...window", w.name(), "paint is invalid; rendering; bounds:", w.layoutBounds());
+        pr("...window", w.name(), "paint is invalid; rendering; bounds:", w.totalBounds());
       w.render(false);
       w.setPaintValid(true);
     } else if (!w.partialPaintValid()) {

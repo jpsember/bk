@@ -139,7 +139,7 @@ public final class Render {
   private void auxPrepare(JWindow window, boolean partial) {
     mScreen = screen().screen();
     mWindow = window;
-    mClipBounds = window.layoutBounds();
+    mClipBounds = window.totalBounds();
     mStack = new Stack<>();
     mTextGraphics = mScreen.newTextGraphics();
     mPartial = partial;

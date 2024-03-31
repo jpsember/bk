@@ -25,7 +25,7 @@ public class JContainer extends JWindow {
 
   @Override
   public void layout() {
-    final boolean db = true;
+    final boolean db = false;
 
     var problem = false;
 
@@ -40,8 +40,8 @@ public class JContainer extends JWindow {
     // True if we need to exchange x<->y and w<->h so we can always deal with x being the dynamic dimension
     boolean swap = !mHorzFlag;
 
-    var boundsWithinScreen = layoutBounds();
-pr("layoutBounds:",layoutBounds());
+    var boundsWithinScreen = calcContentBounds();
+    pr("contentBounds:", boundsWithinScreen);
 
     // The size of the container (normalized so windows are stacked horizontally)
 
@@ -104,7 +104,7 @@ pr("layoutBounds:",layoutBounds());
         pr("ourNormSize:", ourNormSize, "ourNormBounds:", ourNormBounds);
 
       var ourBounds = swapIf(ourNormBounds, swap);
-      c.setLayoutBounds(ourBounds);
+      c.setTotalBounds(ourBounds);
       if (db)
         pr("...child bounds:", ourBounds);
       normNextPosition = normNextPosition.sumWith(ourNormSize.x, 0);
