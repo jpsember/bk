@@ -1,11 +1,6 @@
 package bk;
 
-import static bk.Util.*;
 import static js.base.Tools.*;
-
-import com.googlecode.lanterna.input.KeyStroke;
-
-import js.geometry.MyMath;
 
 public class MessageWindow extends JWindow {
 

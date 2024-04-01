@@ -40,10 +40,10 @@ public final class Util {
     DateTimeTools.sleepForRealMs(ms);
   }
 
-//  @Deprecated
-//  public static JScreen screen() {
-//    return JScreen.sharedInstance();
-//  }
+  //  @Deprecated
+  //  public static JScreen screen() {
+  //    return JScreen.sharedInstance();
+  //  }
 
   public static WinMgr winMgr() {
     return WinMgr.SHARED_INSTANCE;
@@ -148,12 +148,15 @@ public final class Util {
   public static final Validator DEFAULT_VALIDATOR = new Validator() {
   };
   public static final Validator DATE_VALIDATOR = new Validator() {
-    public String validate(String value) {
+    public ValidationResult validate(String value) {
       final boolean db = false && alert("db is on");
       if (db)
         pr("validating:", quote(value));
       value = value.trim();
       int dateInSeconds = 0;
+
+      String strDate = "";
+
       try {
         todo("clean this up; allow multiple formats");
         var temp = sDateParser.parse(value);
@@ -167,22 +170,23 @@ public final class Util {
         if (y < 1970 || y > 2050)
           throw badArg("unexpected year:", y);
         dateInSeconds = (int) Instant.EPOCH.until(z, ChronoUnit.SECONDS);
+        strDate = formatDate(dateInSeconds);
       } catch (Throwable t) {
         if (db)
           pr("failed validating:", value, "got:", INDENT, t);
       }
-      if (dateInSeconds == 0)
-        return "";
-      return formatDate(dateInSeconds);
+      return new ValidationResult(strDate, dateInSeconds);
     };
   };
+
   public static final Validator CURRENCY_VALIDATOR = new Validator() {
-    public String validate(String value) {
+    public ValidationResult validate(String value) {
       final boolean db = false && alert("db is on");
       if (db)
         pr("validating currency:", value);
       value = value.trim();
-      int amount = -1;
+      Integer amount = null;
+      var result = ValidationResult.NONE;
       try {
         if (!value.isEmpty()) {
           int j = value.lastIndexOf('.');
@@ -197,48 +201,45 @@ public final class Util {
         if (asInt < 0 || asInt >= MAX_CURRENCY)
           throw badArg("failed to convert", value);
         amount = (int) asInt;
+        result = new ValidationResult(formatCurrency(amount), amount);
       } catch (Throwable t) {
         if (db)
           pr("failed to validate:", quote(value), "got:", t);
       }
-      if (amount < 0)
-        return "";
-
-      return formatCurrency(amount);
+      return result;
     };
   };
 
   public static final Validator ACCOUNT_VALIDATOR = new Validator() {
-    public String validate(String value) {
+    public ValidationResult validate(String value) {
+      var result = ValidationResult.NONE;
       final boolean db = false && alert("db is on");
       if (db)
         pr("validating account number:", value);
+
       value = value.trim();
-      int number = 0;
       try {
         if (db)
           pr("parsing:", value);
         var i = Integer.parseInt(value);
         if (i < 1000 || i > 5999)
           throw badArg("unexpected account number", i);
-        number = i;
+        result = new ValidationResult(Integer.toString(i), i);
       } catch (Throwable t) {
         if (db)
           pr("failed to validate:", quote(value), "got:", t);
       }
-      if (number == 0)
-        return "";
-      return Integer.toString(number);
+      return result;
     };
   };
 
   public static final Validator DESCRIPTION_VALIDATOR = new Validator() {
-    public String validate(String value) {
+    public ValidationResult validate(String value) {
+      var result = ValidationResult.NONE;
       final boolean db = false && alert("db is on");
       if (db)
         pr("validating description:", quote(value));
       value = value.trim();
-      String desc = null;
       try {
         if (db)
           pr("parsing:", value);
@@ -249,17 +250,28 @@ public final class Util {
           if (j < ' ' || j > 127)
             badArg("unexpected character:", j);
         }
-        desc = value;
+        result = new ValidationResult(value, value);
       } catch (Throwable t) {
         if (db)
           pr("failed to validate:", quote(value), "got:", t);
       }
-      return nullTo(desc, "");
+      return result;
     };
   };
 
   public static final FocusManager focusManager() {
     return FocusManager.SHARED_INSTANCE;
   }
-  public static final FocusHandler focus() {return focusManager().focus();}
+
+  public static final FocusHandler focus() {
+    return focusManager().focus();
+  }
+
+  public static String validateTransaction(Transaction t) {
+    todo("ensure accounts exist");
+    if (t.debit() == t.credit())
+      return "The account numbers cannot be the same!";
+    return null;
+  }
+
 }

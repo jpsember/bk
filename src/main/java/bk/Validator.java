@@ -2,8 +2,8 @@ package bk;
 
 public interface Validator {
 
-  default String validate(String value) {
-    return value;
+  default ValidationResult validate(String value) {
+    return ValidationResult.NONE;
   }
 
 }

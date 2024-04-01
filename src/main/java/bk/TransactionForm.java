@@ -12,17 +12,15 @@ public class TransactionForm extends FormWindow {
 
   private TransactionForm(int type) {
     todo("!set date to current date if empty");
-    loadTools();
-    loadUtil();
 
     mType = type;
     mSizeExpr = 12;
 
-   mdate =  validator(DATE_VALIDATOR).addField("Date");
-  mamount=  validator(CURRENCY_VALIDATOR).addField("Amount");
-  mdr=  validator(ACCOUNT_VALIDATOR).addField("Dr");
-  mcr=  validator(ACCOUNT_VALIDATOR).addField("Cr");
-  mdesc=  validator(DESCRIPTION_VALIDATOR).addField("Description");
+    mdate = validator(DATE_VALIDATOR).addField("Date");
+    mamount = validator(CURRENCY_VALIDATOR).addField("Amount");
+    mdr = validator(ACCOUNT_VALIDATOR).addField("Dr");
+    mcr = validator(ACCOUNT_VALIDATOR).addField("Cr");
+    mdesc = validator(DESCRIPTION_VALIDATOR).addField("Description");
     addVertSpace(1);
     addButton("Ok", () -> okHandler());
     addButton("Cancel", () -> cancelHandler());
@@ -56,14 +54,21 @@ public class TransactionForm extends FormWindow {
   }
 
   private void okHandler() {
-    
-    todo("have validator return Objects (as well as ability to convert those objects to strings)");
-  //  mdate.value();
-    
-    if (mType == TYPE_ADD) {
-      setMessage("Ok pressed!");
+    String problem = "One or more fields is invalid.";
+    if (mdate.valid() && mamount.valid() && mdr.valid() && mcr.valid() && mdesc.valid()) {
+      var tr = Transaction.newBuilder();
+      tr.date(mdate.validResult());
+      tr.amount(mamount.validResult());
+      tr.debit(mdr.validResult());
+      tr.credit(mcr.validResult());
+      tr.description(mdesc.validResult());
+      problem = validateTransaction(tr);
     }
- //   removeFormFromScreen();
+    if (problem != null) {
+      setMessage(problem);
+      return;
+    }
+    removeFormFromScreen();
   }
 
   private void cancelHandler() {
@@ -72,6 +77,5 @@ public class TransactionForm extends FormWindow {
 
   private int mType;
   private FocusHandler mOldFocus;
-  private WidgetWindow mdate,mamount,mdr,mcr,mdesc;
-  
+  private WidgetWindow mdate, mamount, mdr, mcr, mdesc;
 }

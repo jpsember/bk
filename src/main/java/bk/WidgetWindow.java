@@ -41,10 +41,9 @@ public class WidgetWindow extends JWindow implements FocusHandler {
 
   @Override
   public void loseFocus() {
-    String c = mValidator.validate(mContent);
-    c = nullToEmpty(c);
-    mContent = c;
-    if (c.isEmpty())
+    mValidationResult = mValidator.validate(mContent);
+    mContent = mValidationResult.string();
+    if (mContent.isEmpty())
       todo("handle a failed validation");
   }
 
@@ -95,12 +94,25 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     r.pop();
   }
 
+  public ValidationResult validationResult() {
+    return nullTo(mValidationResult, ValidationResult.NONE);
+  }
+
+  public boolean valid() {
+    return validationResult().value() != null;
+  }
+
+  public <T> T validResult() {
+    if (!valid())
+      badState("not valid");
+    return validationResult().typedValue();
+  }
+
   @Override
   public void processKeyStroke(KeyStroke k) {
     //pr("keyType:", k.getKeyType(), k);
     switch (k.getKeyType()) {
-    case Enter:
-    {
+    case Enter: {
       if (mButtonListener != null)
         mButtonListener.buttonPressed();
       else
@@ -187,4 +199,5 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   private Validator mValidator = DEFAULT_VALIDATOR;
   private JWindow mFocusRootWindow;
   private ButtonListener mButtonListener;
+  private ValidationResult mValidationResult;
 }
