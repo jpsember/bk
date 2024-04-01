@@ -56,7 +56,7 @@ public class BkOper extends AppOper {
     var mgr = winMgr();
 
     try {
-      JScreen.sharedInstance().open();
+      mgr.open();
 
       //  var form = new TransactionForm(); // FormWindow(); //SampleForm();
       //      form.addField("Description");

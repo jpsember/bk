@@ -10,9 +10,13 @@ import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.AbstractScreen;
+import com.googlecode.lanterna.screen.TerminalScreen;
+import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
+import com.googlecode.lanterna.terminal.Terminal;
 
 import js.base.BaseObject;
 import js.base.Pair;
+import js.file.Files;
 import js.geometry.IPoint;
 import js.geometry.IRect;
 
@@ -87,11 +91,6 @@ public class WinMgr extends BaseObject {
     mBorderType = BORDER_THIN;
     return this;
   }
-
-  //  public WinMgr handler(WindowHandler handler) {
-  //    mHandler = handler;
-  //    return this;
-  //  }
 
   private <T> T pop(int type) {
     if (mStack.size() <= 1)
@@ -172,12 +171,12 @@ public class WinMgr extends BaseObject {
   }
 
   public void mainLoop() {
-    var js = JScreen.sharedInstance();
-    while (js.isOpen()) {
+    //    var js = JScreen.sharedInstance();
+    while (isOpen()) {
       update();
       sleepMs(10);
       if (quitRequested())
-        js.close();
+        close();
     }
   }
 
@@ -221,6 +220,8 @@ public class WinMgr extends BaseObject {
     }
   }
 
+  private IPoint mPrevLayoutScreenSize;
+
   public boolean quitRequested() {
     return mQuitFlag;
   }
@@ -230,8 +231,6 @@ public class WinMgr extends BaseObject {
   }
 
   private boolean mQuitFlag;
-
-  private AbstractScreen mScreen = JScreen.sharedInstance().screen();
 
   static {
     SHARED_INSTANCE = new WinMgr();
@@ -251,8 +250,6 @@ public class WinMgr extends BaseObject {
    */
   private void updateView(JWindow w) {
     final boolean db = false && alert("logging is on");
-
-    //    winMgr().addFocus(w);
 
     if (db) {
       if (!w.layoutValid() || !w.paintValid())
@@ -296,9 +293,47 @@ public class WinMgr extends BaseObject {
    */
   public Throwable closeIfError(Throwable t) {
     if (t != null)
-      JScreen.sharedInstance().close();
+      close();
     return t;
   }
 
-  private IPoint mPrevLayoutScreenSize;
+  // ------------------------------------------------------------------
+  // Lanterna screen
+  // ------------------------------------------------------------------
+
+  public void open() {
+    try {
+      DefaultTerminalFactory defaultTerminalFactory = new DefaultTerminalFactory();
+      mTerminal = defaultTerminalFactory.createTerminal();
+      mScreen = new TerminalScreen(mTerminal);
+      mScreen.startScreen();
+      winMgr().hideCursor();
+    } catch (Throwable t) {
+      throw asRuntimeException(t);
+    }
+  }
+
+  public void close() {
+    if (mScreen == null)
+      return;
+    Files.close(mScreen);
+    // There seems to be a problem with restoring the cursor position; it positions the cursor at the end of the last line.
+    // Probably because our logging doesn't print a linefeed until necessary.
+    pr();
+    System.out.println();
+    mScreen = null;
+    mTerminal = null;
+  }
+
+  public boolean isOpen() {
+    return mScreen != null;
+  }
+
+  public AbstractScreen screen() {
+    return mScreen;
+  }
+
+  private Terminal mTerminal;
+  private AbstractScreen mScreen;
+
 }
