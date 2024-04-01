@@ -92,8 +92,21 @@ public class JWindow extends BaseObject {
       mFlags |= flag;
   }
 
+  public boolean hidden() {
+    return hasFlag(FLG_HIDDEN);
+  }
+
   public void repaint() {
     setPaintValid(false);
+  }
+
+  public void setVisible(boolean f) {
+    boolean newHidden = !f;
+    boolean hidden = hidden();
+    if (hidden != newHidden) {
+      setFlag(FLG_HIDDEN, newHidden);
+      todo("trigger re-layout of parent, or top level container if there is none");
+    }
   }
 
   public void repaintPartial() {
@@ -152,6 +165,7 @@ public class JWindow extends BaseObject {
   private static final int FLG_PAINTVALID = 1 << 2;
   private static final int FLG_LAYOUTVALID = 1 << 3;
   private static final int FLG_PARTIALPAINTVALID = 1 << 4;
+  private static final int FLG_HIDDEN = 1 << 5;
   private IRect mWindowBounds;
   private List<JWindow> mChildren = arrayList();
 

@@ -57,15 +57,7 @@ public class BkOper extends AppOper {
 
     try {
       mgr.open();
-
-      //  var form = new TransactionForm(); // FormWindow(); //SampleForm();
-      //      form.addField("Description");
-      //      form.addField("Age");
-      //      form.addField("Dr");
-      //      form.addField("Cr");
-
       LedgerWindow genLedger = buildGeneralLedger();
-
       // Create a root container
       mgr.pushContainer();
       {

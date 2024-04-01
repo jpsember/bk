@@ -27,12 +27,9 @@ public class LedgerWindow extends JWindow implements FocusHandler {
   @Override
   public void paint() {
     var r = Render.SHARED_INSTANCE;
-    //    mWindow = r.window();
 
     var b = r.clipBounds();
     mLastRenderedClipBounds = b;
-    todo(
-        "this is the clip bounds, but not necessarily the window bounds... maybe we want to subclass JWindow?");
     if (r.partial()) {
       var rn = MyMath.random();
       r.pushStyle(STYLE_INVERSE);
@@ -214,7 +211,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     });
 
     // Add transaction window to main
-    f.mSizeExpr = 8;
+    f.mSizeExpr = 12;
     var m = winMgr();
     var c = m.topLevelContainer();
     c.children().add(f);

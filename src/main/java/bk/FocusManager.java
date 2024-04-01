@@ -19,50 +19,6 @@ public class FocusManager extends BaseObject {
     return mFocus;
   }
 
-  // public void updateFocus() {
-  //    if (focus() != FOCUS_NONE)
-  //      return;
-  //    var lst = topLevelContainer().focusList();
-  //    if (lst.isEmpty())
-  //      return;
-  //    setFocus(lst.get(0));
-  //  }
-  //
-  //  public void setFocus(FocusHandler h) {
-  //    h = nullTo(h, FOCUS_NONE);
-  //    if (h == mFocus)
-  //      return;
-  //    if (mFocus != null) {
-  //      mFocus.loseFocus();
-  //      mFocus.repaint();
-  //    }
-  //    mFocus = h;
-  //    h.gainFocus();
-  //    h.repaint();
-  //  }
-  //
-  //  public void moveFocus(JWindow rootWindowOrNull, int amount) {
-  //    var w = nullTo(rootWindowOrNull, topLevelContainer());
-  //    var focusList = w.focusList();
-  //    int slot = focusList.indexOf(mFocus);
-  //    switch (amount) {
-  //    case -1:
-  //    case 1:
-  //      slot = MyMath.myMod(slot + amount, focusList.size());
-  //      break;
-  //    default:
-  //      badArg("unhandled moveFocus arg", amount);
-  //    }
-  //    setFocus(focusList.get(slot));
-  //  }
-  //
-  //  private FocusHandler mFocus = FOCUS_NONE;
-  //
-  //  public static final FocusHandler FOCUS_NONE = new FocusHandler() {
-  //  };
-  //
-  //  
-
   void update() {
     if (focus() != FOCUS_NONE)
       return;
@@ -77,6 +33,7 @@ public class FocusManager extends BaseObject {
     if (h == mFocus)
       return;
     if (mFocus != null) {
+      winMgr().hideCursor();
       mFocus.loseFocus();
       mFocus.repaint();
     }
@@ -103,15 +60,14 @@ public class FocusManager extends BaseObject {
     var w = nullTo(topLevelWindowOrNull, winMgr().topLevelContainer());
     List<FocusHandler> out = arrayList();
     auxFocusList(out, w);
-    pr("focusList has size:", out.size());
     return out;
   }
 
   private void auxFocusList(List<FocusHandler> list, JWindow window) {
-    pr("auxFocusList, window:", window);
+    if (window.hidden())
+      return;
     if (window instanceof FocusHandler) {
       list.add((FocusHandler) window);
-      pr("...adding handler");
     }
 
     for (var c : window.children())
