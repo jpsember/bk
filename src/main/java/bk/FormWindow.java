@@ -46,14 +46,14 @@ public class FormWindow extends JContainer {
     return this;
   }
 
-  public FormWindow addField(String label) {
+  public WidgetWindow addField(String label) {
     WidgetWindow widget;
     widget = new WidgetWindow().focusRootWindow(this).label(label);
     widget.setSize(1);
     widget.validator(nullTo(mPendingValidator, DEFAULT_VALIDATOR));
     mPendingValidator = null;
     children().add(widget);
-    return this;
+    return widget;
   }
 
   public FormWindow validator(Validator v) {

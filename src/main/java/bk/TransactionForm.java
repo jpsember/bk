@@ -18,11 +18,11 @@ public class TransactionForm extends FormWindow {
     mType = type;
     mSizeExpr = 12;
 
-    validator(DATE_VALIDATOR).addField("Date");
-    validator(CURRENCY_VALIDATOR).addField("Amount");
-    validator(ACCOUNT_VALIDATOR).addField("Dr");
-    validator(ACCOUNT_VALIDATOR).addField("Cr");
-    validator(DESCRIPTION_VALIDATOR).addField("Description");
+   mdate =  validator(DATE_VALIDATOR).addField("Date");
+  mamount=  validator(CURRENCY_VALIDATOR).addField("Amount");
+  mdr=  validator(ACCOUNT_VALIDATOR).addField("Dr");
+  mcr=  validator(ACCOUNT_VALIDATOR).addField("Cr");
+  mdesc=  validator(DESCRIPTION_VALIDATOR).addField("Description");
     addVertSpace(1);
     addButton("Ok", () -> okHandler());
     addButton("Cancel", () -> cancelHandler());
@@ -56,7 +56,9 @@ public class TransactionForm extends FormWindow {
   }
 
   private void okHandler() {
-    todo("add error message line in form");
+    
+    todo("have validator return Objects (as well as ability to convert those objects to strings)");
+  //  mdate.value();
     
     if (mType == TYPE_ADD) {
       setMessage("Ok pressed!");
@@ -70,4 +72,6 @@ public class TransactionForm extends FormWindow {
 
   private int mType;
   private FocusHandler mOldFocus;
+  private WidgetWindow mdate,mamount,mdr,mcr,mdesc;
+  
 }
