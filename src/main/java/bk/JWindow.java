@@ -21,7 +21,7 @@ public class JWindow extends BaseObject {
   }
 
   public final boolean hasFocus() {
-    return winMgr().focus() == this;
+    return focusManager().focus() == this;
   }
 
   public IRect totalBounds() {
@@ -110,7 +110,6 @@ public class JWindow extends BaseObject {
     var r = Render.prepare(this, partial);
 
     var totalBounds = totalBounds();
-    var clipBounds = totalBounds;
     if (!partial)
       r.clearRect(totalBounds);
     int btype = mFlags & FLG_BORDER;
@@ -118,8 +117,6 @@ public class JWindow extends BaseObject {
       if (!partial)
         r.drawRect(totalBounds, btype);
       r.setClipBounds(calcContentBounds());
-
-      pr("clip bounds set to:", clipBounds);
     }
     paint();
     r = Render.unprepare();

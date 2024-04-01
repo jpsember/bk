@@ -3,12 +3,10 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
-import java.util.List;
 import java.util.Stack;
 
 import js.base.BaseObject;
 import js.base.Pair;
-import js.geometry.MyMath;
 
 public class WinMgr extends BaseObject {
 
@@ -141,74 +139,6 @@ public class WinMgr extends BaseObject {
     return peek(S_TYPE_CONTAINER);
   }
 
-  public FocusHandler focus() {
-    return mFocus;
-  }
-
-  public void chooseFocus() {
-    var c = topLevelContainer();
-    openFocusList();
-    auxAddFoc(c);
-    closeFocusList();
-  }
-
-  private void auxAddFoc(JWindow w) {
-    addFocus(w);
-    for (var c2 : w.children())
-      auxAddFoc(c2);
-  }
-
-  public void openFocusList() {
-    mFocusList = arrayList();
-  }
-
-  public void closeFocusList() {
-    var f = mFocus;
-    if (f != null) {
-      if (!mFocusList.contains(f)) {
-        f = null;
-      }
-    }
-    if (f == null && !mFocusList.isEmpty())
-      f = mFocusList.get(0);
-    setFocus(f);
-  }
-
-  public void addFocus(JWindow w) {
-    if (!(w instanceof FocusHandler))
-      return;
-    mFocusList.add((FocusHandler) w);
-  }
-
-  private List<FocusHandler> mFocusList;
-
-  public void setFocus(FocusHandler h) {
-    h = nullTo(h, FOCUS_NONE);
-    if (h == mFocus)
-      return;
-    if (mFocus != null) {
-      mFocus.loseFocus();
-      mFocus.repaint();
-    }
-    mFocus = h;
-    h.gainFocus();
-    h.repaint();
-  }
-
-  public void moveFocus(int amount) {
-    int slot = mFocusList.indexOf(mFocus);
-    switch (amount) {
-    case -1:
-    case 1:
-      slot = MyMath.myMod(slot + amount, mFocusList.size());
-      break;
-    default:
-      badArg("unhandled moveFocus arg", amount);
-    }
-    setFocus(mFocusList.get(slot));
-  }
-
-  private FocusHandler mFocus = FOCUS_NONE;
   private Stack<Pair<Integer, Object>> mStack = new Stack();
   private boolean mHorzFlag;
   private int mBorderType;
@@ -220,9 +150,6 @@ public class WinMgr extends BaseObject {
       badState("window stack size is unexpected:", mStack.size(),
           "or doesn't have top-level container at bottom");
   }
-
-  public static final FocusHandler FOCUS_NONE = new FocusHandler() {
-  };
   static {
     SHARED_INSTANCE = new WinMgr();
   }

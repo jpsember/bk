@@ -65,6 +65,9 @@ public class JScreen {
   public void update() {
     try {
       var m = winMgr();
+      
+      focusManager().update();
+      
       KeyStroke keyStroke = mScreen.pollInput();
       if (keyStroke != null) {
         if (keyStroke.getKeyType() == KeyType.Escape) {
@@ -72,9 +75,9 @@ public class JScreen {
           quit();
           return;
         }
-        var w = m.focus();
+        //var w = m.focus();
         todo("do we need to prepare handler?");
-        w.processKeyStroke(keyStroke);
+        focusManager().focus().processKeyStroke(keyStroke);
       }
 
       var c = m.topLevelContainer();
@@ -90,7 +93,9 @@ public class JScreen {
       }
 
       todo("?should a lot of this be moved to WinMgr?");
-      m.chooseFocus();
+      
+
+//      m.chooseFocus();
       updateView(c);
      
       // Make changes visible
@@ -157,7 +162,7 @@ public class JScreen {
   private void updateView(JWindow w) {
     final boolean db = false && alert("logging is on");
 
-    winMgr().addFocus(w);
+//    winMgr().addFocus(w);
 
     if (db) {
       if (!w.layoutValid() || !w.paintValid())

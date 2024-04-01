@@ -257,12 +257,8 @@ public final class Util {
     };
   };
 
-  public static FocusHandler firstFocusIn(JWindow w) {
-    for (var c : w.children()) {
-      if (c instanceof FocusHandler)
-        return (FocusHandler) c;
-    }
-    throw badArg("no focus handler found in", w);
+  public static final FocusManager focusManager() {
+    return FocusManager.SHARED_INSTANCE;
   }
-
+  public static final FocusHandler focus() {return focusManager().focus();}
 }

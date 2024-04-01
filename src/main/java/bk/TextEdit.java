@@ -70,7 +70,7 @@ public class TextEdit extends BaseObject {
         s = s.substring(0, i) + " " + s.substring(i);
         s = truncate(s, mWidth);
       }
-      if (winMgr().focus() == mHandler)
+      if ( focus() == mHandler)
         screen().setCursorPosition(mLocation.x + curPos, mLocation.y);
     }
 

@@ -17,7 +17,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
 
   @Override
   protected String supplyName() {
-   return "LedgerWindow";
+    return "LedgerWindow";
   }
 
   public boolean includesHeaderFields() {
@@ -135,7 +135,6 @@ public class LedgerWindow extends JWindow implements FocusHandler {
       case 'a':
         addTransaction();
         break;
-
       }
     }
 
@@ -226,7 +225,8 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     var c = m.topLevelContainer();
     c.children().add(f);
     c.setLayoutInvalid();
-    m.setFocus(firstFocusIn(f));
+    focusManager().set(focusManager().handlers(f).get(0));
+    //m.setFocus(firstFocusIn(f));
     c.repaint();
   }
 

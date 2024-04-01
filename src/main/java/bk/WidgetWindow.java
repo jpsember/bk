@@ -29,6 +29,11 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     return this;
   }
 
+  public WidgetWindow focusRootWindow(JWindow rootWindow) {
+    mFocusRootWindow = rootWindow;
+    return this;
+  }
+
   @Override
   public void loseFocus() {
     String c = mValidator.validate(mContent);
@@ -88,16 +93,15 @@ public class WidgetWindow extends JWindow implements FocusHandler {
 
   @Override
   public void processKeyStroke(KeyStroke k) {
-    var m = winMgr();
     //pr("keyType:", k.getKeyType(), k);
     todo("have validation, maybe clear if illegal?");
     switch (k.getKeyType()) {
     case ArrowDown:
     case Tab:
-      m.moveFocus(1);
+      focusManager().move(mFocusRootWindow, 1);
       break;
     case ArrowUp:
-      m.moveFocus(-1);
+      focusManager().move(mFocusRootWindow, -1);
       break;
     case ArrowLeft:
       if (mCursorPos == 0)
@@ -170,4 +174,5 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   private int mWidth = 16;
   private String mLabel = "<no label!>";
   private Validator mValidator = DEFAULT_VALIDATOR;
+  private JWindow mFocusRootWindow;
 }
