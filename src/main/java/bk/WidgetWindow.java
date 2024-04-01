@@ -14,6 +14,12 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     return this;
   }
 
+  public WidgetWindow validator(Validator v) {
+    checkNotNull(v, "validator");
+    mValidator = v;
+    return this;
+  }
+
   public int width() {
     return mWidth;
   }
@@ -21,6 +27,16 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   public WidgetWindow label(String label) {
     mLabel = label;
     return this;
+  }
+
+  @Override
+  public void loseFocus() {
+    String c = mValidator.validate(mContent);
+    c = nullToEmpty(c);
+    pr("validated:", mContent, "to:", c);
+    mContent = c;
+    if (c.isEmpty())
+      todo("handle a failed validation");
   }
 
   @Override
@@ -58,8 +74,6 @@ public class WidgetWindow extends JWindow implements FocusHandler {
           style = STYLE_INVERSE;
           curPos = s.length();
         } else {
-          int i = MyMath.clamp(mCursorPos, 0, s.length());
-          s = s.substring(0, i) /*+ " "*/ + s.substring(i);
           s = truncate(s, mWidth);
         }
 
@@ -76,7 +90,8 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   @Override
   public void processKeyStroke(KeyStroke k) {
     var m = winMgr();
-    pr("keyType:",k.getKeyType(),k);
+    //pr("keyType:", k.getKeyType(), k);
+    todo("have validation, maybe clear if illegal?");
     switch (k.getKeyType()) {
     case ArrowDown:
     case Tab:
@@ -88,6 +103,8 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     case ArrowLeft:
       if (mCursorPos > 0)
         mCursorPos--;
+      else
+        mCursorPos = mContent.length() - 1;
       break;
     case ArrowRight:
       if (mCursorPos < mContent.length())
@@ -95,11 +112,8 @@ public class WidgetWindow extends JWindow implements FocusHandler {
       break;
     case Backspace:
       if (mCursorPos > 0) {
-//        if (mContent.length() > mCursorPos) 
-        {
-          mContent = mContent.substring(0, mCursorPos - 1) + mContent.substring(mCursorPos);
-          mCursorPos--;
-        }
+        mContent = mContent.substring(0, mCursorPos - 1) + mContent.substring(mCursorPos);
+        mCursorPos--;
       } else {
         mCursorPos = 0;
         mContent = "";
@@ -114,13 +128,18 @@ public class WidgetWindow extends JWindow implements FocusHandler {
           mContent = mContent.substring(0, mCursorPos) + mContent.substring(mCursorPos + 1);
       }
       break;
+    case Home:
+      mCursorPos = 0;
+      break;
+    case End:
+      mCursorPos = mContent.length();
+      break;
     case Character: {
       var c = k.getCharacter();
       insertChar(c);
     }
       break;
     default:
-
       todo("have some sort of fallback");
       break;
     }
@@ -145,9 +164,9 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   }
 
   private int mCursorPos = -1; // position of cursor, or -1 if entire string is highlighted
-  private String mContent = "wassup";
+  private String mContent = "";
 
   private int mWidth = 16;
   private String mLabel = "<no label!>";
-
+  private Validator mValidator = DEFAULT_VALIDATOR;
 }

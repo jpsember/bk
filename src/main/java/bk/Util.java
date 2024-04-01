@@ -1,11 +1,15 @@
 package bk;
 
+import static js.base.Tools.*;
+
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -18,6 +22,7 @@ import bk.gen.Transaction;
 import js.base.DateTimeTools;
 
 public final class Util {
+  public static final boolean EXP = false && alert("experiment in progress");
 
   public static final int BORDER_NONE = 0;
   public static final int BORDER_THIN = 1;
@@ -38,11 +43,6 @@ public final class Util {
 
   public static JScreen screen() {
     return JScreen.sharedInstance();
-  }
-
-  @Deprecated
-  public static TextGraphics textGraphics() {
-    return screen().textGraphics();
   }
 
   public static WinMgr winMgr() {
@@ -85,14 +85,32 @@ public final class Util {
   }
 
   private static ZoneId sLocalTimeZoneId = ZoneId.systemDefault();
-
+  private static LocalDate sCurrentDate = LocalDate.now();
   private static DateTimeFormatter sDateFormatter = new DateTimeFormatterBuilder().appendPattern("yyyy/MM/dd")
+      .parseDefaulting(ChronoField.YEAR_OF_ERA, sCurrentDate.getYear())
+      .parseDefaulting(ChronoField.HOUR_OF_DAY, 0).parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+      .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0).toFormatter().withZone(ZoneId.systemDefault());
+
+  private static DateTimeFormatter sDateParser = new DateTimeFormatterBuilder().appendPattern("[yyyy/]M/d")
+      .parseDefaulting(ChronoField.YEAR_OF_ERA, sCurrentDate.getYear())
       .parseDefaulting(ChronoField.HOUR_OF_DAY, 0).parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
       .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0).toFormatter().withZone(ZoneId.systemDefault());
 
   public static String formatDate(int epochSeconds) {
     var inst = Instant.ofEpochSecond(epochSeconds);
     return sDateFormatter.format(inst);
+  }
+
+  private static final int MAX_CURRENCY = 10_000_000_00;
+
+  public static String formatCurrency(int cents) {
+    checkArgument(cents >= 0 && cents < MAX_CURRENCY, "currency value out of range:", cents);
+    var s = Integer.toString(cents);
+    var k = s.length();
+    int leadZeros = Math.max(0, 3 - k);
+    s = "000".substring(0, leadZeros) + s;
+    var h = s.length() - 2;
+    return s.substring(0, h) + "." + s.substring(h);
   }
 
   public static int generateDate() {
@@ -127,4 +145,66 @@ public final class Util {
     private String SIN = Character.toString(Symbols.SINGLE_LINE_VERTICAL);
   };
   public static final LedgerField EMPTY_FIELD = new TextField("");
+  public static final Validator DEFAULT_VALIDATOR = new Validator() {
+  };
+  public static final Validator DATE_VALIDATOR = new Validator() {
+    public String validate(String value) {
+      final boolean db = false && alert("db is on");
+      if (db)
+        pr("validating:", quote(value));
+      value = value.trim();
+      int dateInSeconds = 0;
+      try {
+        todo("clean this up; allow multiple formats");
+        var temp = sDateParser.parse(value);
+        Instant instant = Instant.from(temp);
+        var z = instant.atZone(sLocalTimeZoneId);
+        // pr("instant from parsing:", value, "is:", z.toString());
+        dateInSeconds = (int) Instant.EPOCH.until(instant, ChronoUnit.SECONDS);
+        var inst = Instant.ofEpochSecond(dateInSeconds).atZone(sLocalTimeZoneId);
+        var dt = LocalDate.from(inst);
+        var y = dt.getYear();
+        if (y < 1970 || y > 2050)
+          throw badArg("unexpected year:", y);
+        dateInSeconds = (int) Instant.EPOCH.until(z, ChronoUnit.SECONDS);
+      } catch (Throwable t) {
+        if (db)
+          pr("failed validating:", value, "got:", INDENT, t);
+      }
+      if (dateInSeconds == 0)
+        return "";
+      return formatDate(dateInSeconds);
+    };
+  };
+  public static final Validator CURRENCY_VALIDATOR = new Validator() {
+    public String validate(String value) {
+      final boolean db = alert("db is on");
+      if (db)
+        pr("validating currency:", value);
+      value = value.trim();
+      int amount = -1;
+      try {
+        if (!value.isEmpty()) {
+          int j = value.lastIndexOf('.');
+          if (j < 0) {
+            value = value + ".00";
+          }
+        }
+        if (db)
+          pr("parsing:", value);
+        var d = Double.parseDouble(value);
+        var asInt = Math.round(d * 100);
+        if (asInt < 0 || asInt >= MAX_CURRENCY)
+          throw badArg("failed to convert", value);
+        amount = (int) asInt;
+      } catch (Throwable t) {
+        if (db)
+          pr("failed to validate:", quote(value), "got:", t);
+      }
+      if (amount < 0)
+        return "";
+
+      return formatCurrency(amount);
+    };
+  };
 }

@@ -44,6 +44,15 @@ public class BkOper extends AppOper {
   @Override
   public void perform() {
 
+    if (EXP) {
+      String ss[] = { "2024/10/04", "10/04", "10/4", "8/4", "024/10/2","24/10/2",};
+      for (var s : ss) {
+        var c = DATE_VALIDATOR.validate(s);
+        pr("validated:", INDENT, s, "=>", c);
+      }
+      halt();
+    }
+
     var screen = screen();
     try {
       loadUtil();
@@ -51,11 +60,11 @@ public class BkOper extends AppOper {
 
       var mgr = winMgr();
 
-      var form = new FormWindow(); //SampleForm();
-      form.addField("Description");
-      form.addField("Age");
-      form.addField("Dr");
-      form.addField("Cr");
+      var form = new TransactionForm(); // FormWindow(); //SampleForm();
+      //      form.addField("Description");
+      //      form.addField("Age");
+      //      form.addField("Dr");
+      //      form.addField("Cr");
 
       LedgerWindow genLedger = null;
 
@@ -75,14 +84,14 @@ public class BkOper extends AppOper {
         {
           //mgr.horz().pushContainer();
           {
-           // mgr.chars(15).window();
+            // mgr.chars(15).window();
             mgr.roundedBorder();
             //            if (false)
             //              mgr.handler(ourLedger);
             // mgr.handler(form);
             mgr.window(form);
-//            mgr.thinBorder();
-//            mgr.pct(20).window();
+            //            mgr.thinBorder();
+            //            mgr.pct(20).window();
           }
           //mgr.popContainer();
         }

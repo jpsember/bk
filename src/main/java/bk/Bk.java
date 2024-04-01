@@ -9,12 +9,15 @@ import java.io.Writer;
 import js.app.App;
 import js.base.DateTimeTools;
 import js.base.LoggerInterface;
+import static bk.Util.*;
 
 public class Bk extends App {
 
+  
   public static void main(String[] args) {
     var logger = new OurTextLogger();
-    logger(logger);
+   if (!EXP)
+     logger(logger);
     try {
       loadTools();
       Bk app = new Bk();
