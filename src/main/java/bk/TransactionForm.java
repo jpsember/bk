@@ -26,6 +26,8 @@ public class TransactionForm extends FormWindow {
     addVertSpace(1);
     addButton("Ok", () -> okHandler());
     addButton("Cancel", () -> cancelHandler());
+    addVertSpace(1);
+    addMessageLine();
   }
 
   public static void addTransaction() {
@@ -54,9 +56,12 @@ public class TransactionForm extends FormWindow {
   }
 
   private void okHandler() {
+    todo("add error message line in form");
+    
     if (mType == TYPE_ADD) {
+      setMessage("Ok pressed!");
     }
-    removeFormFromScreen();
+ //   removeFormFromScreen();
   }
 
   private void cancelHandler() {

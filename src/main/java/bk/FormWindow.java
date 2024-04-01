@@ -17,9 +17,25 @@ public class FormWindow extends JContainer {
   public FormWindow addButton(String label, ButtonListener listener) {
     WidgetWindow widget;
     widget = new WidgetWindow().focusRootWindow(this).label(label).button(listener);
-    widget.setSize(2);
-    mPendingValidator = null;
+    widget.setSize(1);
     children().add(widget);
+    return this;
+  }
+
+  public FormWindow addMessageLine() {
+    checkState(mMessage == null);
+    MessageWindow widget;
+    widget = new MessageWindow();
+    widget.setSize(1);
+    children().add(widget);
+    mMessage = widget;
+    return this;
+  }
+
+  public FormWindow setMessage(String message) {
+    checkState(mMessage != null);
+    mMessage.message(message);
+    mMessage.repaint();
     return this;
   }
 
@@ -46,4 +62,5 @@ public class FormWindow extends JContainer {
   }
 
   private Validator mPendingValidator;
+  private MessageWindow mMessage;
 }
