@@ -29,8 +29,8 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     return this;
   }
 
-  public WidgetWindow button() {
-    mButtonFlag = true;
+  public WidgetWindow button(ButtonListener listener) {
+    mButtonListener = listener;
     return this;
   }
 
@@ -65,11 +65,12 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     boolean hf = hasFocus();
     r.pushStyle(hf ? STYLE_INVERSE : STYLE_NORMAL);
 
+    boolean isButton = mButtonListener != null;
     {
-      var ef = mLabel + (mButtonFlag ? " " : ":");
+      var ef = mLabel + (isButton ? " " : ":");
       r.drawString(b.x + labelWidth - ef.length(), b.y, labelWidth, ef);
     }
-    if (!mButtonFlag) {
+    if (!isButton) {
       var lx = b.x + labelWidth + SEP;
       var ly = b.y;
       var s = truncate(mContent, mWidth);
@@ -97,11 +98,14 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   @Override
   public void processKeyStroke(KeyStroke k) {
     //pr("keyType:", k.getKeyType(), k);
-    todo("have validation, maybe clear if illegal?");
     switch (k.getKeyType()) {
     case Enter:
-      todo("if this is a button, act on it");
-      focusManager().move(mFocusRootWindow, 1);
+    {
+      if (mButtonListener != null)
+        mButtonListener.buttonPressed();
+      else
+        focusManager().move(mFocusRootWindow, 1);
+    }
       break;
     case ArrowDown:
     case Tab:
@@ -182,5 +186,5 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   private String mLabel = "<no label!>";
   private Validator mValidator = DEFAULT_VALIDATOR;
   private JWindow mFocusRootWindow;
-  private boolean mButtonFlag;
+  private ButtonListener mButtonListener;
 }

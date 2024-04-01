@@ -9,7 +9,6 @@ import com.googlecode.lanterna.input.KeyStroke;
 
 import bk.gen.Alignment;
 import bk.gen.Column;
-import bk.gen.Transaction;
 import js.geometry.IRect;
 import js.geometry.MyMath;
 
@@ -124,7 +123,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
       var ch = k.getCharacter();
       switch (ch) {
       case 'a':
-        addTransaction();
+        TransactionForm.addTransaction();
         break;
       }
     }
@@ -198,27 +197,6 @@ public class LedgerWindow extends JWindow implements FocusHandler {
       }
     }
     return b;
-  }
-
-  private void addTransaction() {
-    var f = new TransactionForm(new TransactionHandler() {
-
-      @Override
-      public int processEditResult(Transaction.Builder transaction) {
-        todo("process result");
-        return 0;
-      }
-    });
-
-    // Add transaction window to main
-    f.mSizeExpr = 12;
-    var m = winMgr();
-    var c = m.topLevelContainer();
-    c.children().add(f);
-    c.setLayoutInvalid();
-    focusManager().set(focusManager().handlers(f).get(0));
-    //m.setFocus(firstFocusIn(f));
-    c.repaint();
   }
 
   private List<Column> mColumns = arrayList();

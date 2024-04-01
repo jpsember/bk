@@ -14,9 +14,9 @@ public class FormWindow extends JContainer {
     setBorder(BORDER_THIN);
   }
 
-  public FormWindow addButton(String label) {
+  public FormWindow addButton(String label, ButtonListener listener) {
     WidgetWindow widget;
-    widget = new WidgetWindow().focusRootWindow(this).label(label).button();
+    widget = new WidgetWindow().focusRootWindow(this).label(label).button(listener);
     widget.setSize(2);
     mPendingValidator = null;
     children().add(widget);
@@ -29,7 +29,7 @@ public class FormWindow extends JContainer {
     children().add(w);
     return this;
   }
-  
+
   public FormWindow addField(String label) {
     WidgetWindow widget;
     widget = new WidgetWindow().focusRootWindow(this).label(label);
