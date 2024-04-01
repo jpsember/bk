@@ -156,7 +156,6 @@ public class JWindow extends BaseObject {
   private static final int FLG_LAYOUTVALID = 1 << 3;
   private static final int FLG_PARTIALPAINTVALID = 1 << 4;
   private IRect mWindowBounds;
-  //  private IRect mContentBounds;
   private List<JWindow> mChildren = arrayList();
 
 }

@@ -33,7 +33,6 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   public void loseFocus() {
     String c = mValidator.validate(mContent);
     c = nullToEmpty(c);
-    pr("validated:", mContent, "to:", c);
     mContent = c;
     if (c.isEmpty())
       todo("handle a failed validation");
@@ -101,6 +100,8 @@ public class WidgetWindow extends JWindow implements FocusHandler {
       m.moveFocus(-1);
       break;
     case ArrowLeft:
+      if (mCursorPos == 0)
+        break;
       if (mCursorPos > 0)
         mCursorPos--;
       else

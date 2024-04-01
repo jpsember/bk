@@ -25,11 +25,10 @@ public class FormWindow extends JContainer {
     return this;
   }
 
-  @Override
-  void render(boolean partial) {
-    pr("rendering FormWindow");
-    super.render(partial);
-  }
+//  @Override
+//  void render(boolean partial) {
+//    super.render(partial);
+//  }
 
   public FormWindow validator(Validator v) {
     mPendingValidator = v;

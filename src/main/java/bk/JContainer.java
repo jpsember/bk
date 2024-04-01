@@ -41,7 +41,7 @@ public class JContainer extends JWindow {
     boolean swap = !mHorzFlag;
 
     var boundsWithinScreen = calcContentBounds();
-    pr("contentBounds:", boundsWithinScreen);
+   if (db) pr("contentBounds:", boundsWithinScreen);
 
     // The size of the container (normalized so windows are stacked horizontally)
 

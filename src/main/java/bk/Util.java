@@ -14,7 +14,6 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.googlecode.lanterna.Symbols;
-import com.googlecode.lanterna.graphics.TextGraphics;
 
 import bk.gen.Column;
 import bk.gen.Datatype;
@@ -178,7 +177,7 @@ public final class Util {
   };
   public static final Validator CURRENCY_VALIDATOR = new Validator() {
     public String validate(String value) {
-      final boolean db = alert("db is on");
+      final boolean db = false && alert("db is on");
       if (db)
         pr("validating currency:", value);
       value = value.trim();
@@ -205,6 +204,56 @@ public final class Util {
         return "";
 
       return formatCurrency(amount);
+    };
+  };
+
+  public static final Validator ACCOUNT_VALIDATOR = new Validator() {
+    public String validate(String value) {
+      final boolean db = false && alert("db is on");
+      if (db)
+        pr("validating account number:", value);
+      value = value.trim();
+      int number = 0;
+      try {
+        if (db)
+          pr("parsing:", value);
+        var i = Integer.parseInt(value);
+        if (i < 1000 || i > 5999)
+          throw badArg("unexpected account number", i);
+        number = i;
+      } catch (Throwable t) {
+        if (db)
+          pr("failed to validate:", quote(value), "got:", t);
+      }
+      if (number == 0)
+        return "";
+      return Integer.toString(number);
+    };
+  };
+
+  public static final Validator DESCRIPTION_VALIDATOR = new Validator() {
+    public String validate(String value) {
+      final boolean db = false && alert("db is on");
+      if (db)
+        pr("validating description:", quote(value));
+      value = value.trim();
+      String desc = null;
+      try {
+        if (db)
+          pr("parsing:", value);
+        if (value.length() > 1000)
+          badArg("description is too long");
+        for (int i = 0; i < value.length(); i++) {
+          var j = value.charAt(i);
+          if (j < ' ' || j > 127)
+            badArg("unexpected character:", j);
+        }
+        desc = value;
+      } catch (Throwable t) {
+        if (db)
+          pr("failed to validate:", quote(value), "got:", t);
+      }
+      return nullTo(desc, "");
     };
   };
 }

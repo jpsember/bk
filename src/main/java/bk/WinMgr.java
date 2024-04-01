@@ -127,7 +127,6 @@ public class WinMgr extends BaseObject {
   private void applyParam(JWindow w) {
     w.setSize(mSizeExpr);
     w.setBorder(mBorderType);
-    pr("applying param to window:", w, "size:", mSizeExpr, "border:", mBorderType);
     resetPendingWindowVars();
   }
 
@@ -192,7 +191,6 @@ public class WinMgr extends BaseObject {
       mFocus.repaint();
     }
     mFocus = h;
-    pr("focus changing to:", mFocus);
     h.gainFocus();
     h.repaint();
   }
