@@ -53,13 +53,12 @@ public class BkOper extends AppOper {
       halt();
     }
 
-    var screen = screen();
+    var mgr = winMgr();
+
     try {
-      screen.open();
+      JScreen.sharedInstance().open();
 
-      var mgr = winMgr();
-
-    //  var form = new TransactionForm(); // FormWindow(); //SampleForm();
+      //  var form = new TransactionForm(); // FormWindow(); //SampleForm();
       //      form.addField("Description");
       //      form.addField("Age");
       //      form.addField("Dr");
@@ -71,7 +70,6 @@ public class BkOper extends AppOper {
       mgr.pushContainer();
       {
 
-        
         {
           // Construct ledger
           mgr.pct(100);
@@ -95,9 +93,9 @@ public class BkOper extends AppOper {
         //        }
       }
       mgr.doneConstruction();
-      screen.mainLoop();
+      mgr.mainLoop();
     } catch (Throwable t) {
-      setError(screen.closeIfError(t));
+      setError(mgr.closeIfError(t));
     }
   }
 

@@ -3,19 +3,12 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
-import com.googlecode.lanterna.TerminalPosition;
-import com.googlecode.lanterna.TerminalSize;
-import com.googlecode.lanterna.graphics.TextGraphics;
-import com.googlecode.lanterna.input.KeyStroke;
-import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.AbstractScreen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 
 import js.file.Files;
-import js.geometry.IPoint;
-import js.geometry.IRect;
 
 /**
  * Wrapper for lanterna terminal / screen
@@ -40,7 +33,7 @@ public class JScreen {
       mTerminal = defaultTerminalFactory.createTerminal();
       mScreen = new TerminalScreen(mTerminal);
       mScreen.startScreen();
-      hideCursor();
+      winMgr().hideCursor();
     } catch (Throwable t) {
       throw asRuntimeException(t);
     }
@@ -62,154 +55,11 @@ public class JScreen {
     return mScreen != null;
   }
 
-  public void update() {
-    try {
-      var m = winMgr();
-      
-      focusManager().update();
-      
-      KeyStroke keyStroke = mScreen.pollInput();
-      if (keyStroke != null) {
-        if (keyStroke.getKeyType() == KeyType.Escape) {
-          todo("Have a special key, like ctrl q, to quit");
-          quit();
-          return;
-        }
-        //var w = m.focus();
-        todo("do we need to prepare handler?");
-        focusManager().focus().processKeyStroke(keyStroke);
-      }
-
-      var c = m.topLevelContainer();
-
-      // Update size of terminal
-      mScreen.doResizeIfNecessary();
-      var currSize = toIpoint(mScreen.getTerminalSize());
-      if (!currSize.equals(mPrevLayoutScreenSize)) {
-        mTextGraphics = null;
-        mPrevLayoutScreenSize = currSize;
-        c.setTotalBounds(new IRect(currSize));
-        c.setLayoutInvalid();
-      }
-
-      todo("?should a lot of this be moved to WinMgr?");
-      
-
-//      m.chooseFocus();
-      updateView(c);
-     
-      // Make changes visible
-      mScreen.refresh();
-    } catch (Throwable t) {
-      closeIfError(t);
-      throw asRuntimeException(t);
-    }
-  }
-
   public AbstractScreen screen() {
     return mScreen;
   }
 
-  @Deprecated
-  public TextGraphics textGraphics() {
-    if (mTextGraphics == null) {
-      todo("add support for inverse, bold text styles");
-      mTextGraphics = screen().newTextGraphics();
-    }
-    return mTextGraphics;
-  }
-
-  private static IPoint toIpoint(TerminalSize s) {
-    return IPoint.with(s.getColumns(), s.getRows());
-  }
-
-  public boolean quitRequested() {
-    return mQuitFlag;
-  }
-
-  public void quit() {
-    mQuitFlag = true;
-  }
-
-  public void mainLoop() {
-    while (isOpen()) {
-      update();
-      sleepMs(10);
-      if (quitRequested())
-        close();
-    }
-  }
-
-  /**
-   * Restore normal terminal window if an exception is not null (so that
-   * subsequent dumping of the exception will actually appear to the user in the
-   * normal terminal window)
-   */
-  public Throwable closeIfError(Throwable t) {
-    if (t != null)
-      close();
-    return t;
-  }
-
-  /**
-   * If a view's layout is invalid, calls its layout() method, and invalidates
-   * its paint.
-   * 
-   * If the view's paint is invalid, renders it.
-   * 
-   * Recursively processes all child views in this manner as well.
-   */
-  private void updateView(JWindow w) {
-    final boolean db = false && alert("logging is on");
-
-//    winMgr().addFocus(w);
-
-    if (db) {
-      if (!w.layoutValid() || !w.paintValid())
-        pr(VERT_SP, "updateViews");
-    }
-
-    if (!w.layoutValid()) {
-      if (db)
-        pr("...window", w.name(), "layout is invalid");
-      w.repaint();
-      w.layout();
-      w.setLayoutValid();
-
-      // Invalidate layout of any child views as well
-      for (var c : w.children())
-        c.setLayoutInvalid();
-    }
-
-    if (!w.paintValid()) {
-      // We are repainting everything, so make the partial valid as well
-      w.setPartialPaintValid(true);
-      if (db)
-        pr("...window", w.name(), "paint is invalid; rendering; bounds:", w.totalBounds());
-      w.render(false);
-      w.setPaintValid(true);
-    } else if (!w.partialPaintValid()) {
-      if (db)
-        pr("...window", w.name(), "partial paint is invalid");
-      w.render(true);
-      w.setPartialPaintValid(true);
-    }
-
-    for (var c : w.children())
-      updateView(c);
-  }
-
-  public void setCursorPosition(int x, int y) {
-    mScreen.setCursorPosition(new TerminalPosition(x, y));
-  }
-
-  public void hideCursor() {
-    mScreen.setCursorPosition(null);
-  }
-
   private Terminal mTerminal;
   private AbstractScreen mScreen;
-  private IPoint mPrevLayoutScreenSize;
-  private boolean mQuitFlag;
-  private TextGraphics mTextGraphics;
+
 }

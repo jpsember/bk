@@ -10,7 +10,6 @@ import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.graphics.TextGraphics;
-import com.googlecode.lanterna.screen.Screen;
 
 import js.geometry.IPoint;
 import js.geometry.IRect;
@@ -137,11 +136,10 @@ public final class Render {
   }
 
   private void auxPrepare(JWindow window, boolean partial) {
-    mScreen = screen().screen();
     mWindow = window;
     mClipBounds = window.totalBounds();
     mStack = new Stack<>();
-    mTextGraphics = mScreen.newTextGraphics();
+    mTextGraphics = winMgr().abstractScreen().newTextGraphics();
     mPartial = partial;
   }
 
@@ -154,7 +152,6 @@ public final class Render {
     if (!mStack.isEmpty())
       alert("Render.stack isn't empty");
     mStack = null;
-    mScreen = null;
     mWindow = null;
     mClipBounds = null;
     mTextGraphics = null;
@@ -179,7 +176,7 @@ public final class Render {
   public Render pushStyle(int style) {
     checkArgument(style >= 0 && style < STYLE_TOTAL);
     mStack.push(mTextGraphics);
-    var t = mScreen.newTextGraphics();
+    var t = winMgr().abstractScreen().newTextGraphics();
     switch (style) {
     case STYLE_INVERSE:
       t.setForegroundColor(TextColor.ANSI.WHITE_BRIGHT);
@@ -202,7 +199,6 @@ public final class Render {
   private Stack<TextGraphics> mStack = new Stack<>();
   private IRect mClipBounds;
   private JWindow mWindow;
-  private Screen mScreen;
   private TextGraphics mTextGraphics;
   private boolean mPartial;
   private static final Render sShared = new Render();

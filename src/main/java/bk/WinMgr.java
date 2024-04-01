@@ -5,8 +5,16 @@ import static js.base.Tools.*;
 
 import java.util.Stack;
 
+import com.googlecode.lanterna.TerminalPosition;
+import com.googlecode.lanterna.TerminalSize;
+import com.googlecode.lanterna.input.KeyStroke;
+import com.googlecode.lanterna.input.KeyType;
+import com.googlecode.lanterna.screen.AbstractScreen;
+
 import js.base.BaseObject;
 import js.base.Pair;
+import js.geometry.IPoint;
+import js.geometry.IRect;
 
 public class WinMgr extends BaseObject {
 
@@ -150,7 +158,147 @@ public class WinMgr extends BaseObject {
       badState("window stack size is unexpected:", mStack.size(),
           "or doesn't have top-level container at bottom");
   }
+
+  public void setCursorPosition(int x, int y) {
+    mScreen.setCursorPosition(new TerminalPosition(x, y));
+  }
+
+  public void hideCursor() {
+    mScreen.setCursorPosition(null);
+  }
+
+  public AbstractScreen abstractScreen() {
+    return mScreen;
+  }
+
+  public void mainLoop() {
+    var js = JScreen.sharedInstance();
+    while (js.isOpen()) {
+      update();
+      sleepMs(10);
+      if (quitRequested())
+        js.close();
+    }
+  }
+
+  public void update() {
+    var m = winMgr();
+    try {
+
+      focusManager().update();
+
+      KeyStroke keyStroke = mScreen.pollInput();
+      if (keyStroke != null) {
+        if (keyStroke.getKeyType() == KeyType.Escape) {
+          todo("Have a special key, like ctrl q, to quit");
+          quit();
+          return;
+        }
+        //var w = m.focus();
+        todo("do we need to prepare handler?");
+        focusManager().focus().processKeyStroke(keyStroke);
+      }
+
+      var c = m.topLevelContainer();
+
+      // Update size of terminal
+      mScreen.doResizeIfNecessary();
+      var currSize = toIpoint(mScreen.getTerminalSize());
+      if (!currSize.equals(mPrevLayoutScreenSize)) {
+        mPrevLayoutScreenSize = currSize;
+        c.setTotalBounds(new IRect(currSize));
+        c.setLayoutInvalid();
+      }
+
+      //      m.chooseFocus();
+      updateView(c);
+
+      // Make changes visible
+      mScreen.refresh();
+    } catch (Throwable t) {
+      m.closeIfError(t);
+      throw asRuntimeException(t);
+    }
+  }
+
+  public boolean quitRequested() {
+    return mQuitFlag;
+  }
+
+  public void quit() {
+    mQuitFlag = true;
+  }
+
+  private boolean mQuitFlag;
+
+  private AbstractScreen mScreen = JScreen.sharedInstance().screen();
+
   static {
     SHARED_INSTANCE = new WinMgr();
   }
+
+  private static IPoint toIpoint(TerminalSize s) {
+    return IPoint.with(s.getColumns(), s.getRows());
+  }
+
+  /**
+   * If a view's layout is invalid, calls its layout() method, and invalidates
+   * its paint.
+   * 
+   * If the view's paint is invalid, renders it.
+   * 
+   * Recursively processes all child views in this manner as well.
+   */
+  private void updateView(JWindow w) {
+    final boolean db = false && alert("logging is on");
+
+    //    winMgr().addFocus(w);
+
+    if (db) {
+      if (!w.layoutValid() || !w.paintValid())
+        pr(VERT_SP, "updateViews");
+    }
+
+    if (!w.layoutValid()) {
+      if (db)
+        pr("...window", w.name(), "layout is invalid");
+      w.repaint();
+      w.layout();
+      w.setLayoutValid();
+
+      // Invalidate layout of any child views as well
+      for (var c : w.children())
+        c.setLayoutInvalid();
+    }
+
+    if (!w.paintValid()) {
+      // We are repainting everything, so make the partial valid as well
+      w.setPartialPaintValid(true);
+      if (db)
+        pr("...window", w.name(), "paint is invalid; rendering; bounds:", w.totalBounds());
+      w.render(false);
+      w.setPaintValid(true);
+    } else if (!w.partialPaintValid()) {
+      if (db)
+        pr("...window", w.name(), "partial paint is invalid");
+      w.render(true);
+      w.setPartialPaintValid(true);
+    }
+
+    for (var c : w.children())
+      updateView(c);
+  }
+
+  /**
+   * Restore normal terminal window if an exception is not null (so that
+   * subsequent dumping of the exception will actually appear to the user in the
+   * normal terminal window)
+   */
+  public Throwable closeIfError(Throwable t) {
+    if (t != null)
+      JScreen.sharedInstance().close();
+    return t;
+  }
+
+  private IPoint mPrevLayoutScreenSize;
 }

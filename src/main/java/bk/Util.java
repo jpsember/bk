@@ -40,9 +40,10 @@ public final class Util {
     DateTimeTools.sleepForRealMs(ms);
   }
 
-  public static JScreen screen() {
-    return JScreen.sharedInstance();
-  }
+//  @Deprecated
+//  public static JScreen screen() {
+//    return JScreen.sharedInstance();
+//  }
 
   public static WinMgr winMgr() {
     return WinMgr.SHARED_INSTANCE;
