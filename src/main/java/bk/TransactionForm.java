@@ -17,6 +17,6 @@ public class TransactionForm extends FormWindow {
     validator(DESCRIPTION_VALIDATOR).addField("Description");
   }
 
-  private TransactionHandler mHandler;
+  /*private*/ TransactionHandler mHandler;
 
 }
