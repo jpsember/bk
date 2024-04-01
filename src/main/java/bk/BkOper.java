@@ -45,7 +45,7 @@ public class BkOper extends AppOper {
   public void perform() {
 
     if (EXP) {
-      String ss[] = { "2024/10/04", "10/04", "10/4", "8/4", "024/10/2","24/10/2",};
+      String ss[] = { "2024/10/04", "10/04", "10/4", "8/4", "024/10/2", "24/10/2", };
       for (var s : ss) {
         var c = DATE_VALIDATOR.validate(s);
         pr("validated:", INDENT, s, "=>", c);
@@ -55,46 +55,44 @@ public class BkOper extends AppOper {
 
     var screen = screen();
     try {
-      loadUtil();
       screen.open();
 
       var mgr = winMgr();
 
-      var form = new TransactionForm(); // FormWindow(); //SampleForm();
+    //  var form = new TransactionForm(); // FormWindow(); //SampleForm();
       //      form.addField("Description");
       //      form.addField("Age");
       //      form.addField("Dr");
       //      form.addField("Cr");
 
-      LedgerWindow genLedger = null;
+      LedgerWindow genLedger = buildGeneralLedger();
 
       // Create a root container
       mgr.pushContainer();
       {
 
-        if (false) {
-          // Construct two windows; the second has some horizontal panels
-          mgr.pct(25);
+        
+        {
+          // Construct ledger
+          mgr.pct(100);
           mgr.thickBorder();
-          genLedger = buildGeneralLedger();
-          //        mgr.handler(genLedger);
           mgr.window(genLedger);
         }
-        mgr.pct(75);
-        {
-          //mgr.horz().pushContainer();
-          {
-            // mgr.chars(15).window();
-            mgr.roundedBorder();
-            //            if (false)
-            //              mgr.handler(ourLedger);
-            // mgr.handler(form);
-            mgr.window(form);
-            //            mgr.thinBorder();
-            //            mgr.pct(20).window();
-          }
-          //mgr.popContainer();
-        }
+        //        mgr.pct(75);
+        //        {
+        //          //mgr.horz().pushContainer();
+        //          {
+        //            // mgr.chars(15).window();
+        //            mgr.roundedBorder();
+        //            //            if (false)
+        //            //              mgr.handler(ourLedger);
+        //            // mgr.handler(form);
+        //            mgr.window(form);
+        //            //            mgr.thinBorder();
+        //            //            mgr.pct(20).window();
+        //          }
+        //          //mgr.popContainer();
+        //        }
       }
       mgr.doneConstruction();
       screen.mainLoop();

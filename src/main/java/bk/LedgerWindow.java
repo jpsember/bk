@@ -9,10 +9,16 @@ import com.googlecode.lanterna.input.KeyStroke;
 
 import bk.gen.Alignment;
 import bk.gen.Column;
+import bk.gen.Transaction;
 import js.geometry.IRect;
 import js.geometry.MyMath;
 
 public class LedgerWindow extends JWindow implements FocusHandler {
+
+  @Override
+  protected String supplyName() {
+   return "LedgerWindow";
+  }
 
   public boolean includesHeaderFields() {
     return true;
@@ -25,7 +31,8 @@ public class LedgerWindow extends JWindow implements FocusHandler {
 
     var b = r.clipBounds();
     mLastRenderedClipBounds = b;
-    todo("this is the clip bounds, but not necessarily the window bounds... maybe we want to subclass JWindow?");
+    todo(
+        "this is the clip bounds, but not necessarily the window bounds... maybe we want to subclass JWindow?");
     if (r.partial()) {
       var rn = MyMath.random();
       r.pushStyle(STYLE_INVERSE);
@@ -100,8 +107,8 @@ public class LedgerWindow extends JWindow implements FocusHandler {
       return;
     }
 
+    todo("can we support command- sequences without terminal interfering?");
     Integer targetEntry = null;
-    todo("avoid calling handler if window hasn't been defined yet");
     int pageSize = mLastRenderedClipBounds.height - 2; // Assume a boundary
     switch (k.getKeyType()) {
     case ArrowUp:
@@ -122,9 +129,20 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     case End:
       targetEntry = mEntries.size();
       break;
+    case Character: {
+      var ch = k.getCharacter();
+      switch (ch) {
+      case 'a':
+        addTransaction();
+        break;
+
+      }
+    }
+
     default:
       break;
     }
+
     if (targetEntry != null) {
       int sz = mEntries.size();
       if (sz != 0) {
@@ -134,7 +152,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
       }
     } else if (alert("experiment with partial repaint")) {
       pr("triggering partial repaint");
-       repaintPartial();
+      repaintPartial();
     }
   }
 
@@ -192,11 +210,30 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     return b;
   }
 
+  private void addTransaction() {
+    var f = new TransactionForm(new TransactionHandler() {
+
+      @Override
+      public int processEditResult(Transaction.Builder transaction) {
+        todo("process result");
+        return 0;
+      }
+    });
+
+    // Add transaction window to main
+    f.mSizeExpr = 8;
+    var m = winMgr();
+    var c = m.topLevelContainer();
+    c.children().add(f);
+    c.setLayoutInvalid();
+    m.setFocus(firstFocusIn(f));
+    c.repaint();
+  }
+
   private List<Column> mColumns = arrayList();
   private List<List<LedgerField>> mEntries = arrayList();
   private StringBuilder msb = new StringBuilder();
   private int mCursorRow;
   private IRect mLastRenderedClipBounds;
-  //  private JWindow mWindow;
 
 }

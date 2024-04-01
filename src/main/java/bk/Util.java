@@ -256,4 +256,13 @@ public final class Util {
       return nullTo(desc, "");
     };
   };
+
+  public static FocusHandler firstFocusIn(JWindow w) {
+    for (var c : w.children()) {
+      if (c instanceof FocusHandler)
+        return (FocusHandler) c;
+    }
+    throw badArg("no focus handler found in", w);
+  }
+
 }
