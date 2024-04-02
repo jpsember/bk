@@ -1,4 +1,5 @@
 fields {
+  long timestamp;
   int date;
   int amount;
   int debit;

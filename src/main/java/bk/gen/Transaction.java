@@ -5,6 +5,10 @@ import js.json.JSMap;
 
 public class Transaction implements AbstractData {
 
+  public long timestamp() {
+    return mTimestamp;
+  }
+
   public int date() {
     return mDate;
   }
@@ -30,11 +34,12 @@ public class Transaction implements AbstractData {
     return new Builder(this);
   }
 
-  protected static final String _0 = "date";
-  protected static final String _1 = "amount";
-  protected static final String _2 = "debit";
-  protected static final String _3 = "credit";
-  protected static final String _4 = "description";
+  protected static final String _0 = "timestamp";
+  protected static final String _1 = "date";
+  protected static final String _2 = "amount";
+  protected static final String _3 = "debit";
+  protected static final String _4 = "credit";
+  protected static final String _5 = "description";
 
   @Override
   public String toString() {
@@ -44,11 +49,12 @@ public class Transaction implements AbstractData {
   @Override
   public JSMap toJson() {
     JSMap m = new JSMap();
-    m.putUnsafe(_0, mDate);
-    m.putUnsafe(_1, mAmount);
-    m.putUnsafe(_2, mDebit);
-    m.putUnsafe(_3, mCredit);
-    m.putUnsafe(_4, mDescription);
+    m.putUnsafe(_0, mTimestamp);
+    m.putUnsafe(_1, mDate);
+    m.putUnsafe(_2, mAmount);
+    m.putUnsafe(_3, mDebit);
+    m.putUnsafe(_4, mCredit);
+    m.putUnsafe(_5, mDescription);
     return m;
   }
 
@@ -63,11 +69,12 @@ public class Transaction implements AbstractData {
   }
 
   private Transaction(JSMap m) {
-    mDate = m.opt(_0, 0);
-    mAmount = m.opt(_1, 0);
-    mDebit = m.opt(_2, 0);
-    mCredit = m.opt(_3, 0);
-    mDescription = m.opt(_4, "");
+    mTimestamp = m.opt(_0, 0L);
+    mDate = m.opt(_1, 0);
+    mAmount = m.opt(_2, 0);
+    mDebit = m.opt(_3, 0);
+    mCredit = m.opt(_4, 0);
+    mDescription = m.opt(_5, "");
   }
 
   public static Builder newBuilder() {
@@ -82,6 +89,8 @@ public class Transaction implements AbstractData {
       return false;
     Transaction other = (Transaction) object;
     if (other.hashCode() != hashCode())
+      return false;
+    if (!(mTimestamp == other.mTimestamp))
       return false;
     if (!(mDate == other.mDate))
       return false;
@@ -101,6 +110,7 @@ public class Transaction implements AbstractData {
     int r = m__hashcode;
     if (r == 0) {
       r = 1;
+      r = r * 37 + (int)mTimestamp;
       r = r * 37 + mDate;
       r = r * 37 + mAmount;
       r = r * 37 + mDebit;
@@ -111,6 +121,7 @@ public class Transaction implements AbstractData {
     return r;
   }
 
+  protected long mTimestamp;
   protected int mDate;
   protected int mAmount;
   protected int mDebit;
@@ -121,6 +132,7 @@ public class Transaction implements AbstractData {
   public static final class Builder extends Transaction {
 
     private Builder(Transaction m) {
+      mTimestamp = m.mTimestamp;
       mDate = m.mDate;
       mAmount = m.mAmount;
       mDebit = m.mDebit;
@@ -142,12 +154,18 @@ public class Transaction implements AbstractData {
     @Override
     public Transaction build() {
       Transaction r = new Transaction();
+      r.mTimestamp = mTimestamp;
       r.mDate = mDate;
       r.mAmount = mAmount;
       r.mDebit = mDebit;
       r.mCredit = mCredit;
       r.mDescription = mDescription;
       return r;
+    }
+
+    public Builder timestamp(long x) {
+      mTimestamp = x;
+      return this;
     }
 
     public Builder date(int x) {

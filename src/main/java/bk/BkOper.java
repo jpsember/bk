@@ -53,6 +53,8 @@ public class BkOper extends AppOper {
       halt();
     }
 
+    storage().read();
+    
     var mgr = winMgr();
 
     try {

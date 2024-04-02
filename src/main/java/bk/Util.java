@@ -274,4 +274,13 @@ public final class Util {
     return null;
   }
 
+  public static Storage storage() {
+    if (sStorage == null) {
+      sStorage = new Storage();
+    }
+    return sStorage;
+  }
+
+  private static Storage sStorage;
+
 }

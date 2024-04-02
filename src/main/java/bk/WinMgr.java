@@ -175,7 +175,8 @@ public class WinMgr extends BaseObject {
     while (isOpen()) {
       update();
       sleepMs(10);
-      if (quitRequested())
+      storage().flush();
+     if (quitRequested())
         close();
     }
   }

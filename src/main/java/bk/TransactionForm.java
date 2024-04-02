@@ -57,6 +57,7 @@ public class TransactionForm extends FormWindow {
     String problem = "One or more fields is invalid.";
     if (mdate.valid() && mamount.valid() && mdr.valid() && mcr.valid() && mdesc.valid()) {
       var tr = Transaction.newBuilder();
+      tr.timestamp(System.currentTimeMillis());
       tr.date(mdate.validResult());
       tr.amount(mamount.validResult());
       tr.debit(mdr.validResult());
