@@ -44,17 +44,17 @@ public class AccountForm extends FormWindow {
   //    f.addFormToScreen();
   //  }
 
-  public void addFormToScreen() {
-    todo("do this elsewhere");
-    var m = winMgr();
-    var c = m.topLevelContainer();
-    c.addChild(this);
-    c.setLayoutInvalid();
-
-    var fm = focusManager();
-    mOldFocus = fm.focus();
-    fm.set(fm.handlers(this).get(0));
-  }
+//  public void addFormToScreen() {
+//    todo("do this elsewhere");
+//    var m = winMgr();
+//    var c = m.topLevelContainer();
+//    c.addChild(this);
+//    c.setLayoutInvalid();
+//
+//    var fm = focusManager();
+//    mOldFocus = fm.focus();
+//    fm.set(fm.handlers(this).get(0));
+//  }
 
   //  private void removeFormFromScreen() {
   //    var m = winMgr();
@@ -122,7 +122,7 @@ public class AccountForm extends FormWindow {
   }
 
   private int mType;
-  private FocusHandler mOldFocus;
+  //private FocusHandler mOldFocus;
   private WidgetWindow mNumber, mName;
   private Account mOriginalAccount;
   private Listener mListener;

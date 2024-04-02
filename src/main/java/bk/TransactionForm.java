@@ -30,33 +30,26 @@ public class TransactionForm extends FormWindow {
     addMessageLine();
   }
 
-  public static void addTransaction() {
+  public void forAccount(int accountNumber) {
+    mAccountNumber = accountNumber;
+  }
+
+  public static TransactionForm buildAddTransaction() {
     var f = new TransactionForm(TYPE_ADD, null);
-    // Add transaction window to main
-    f.addFormToScreen();
+    return f;
   }
 
-  public static void editTransaction(Transaction t) {
+  public static TransactionForm buildEditTransaction(Transaction t) {
     var f = new TransactionForm(TYPE_EDIT, t);
-    f.addFormToScreen();
+     return f;
   }
 
-  private void addFormToScreen() {
-    var m = winMgr();
-    var c = m.topLevelContainer();
-    c.addChild(this);
-    c.setLayoutInvalid();
-
-    var fm = focusManager();
-    mOldFocus = fm.focus();
-    fm.set(fm.handlers(this).get(0));
-  }
-
+ 
   private void removeFormFromScreen() {
     var m = winMgr();
     var c = m.topLevelContainer();
     c.removeChild(this);
-    
+
     c.setLayoutInvalid();
     focusManager().set(mOldFocus);
   }
@@ -73,6 +66,11 @@ public class TransactionForm extends FormWindow {
       tr.credit(mcr.validResult());
       tr.description(mdesc.validResult());
       problem = validateTransaction(tr);
+      if (problem == null) {
+        if (mAccountNumber != 0 && (Integer) mdr.validResult() != mAccountNumber
+            && (Integer) mcr.validResult() != mAccountNumber)
+          problem = "Transaction must involve this account";
+      }
     }
     if (problem != null) {
       setMessage(problem);
@@ -98,5 +96,6 @@ public class TransactionForm extends FormWindow {
   private int mType;
   private FocusHandler mOldFocus;
   private WidgetWindow mdate, mamount, mdr, mcr, mdesc;
-  Transaction mOrig;
+  private int mAccountNumber;
+  private Transaction mOrig;
 }

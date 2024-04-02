@@ -11,14 +11,25 @@ import bk.gen.Column;
 import bk.gen.Datatype;
 import bk.gen.Transaction;
 
-public class GeneralLedger extends LedgerWindow {
+public class TransactionLedger extends LedgerWindow {
 
-  public GeneralLedger() {
-    build();
+  public interface Filter {
+    boolean accept(Transaction t);
   }
 
-  private void build() {
+  public static final Filter ACCEPT_ALL = (t) -> true;
 
+  public TransactionLedger(Filter filter) {
+    mFilter = nullTo(filter, ACCEPT_ALL);
+    addColumns();
+    rebuild();
+  }
+
+  public void accountNumber(int anum) {
+    mAccountNumber = anum;
+  }
+
+  private void addColumns() {
     final int NAMED_ACCOUNT_WIDTH = 25;
     addColumn(Column.newBuilder().name("Date").datatype(Datatype.DATE));
     addColumn(VERT_SEP);
@@ -29,10 +40,18 @@ public class GeneralLedger extends LedgerWindow {
     addColumn(Column.newBuilder().name("Cr").datatype(Datatype.TEXT).width(NAMED_ACCOUNT_WIDTH));
     addColumn(VERT_SEP);
     addColumn(Column.newBuilder().name("Description").datatype(Datatype.TEXT).width(40));
+  }
+
+  private void rebuild() {
+
+    var currentTrans = getCurrentRow();
+    clearEntries();
 
     var trans = storage().transactions();
     List<Transaction> sorted = arrayList();
-    sorted.addAll(trans.values());
+    for (var t : trans.values())
+      if (mFilter.accept(t))
+        sorted.add(t);
     sorted.sort(TRANSACTION_COMPARATOR);
 
     for (var t : sorted) {
@@ -48,6 +67,8 @@ public class GeneralLedger extends LedgerWindow {
       v.add(new TextField(t.description()));
       addEntry(v, t);
     }
+    setCurrentRow(currentTrans);
+    repaint();
   }
 
   @Override
@@ -56,14 +77,19 @@ public class GeneralLedger extends LedgerWindow {
     switch (k.getKeyType()) {
     case Character: {
       switch (getCharSummary(k)) {
-      case ":a":
-        TransactionForm.addTransaction();
+      case ":a": {
+        var f = TransactionForm.buildAddTransaction();
+        f.forAccount(mAccountNumber);
+        addToMainView(f);
         handled = true;
+        
+      }
         break;
       case ":e": {
         Transaction a = getCurrentRow();
         if (a != null) {
-          TransactionForm.editTransaction(a);
+          var f = TransactionForm.buildEditTransaction(a);
+          f.forAccount(mAccountNumber);
         }
         handled = true;
       }
@@ -77,4 +103,7 @@ public class GeneralLedger extends LedgerWindow {
     if (!handled)
       super.processKeyStroke(k);
   }
+
+  private Filter mFilter;
+  private int mAccountNumber;
 }

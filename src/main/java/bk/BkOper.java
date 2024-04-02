@@ -57,7 +57,7 @@ public class BkOper extends AppOper implements AccountListListener, AccountForm.
     try {
       mgr.open();
       mAccounts = new AccountList(this);
-      mTransactions = new GeneralLedger();
+      mTransactions = new TransactionLedger(null);
       sAccountsView = mAccounts;
       sTransactionsView = mTransactions;
 
@@ -96,7 +96,7 @@ public class BkOper extends AppOper implements AccountListListener, AccountForm.
 
   private BkConfig mConfig;
   private AccountList mAccounts;
-  private GeneralLedger mTransactions;
+  private TransactionLedger mTransactions;
 
   // ------------------------------------------------------------------
   // AccountListListener
@@ -105,18 +105,21 @@ public class BkOper extends AppOper implements AccountListListener, AccountForm.
   @Override
   public void editAccount(Account account) {
     var form = new AccountForm(AccountForm.TYPE_EDIT, account, this);
-    form.addFormToScreen();
+    addToMainView(form);
   }
 
   @Override
   public void addAccount() {
     var form = new AccountForm(AccountForm.TYPE_ADD, null, this);
-    form.addFormToScreen();
+    addToMainView(form);
   }
 
   @Override
   public void viewAccount(Account account) {
     todo("view account:", account);
+    var ledger = new TransactionLedger(
+        (t) -> t.credit() == account.number() || t.debit() == account.number());
+    switchToView(ledger);
   }
 
   //------------------------------------------------------------------

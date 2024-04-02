@@ -231,7 +231,7 @@ public final class Util {
 
   public static final Validator ACCOUNT_VALIDATOR = new Validator() {
     public ValidationResult validate(String value) {
-      final boolean db = true && alert("db is on");
+      final boolean db = false && alert("db is on");
       var result = ValidationResult.NONE;
       if (db)
         pr("validating account number:", value);
@@ -374,6 +374,36 @@ public final class Util {
     }
     if (target == null)
       return;
+    switchToView(target);
+  }
+
+  public static FocusHandler addToMainView(JWindow window) {
+
+    pr("addToMainView:",window);
+    FocusHandler focusToRestoreLater = null;
+
+    var m = winMgr();
+    var c = m.topLevelContainer();
+    c.addChild(window);
+    c.setLayoutInvalid();
+
+//    if (window instanceof FocusHandler) 
+    {
+      var fm = focusManager();
+      var handlerList = fm.handlers(window);
+      pr("focus handler list:",handlerList);
+      if (!handlerList.isEmpty()) {
+        focusToRestoreLater = fm.focus();
+        pr("...setting focus to first:",handlerList.get(0));
+        fm.set(handlerList.get(0));
+      }
+    }
+    
+    
+    return focusToRestoreLater;
+  }
+
+  public static void switchToView(JWindow target) {
     var m = winMgr();
     var parent = m.topLevelContainer();
     var ch = parent.children();

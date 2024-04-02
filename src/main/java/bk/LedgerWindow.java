@@ -8,7 +8,6 @@ import java.util.List;
 
 import com.googlecode.lanterna.input.KeyStroke;
 
-import bk.gen.Account;
 import bk.gen.Alignment;
 import bk.gen.Column;
 import js.geometry.IRect;
