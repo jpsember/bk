@@ -18,7 +18,7 @@ public class FormWindow extends JContainer {
     WidgetWindow widget;
     widget = new WidgetWindow().focusRootWindow(this).label(label).button(listener);
     widget.setSize(1);
-    children().add(widget);
+    addChild(widget);
     return this;
   }
 
@@ -27,7 +27,7 @@ public class FormWindow extends JContainer {
     MessageWindow widget;
     widget = new MessageWindow();
     widget.setSize(1);
-    children().add(widget);
+    addChild(widget);
     mMessage = widget;
     return this;
   }
@@ -42,7 +42,7 @@ public class FormWindow extends JContainer {
   public FormWindow addVertSpace(int count) {
     var w = new JWindow();
     w.setSize(count);
-    children().add(w);
+    addChild(w);
     return this;
   }
 
@@ -60,7 +60,7 @@ public class FormWindow extends JContainer {
     widget.value(mPendingValue);
     mPendingValidator = null;
     mPendingValue = null;
-    children().add(widget);
+    addChild(widget);
     return widget;
   }
 
@@ -68,14 +68,13 @@ public class FormWindow extends JContainer {
     mPendingValidator = v;
     return this;
   }
-  
+
   public FormWindow value(Object obj) {
-//    checkState(mPendingValidator != null,"specify validator before value");
-//    String strVal = mPendingValidator.compile(obj) ;
+    //    checkState(mPendingValidator != null,"specify validator before value");
+    //    String strVal = mPendingValidator.compile(obj) ;
     mPendingValue = obj;
     return this;
   }
-  
 
   private Validator mPendingValidator;
   private Object mPendingValue;

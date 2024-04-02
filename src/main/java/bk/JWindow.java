@@ -28,8 +28,30 @@ public class JWindow extends BaseObject {
     return mWindowBounds;
   }
 
+  public JWindow parent() {
+    return mParent;
+  }
+
+  /**
+   * Get list of children. Treat list as read only! To modify the list, use
+   * add/removeChild
+   */
   List<JWindow> children() {
     return mChildren;
+  }
+
+  public void removeChild(JWindow child) {
+    var i = mChildren.indexOf(child);
+    checkState(i >= 0, "window", child, "is not a child of", this);
+    mChildren.remove(i);
+    child.mParent = null;
+    setLayoutInvalid();
+  }
+
+  public void addChild(JWindow child) {
+    mChildren.add(child);
+    child.mParent = this;
+    setLayoutInvalid();
   }
 
   void setTotalBounds(IRect bounds) {
@@ -92,6 +114,14 @@ public class JWindow extends BaseObject {
       mFlags |= flag;
   }
 
+  /**
+   * Remove the window from the view hierarchy
+   */
+  public void remove() {
+    checkState(mParent != null, "window is not in view hierarchy");
+    mParent.removeChild(this);
+  }
+
   public boolean hidden() {
     return hasFlag(FLG_HIDDEN);
   }
@@ -123,6 +153,7 @@ public class JWindow extends BaseObject {
     var r = Render.prepare(this, partial);
 
     var totalBounds = totalBounds();
+    checkNotNull(totalBounds, "JWindow has no totalBounds!", INDENT, this);
     if (!partial)
       r.clearRect(totalBounds);
     int btype = mFlags & FLG_BORDER;
@@ -167,6 +198,7 @@ public class JWindow extends BaseObject {
   private static final int FLG_PARTIALPAINTVALID = 1 << 4;
   private static final int FLG_HIDDEN = 1 << 5;
   private IRect mWindowBounds;
+  private JWindow mParent;
   private List<JWindow> mChildren = arrayList();
 
 }

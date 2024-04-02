@@ -35,7 +35,7 @@ public class WinMgr extends BaseObject {
 
     if (!mStack.isEmpty()) {
       var parent = container();
-      parent.children().add(container);
+      parent.addChild(container);
     }
 
     applyParam(container);
@@ -124,7 +124,7 @@ public class WinMgr extends BaseObject {
   public WinMgr window(JWindow window) {
     checkArgument(window != null, "no window supplied");
     var c = container();
-    c.children().add(window);
+    c.addChild(window);
     applyParam(window);
     return this;
   }
@@ -176,7 +176,7 @@ public class WinMgr extends BaseObject {
       update();
       sleepMs(10);
       storage().flush();
-     if (quitRequested())
+      if (quitRequested())
         close();
     }
   }

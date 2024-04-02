@@ -58,6 +58,8 @@ public class BkOper extends AppOper implements AccountListListener, AccountForm.
       mgr.open();
       mAccounts = new AccountList(this);
       mTransactions = new GeneralLedger();
+      sAccountsView = mAccounts;
+      sTransactionsView = mTransactions;
 
       // Create a root container
       mgr.pushContainer();
@@ -104,7 +106,6 @@ public class BkOper extends AppOper implements AccountListListener, AccountForm.
   public void editAccount(Account account) {
     var form = new AccountForm(AccountForm.TYPE_EDIT, account, this);
     form.addFormToScreen();
-    // AccountForm.editAccount(account);
   }
 
   @Override
@@ -123,11 +124,19 @@ public class BkOper extends AppOper implements AccountListListener, AccountForm.
   // ------------------------------------------------------------------
 
   @Override
-  public void editedAccount(Account account) {
-    pr("editedAccount:",INDENT,account);
+  public void editedAccount(AccountForm form, Account account) {
+
+    form.remove();
+
+    if (account == null)
+      return;
+    pr("editedAccount:", INDENT, account);
     mAccounts.rebuild();
     mAccounts.setCurrentRow(account);
     mAccounts.repaint();
+
+    // Restore focus to the AccountList
+    focusManager().set(mAccounts);
   }
 
 }

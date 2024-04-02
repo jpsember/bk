@@ -15,6 +15,8 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.googlecode.lanterna.Symbols;
+import com.googlecode.lanterna.input.KeyStroke;
+import com.googlecode.lanterna.input.KeyType;
 
 import bk.gen.Account;
 import bk.gen.Column;
@@ -358,6 +360,62 @@ public final class Util {
 
   };
 
+  public static void switchToView(String keySummary) {
+    pr(VERT_SP, "switch to view:", keySummary);
+
+    JWindow target = null;
+    switch (keySummary) {
+    case KEY_VIEW_TRANSACTIONS:
+      target = sTransactionsView;
+      break;
+    case KEY_VIEW_ACCOUNTS:
+      target = sAccountsView;
+      break;
+    }
+    if (target == null)
+      return;
+    var m = winMgr();
+    var parent = m.topLevelContainer();
+    var ch = parent.children();
+    if (ch.contains(target))
+      return;
+    while (!ch.isEmpty())
+      ch.get(0).remove();
+
+    pr("adding:", target);
+    target.setSize(-100); // fill entire view
+    parent.addChild(target);
+    if (target instanceof FocusHandler)
+      focusManager().set((FocusHandler) target);
+  }
+
+  /**
+   * Convert a KeyStroke to a string that includes information about Alt, Shift,
+   * Control keys. Returns null if it wasn't a KeyType.Character, otherwise
+   * "[A][C][S]:<character>"
+   */
+  public static String getCharSummary(KeyStroke k) {
+    if (k.getKeyType() == KeyType.Character) {
+      var sb = new StringBuilder(4);
+      if (k.isAltDown())
+        sb.append('A');
+      if (k.isCtrlDown())
+        sb.append('C');
+      if (k.isShiftDown())
+        sb.append('S');
+      sb.append(':');
+      sb.append(k.getCharacter());
+      return sb.toString();
+    }
+    return null;
+  }
+
+  public static JWindow sTransactionsView;
+  public static JWindow sAccountsView;
+
   public static final int ACCOUNT_NAME_MAX_LENGTH = 30;
+
+  public static final String KEY_VIEW_TRANSACTIONS = "C:t";
+  public static final String KEY_VIEW_ACCOUNTS = "C:a";
 
 }

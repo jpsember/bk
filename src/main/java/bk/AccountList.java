@@ -72,22 +72,19 @@ public class AccountList extends LedgerWindow {
       break;
 
     case Character: {
-      var ch = k.getCharacter();
-      switch (ch) {
-      case 'a':
+      var sum = getCharSummary(k);
+      switch (sum) {
+      case ":a":
         mListener.addAccount();
         rebuild();
-        // AccountForm.addAccount();
         handled = true;
         break;
-      case 'e': {
+      case ":e":
         if (a != null) {
           mListener.editAccount(a);
           rebuild();
-          //  AccountForm.editAccount(a);
         }
         handled = true;
-      }
         break;
       }
     }

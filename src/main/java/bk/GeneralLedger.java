@@ -46,7 +46,7 @@ public class GeneralLedger extends LedgerWindow {
       v.add(new AccountNameField(t.credit(), storage().accountName(t.credit())));
       v.add(VERT_SEP_FLD);
       v.add(new TextField(t.description()));
-      addEntry(v,  t);
+      addEntry(v, t);
     }
   }
 
@@ -55,19 +55,19 @@ public class GeneralLedger extends LedgerWindow {
     boolean handled = false;
     switch (k.getKeyType()) {
     case Character: {
-      var ch = k.getCharacter();
-      switch (ch) {
-      case 'a':
+      switch (getCharSummary(k)) {
+      case ":a":
         TransactionForm.addTransaction();
         handled = true;
         break;
-      case 'e': {
+      case ":e": {
         Transaction a = getCurrentRow();
         if (a != null) {
-          TransactionForm.editTransaction(a); 
+          TransactionForm.editTransaction(a);
         }
         handled = true;
-      } 
+      }
+        break;
       }
     }
       break;

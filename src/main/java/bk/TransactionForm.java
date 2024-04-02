@@ -44,7 +44,7 @@ public class TransactionForm extends FormWindow {
   private void addFormToScreen() {
     var m = winMgr();
     var c = m.topLevelContainer();
-    c.children().add(this);
+    c.addChild(this);
     c.setLayoutInvalid();
 
     var fm = focusManager();
@@ -55,7 +55,8 @@ public class TransactionForm extends FormWindow {
   private void removeFormFromScreen() {
     var m = winMgr();
     var c = m.topLevelContainer();
-    c.children().remove(this);
+    c.removeChild(this);
+    
     c.setLayoutInvalid();
     focusManager().set(mOldFocus);
   }
@@ -63,7 +64,7 @@ public class TransactionForm extends FormWindow {
   private void okHandler() {
     String problem = "One or more fields is invalid.";
     var tr = Transaction.newBuilder();
-    
+
     if (mdate.valid() && mamount.valid() && mdr.valid() && mcr.valid() && mdesc.valid()) {
       tr.timestamp(System.currentTimeMillis());
       tr.date(mdate.validResult());
@@ -77,9 +78,7 @@ public class TransactionForm extends FormWindow {
       setMessage(problem);
       return;
     }
-    
-    
-    
+
     if (mType == TYPE_ADD) {
       storage().addTransaction(tr);
     } else {
@@ -88,15 +87,7 @@ public class TransactionForm extends FormWindow {
       storage().deleteTransaction(orig.timestamp());
       storage().addTransaction(tr);
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     removeFormFromScreen();
   }
 

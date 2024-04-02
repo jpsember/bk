@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.googlecode.lanterna.input.KeyStroke;
 
+import bk.gen.Account;
 import bk.gen.Alignment;
 import bk.gen.Column;
 import js.geometry.IRect;
@@ -119,8 +120,12 @@ public class LedgerWindow extends JWindow implements FocusHandler {
       targetEntry = mEntries.size();
       break;
     case Character: {
-      var ch = k.getCharacter();
-      switch (ch) {
+      var su = getCharSummary(k);
+      switch (su) {
+      case KEY_VIEW_TRANSACTIONS:
+      case KEY_VIEW_ACCOUNTS:
+        switchToView(su);
+        break;
       }
     }
       break;
@@ -216,14 +221,21 @@ public class LedgerWindow extends JWindow implements FocusHandler {
   }
 
   public <T> void setCurrentRow(T auxData) {
+    boolean db = false && alert("verbosity");
+    if (db)
+      pr("setCurrentRow to:", INDENT, auxData);
     int newCursor = 0;
     if (auxData != null) {
-      int pos = mEntries.indexOf(auxData);
+      int pos = indexOfAuxData(auxData);
+      if (db)
+        pr("position was:", pos);
       if (pos >= 0)
         newCursor = pos;
     }
     if (mCursorRow != newCursor) {
       mCursorRow = newCursor;
+      if (db)
+        pr("set cursor row to:", mCursorRow);
       repaint();
     }
   }
@@ -231,6 +243,16 @@ public class LedgerWindow extends JWindow implements FocusHandler {
   private static class Entry {
     Object auxData;
     List<LedgerField> fields;
+  }
+
+  private int indexOfAuxData(Object auxData) {
+    int j = INIT_INDEX;
+    for (var x : mEntries) {
+      j++;
+      if (x.auxData.equals(auxData))
+        return j;
+    }
+    return -1;
   }
 
   private List<Column> mColumns = arrayList();

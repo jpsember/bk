@@ -75,6 +75,7 @@ public static final int DEFAULT_WIDTH = 16;
       var ef = mLabel + (isButton ? " " : ":");
       r.drawString(b.x + labelWidth - ef.length(), b.y, labelWidth, ef);
     }
+   
     if (!isButton) {
       var lx = b.x + labelWidth + SEP;
       var ly = b.y;

@@ -8,7 +8,11 @@ import bk.gen.Account;
 public class AccountForm extends FormWindow {
 
   public interface Listener {
-    void editedAccount(Account account);
+    /**
+     * Called when user has either modified an account or cancelled edits.
+     * Returns modified account, or null if cancel
+     */
+    void editedAccount(AccountForm form, Account account);
   }
 
   public static final int TYPE_ADD = 0, TYPE_EDIT = 1;
@@ -44,7 +48,7 @@ public class AccountForm extends FormWindow {
     todo("do this elsewhere");
     var m = winMgr();
     var c = m.topLevelContainer();
-    c.children().add(this);
+    c.addChild(this);
     c.setLayoutInvalid();
 
     var fm = focusManager();
@@ -52,13 +56,13 @@ public class AccountForm extends FormWindow {
     fm.set(fm.handlers(this).get(0));
   }
 
-  private void removeFormFromScreen() {
-    var m = winMgr();
-    var c = m.topLevelContainer();
-    c.children().remove(this);
-    c.setLayoutInvalid();
-    focusManager().set(mOldFocus);
-  }
+  //  private void removeFormFromScreen() {
+  //    var m = winMgr();
+  //    var c = m.topLevelContainer();
+  //    c.children().remove(this);
+  //    c.setLayoutInvalid();
+  //    focusManager().set(mOldFocus);
+  //  }
 
   private void okHandler() {
     String problem = "One or more fields is invalid.";
@@ -108,12 +112,13 @@ public class AccountForm extends FormWindow {
       editedAccount = mod.build();
       storage().addAccount(editedAccount);
     }
-    removeFormFromScreen();
-    mListener.editedAccount(editedAccount);
+    todo("call handler, remove form from view");
+    // removeFormFromScreen();
+    mListener.editedAccount(this, editedAccount);
   }
 
   private void cancelHandler() {
-    removeFormFromScreen();
+    mListener.editedAccount(this, null);
   }
 
   private int mType;
