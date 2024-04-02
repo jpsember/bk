@@ -20,6 +20,7 @@ public class Storage extends BaseObject {
     var m = JSMap.fromFileIfExists(file());
     var db = Files.parseAbstractData(Database.DEFAULT_INSTANCE, m);
     mDatabase = db.toBuilder();
+    mAccountBalanceMap = hashMap();
     log("read", accounts().size(), "accounts and", transactions().size(), "transactions");
   }
 
@@ -50,7 +51,28 @@ public class Storage extends BaseObject {
     return mDatabase.transactions();
   }
 
+  public int accountBalance(int accountNumber) {
+    Integer key = accountNumber;
+    var value = mAccountBalanceMap.get(key);
+    if (value == null) {
+      long sum = 0;
+      for (var trans : transactions().values()) {
+        if (trans.debit() == accountNumber) {
+          sum += trans.amount();
+        } else if (trans.credit() == accountNumber) {
+          sum -= trans.amount();
+        }
+      }
+      value = (int) sum;
+      if (value != sum)
+        badState("account balance has overflowed:", accountNumber);
+      mAccountBalanceMap.put(key, value);
+    }
+    return value;
+  }
+
   private Database.Builder mDatabase;
+  private Map<Integer, Integer> mAccountBalanceMap;
   private File mFile;
   private boolean mModified;
 }
