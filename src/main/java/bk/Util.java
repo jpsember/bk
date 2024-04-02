@@ -360,5 +360,7 @@ public final class Util {
   };
 
   public static final int ACCOUNT_NAME_MAX_LENGTH = 30;
+  public static final char VIM_UP_CHAR = 'k';
+  public static final char VIM_DOWN_CHAR = 'j';
 
 }

@@ -120,11 +120,12 @@ public class LedgerWindow extends JWindow implements FocusHandler {
       break;
     case Character: {
       var ch = k.getCharacter();
+      // These will get me in trouble
       switch (ch) {
-      case 'k':
+      case VIM_UP_CHAR:
         targetEntry = mCursorRow - 1;
         break;
-      case 'j':
+      case VIM_DOWN_CHAR:
         targetEntry = mCursorRow + 1;
         break;
       }
