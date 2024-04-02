@@ -1,5 +1,6 @@
 package bk;
 
+import static bk.Util.*;
 import static js.base.Tools.*;
 
 import java.time.Instant;
@@ -146,6 +147,15 @@ public final class Util {
   public static final Validator DEFAULT_VALIDATOR = new Validator() {
   };
   public static final Validator DATE_VALIDATOR = new Validator() {
+    public String encode(Object value) {
+      var out = "";
+      if (value != null) {
+        int dateInSeconds = (int) value;
+        out = formatDate(dateInSeconds);
+      }
+      return out;
+    }
+
     public ValidationResult validate(String value) {
       final boolean db = false && alert("db is on");
       if (db)
@@ -178,6 +188,16 @@ public final class Util {
   };
 
   public static final Validator CURRENCY_VALIDATOR = new Validator() {
+    @Override
+    public String encode(Object value) {
+      var out = "";
+      if (value != null) {
+        var i = (int) value;
+        out = formatCurrency(i);
+      }
+      return out;
+    }
+
     public ValidationResult validate(String value) {
       final boolean db = false && alert("db is on");
       if (db)
@@ -228,7 +248,16 @@ public final class Util {
           pr("failed to validate:", quote(value), "got:", t);
       }
       return result;
-    };
+    }
+
+    @Override
+    public String encode(Object value) {
+      var out = "";
+      if (value != null) {
+        out = Integer.toString((Integer) value);
+      }
+      return out;
+    }
   };
   public static final Validator ACCOUNT_NAME_VALIDATOR = new Validator() {
     public ValidationResult validate(String value) {
@@ -304,6 +333,10 @@ public final class Util {
       sStorage = new Storage();
     }
     return sStorage;
+  }
+
+  public static Account account(int number) {
+    return storage().account(number);
   }
 
   private static Storage sStorage;

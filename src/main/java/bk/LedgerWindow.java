@@ -3,6 +3,7 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.googlecode.lanterna.input.KeyStroke;
@@ -71,13 +72,13 @@ public class LedgerWindow extends JWindow implements FocusHandler {
           }
         } else {
 
-          var entries = mEntries.get(entNum);
+          var ent = mEntries.get(entNum);
 
           // Render the fields
           var j = INIT_INDEX;
           for (var col : mColumns) {
             j++;
-            var data = entries.get(j);
+            var data = ent.fields.get(j);
             var text = data.toString();
             plotString(text, x, windowRowNum, col.alignment(), col.width());
             x += col.width() + SPACES_BETWEEN_COLUMNS;
@@ -97,6 +98,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
 
     Integer targetEntry = null;
     int pageSize = mLastRenderedClipBounds.height - 2; // Assume a boundary
+
     switch (k.getKeyType()) {
     case ArrowUp:
       targetEntry = mCursorRow - 1;
@@ -119,9 +121,12 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     case Character: {
       var ch = k.getCharacter();
       switch (ch) {
-//      case 'a':
-//        TransactionForm.addTransaction();
-//        break;
+      case 'k':
+        targetEntry = mCursorRow - 1;
+        break;
+      case 'j':
+        targetEntry = mCursorRow + 1;
+        break;
       }
     }
       break;
@@ -138,7 +143,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
         mCursorRow = t;
         repaint();
       }
-    } else if (alert("experiment with partial repaint")) {
+    } else if (false && alert("experiment with partial repaint")) {
       pr("triggering partial repaint");
       repaintPartial();
     }
@@ -171,9 +176,16 @@ public class LedgerWindow extends JWindow implements FocusHandler {
   }
 
   public void addEntry(List<LedgerField> fields) {
+    addEntry(fields, null);
+  }
+
+  public void addEntry(List<LedgerField> fields, Object auxData) {
     checkArgument(fields.size() == mColumns.size(), "expected", mColumns.size(), "entries, got",
         fields.size());
-    mEntries.add(fields);
+    var ent = new Entry();
+    ent.auxData = auxData;
+    ent.fields = new ArrayList<>(fields);
+    mEntries.add(ent);
   }
 
   private static Column adjustColumn(Column c) {
@@ -198,8 +210,20 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     return b;
   }
 
+  public <T> T getCurrentRow() {
+    if (mCursorRow >= mEntries.size())
+      return null;
+    var ent = mEntries.get(mCursorRow);
+    return (T) ent.auxData;
+  }
+
+  private static class Entry {
+    Object auxData;
+    List<LedgerField> fields;
+  }
+
   private List<Column> mColumns = arrayList();
-  private List<List<LedgerField>> mEntries = arrayList();
+  private List<Entry> mEntries = arrayList();
   private StringBuilder msb = new StringBuilder();
   private int mCursorRow;
   private IRect mLastRenderedClipBounds;

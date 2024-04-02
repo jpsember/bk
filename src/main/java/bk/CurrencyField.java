@@ -1,11 +1,8 @@
 package bk;
 
-import static js.base.Tools.*;
-
 public class CurrencyField implements LedgerField {
 
   public CurrencyField(int amount) {
-   // checkArgument(amount > 0, "currency fields must be nonnegative");
     mAmount = amount;
   }
 

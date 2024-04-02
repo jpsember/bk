@@ -37,7 +37,7 @@ public class AccountList extends LedgerWindow {
       v.add(new AccountNameField(t.name()));
       v.add(VERT_SEP_FLD);
       v.add(new CurrencyField(t.balance()));
-      addEntry(v);
+      addEntry(v, t);
     }
   }
 
@@ -51,6 +51,15 @@ public class AccountList extends LedgerWindow {
       case 'a':
         AccountForm.addAccount();
         handled = true;
+        break;
+      case 'e': {
+        Account a = getCurrentRow();
+        pr("current row:",a);
+        if (a != null) {
+          AccountForm.editAccount(a);
+        }
+        handled = true;
+      }
         break;
       }
     }

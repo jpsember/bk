@@ -30,6 +30,11 @@ public static final int DEFAULT_WIDTH = 16;
     return this;
   }
 
+  public WidgetWindow value(Object value) {
+   mContent =  mValidator.encode(value);
+   return this;
+  }
+  
   public WidgetWindow button(ButtonListener listener) {
     mButtonListener = listener;
     return this;

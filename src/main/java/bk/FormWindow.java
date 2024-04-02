@@ -57,7 +57,9 @@ public class FormWindow extends JContainer {
     mPendingWidth = WidgetWindow.DEFAULT_WIDTH;
     widget.setSize(1);
     widget.validator(nullTo(mPendingValidator, DEFAULT_VALIDATOR));
+    widget.value(mPendingValue);
     mPendingValidator = null;
+    mPendingValue = null;
     children().add(widget);
     return widget;
   }
@@ -66,8 +68,17 @@ public class FormWindow extends JContainer {
     mPendingValidator = v;
     return this;
   }
+  
+  public FormWindow value(Object obj) {
+//    checkState(mPendingValidator != null,"specify validator before value");
+//    String strVal = mPendingValidator.compile(obj) ;
+    mPendingValue = obj;
+    return this;
+  }
+  
 
   private Validator mPendingValidator;
+  private Object mPendingValue;
   private MessageWindow mMessage;
   private int mPendingWidth = WidgetWindow.DEFAULT_WIDTH;;
 

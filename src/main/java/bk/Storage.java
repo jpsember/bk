@@ -6,7 +6,6 @@ import java.io.File;
 import java.util.Map;
 
 import bk.gen.Account;
-import bk.gen.Account.Builder;
 import bk.gen.Database;
 import bk.gen.Transaction;
 import js.base.BaseObject;
@@ -88,7 +87,12 @@ public class Storage extends BaseObject {
     if (existing != null)
       badState("account already exists!", INDENT, existing);
     accounts().put(account.number(), account);
-    mModified = true;
+    setModified();
+  }
+
+  public void deleteAccount(int number) {
+    accounts().remove(number);
+    setModified();
   }
 
   private Database.Builder mDatabase;

@@ -6,4 +6,10 @@ public interface Validator {
     return ValidationResult.NONE;
   }
 
+  default String encode(Object data) {
+    var out = "";
+    if (data != null)
+      out = data.toString();
+    return out;
+  }
 }
