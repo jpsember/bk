@@ -1,4 +1,4 @@
 fields {
-  map int string accounts;
+  map int Account accounts;
   map long Transaction transactions;
 }

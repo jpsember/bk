@@ -8,6 +8,7 @@ import com.googlecode.lanterna.input.KeyStroke;
 import js.geometry.MyMath;
 
 public class WidgetWindow extends JWindow implements FocusHandler {
+public static final int DEFAULT_WIDTH = 16;
 
   public WidgetWindow width(int width) {
     mWidth = width;
@@ -194,7 +195,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   private int mCursorPos = -1; // position of cursor, or -1 if entire string is highlighted
   private String mContent = "";
 
-  private int mWidth = 16;
+  private int mWidth = DEFAULT_WIDTH;
   private String mLabel = "<no label!>";
   private Validator mValidator = DEFAULT_VALIDATOR;
   private JWindow mFocusRootWindow;

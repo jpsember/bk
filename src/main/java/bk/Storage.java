@@ -5,6 +5,8 @@ import static js.base.Tools.*;
 import java.io.File;
 import java.util.Map;
 
+import bk.gen.Account;
+import bk.gen.Account.Builder;
 import bk.gen.Database;
 import bk.gen.Transaction;
 import js.base.BaseObject;
@@ -12,8 +14,6 @@ import js.file.Files;
 import js.json.JSMap;
 
 public class Storage extends BaseObject {
-
-  private static final String KEY_ACCOUNTS = "accounts";
 
   public void read() {
     alertVerbose();
@@ -43,7 +43,7 @@ public class Storage extends BaseObject {
     return mFile;
   }
 
-  public Map<Integer, String> accounts() {
+  public Map<Integer, Account> accounts() {
     return mDatabase.accounts();
   }
 
@@ -71,16 +71,29 @@ public class Storage extends BaseObject {
     return value;
   }
 
+  public Account account(int accountNumber) {
+    return mDatabase.accounts().get(accountNumber);
+  }
+
   public String accountName(int accountNumber) {
-    var acct = mDatabase.accounts().get(accountNumber);
-    if (acct == null) {
-      return "<not found!>";
-    }
-    return acct;
+    var account = account(accountNumber);
+    if (account == null)
+      return "!not found!";
+    return account.name();
+  }
+
+  public void addAccount(Account account) {
+    account = account.build();
+    var existing = account(account.number());
+    if (existing != null)
+      badState("account already exists!", INDENT, existing);
+    accounts().put(account.number(), account);
+    mModified = true;
   }
 
   private Database.Builder mDatabase;
   private Map<Integer, Integer> mAccountBalanceMap;
   private File mFile;
   private boolean mModified;
+
 }

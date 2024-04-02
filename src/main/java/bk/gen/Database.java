@@ -8,7 +8,7 @@ import js.json.JSMap;
 
 public class Database implements AbstractData {
 
-  public Map<Integer, String> accounts() {
+  public Map<Integer, Account> accounts() {
     return mAccounts;
   }
 
@@ -34,8 +34,8 @@ public class Database implements AbstractData {
     JSMap m = new JSMap();
     {
       JSMap j = new JSMap();
-      for (Map.Entry<Integer, String> e : mAccounts.entrySet())
-        j.put(e.getKey().toString(), e.getValue());
+      for (Map.Entry<Integer, Account> e : mAccounts.entrySet())
+        j.put(e.getKey().toString(), e.getValue().toJson());
       m.put(_0, j);
     }
     {
@@ -63,9 +63,9 @@ public class Database implements AbstractData {
       {
         JSMap m2 = m.optJSMap("accounts");
         if (m2 != null && !m2.isEmpty()) {
-          Map<Integer, String> mp = new ConcurrentHashMap<>();
+          Map<Integer, Account> mp = new ConcurrentHashMap<>();
           for (Map.Entry<String, Object> e : m2.wrappedMap().entrySet())
-            mp.put(Integer.parseInt(e.getKey()), (String) e.getValue());
+            mp.put(Integer.parseInt(e.getKey()), Account.DEFAULT_INSTANCE.parse((JSMap) e.getValue()));
           mAccounts = mp;
         }
       }
@@ -116,7 +116,7 @@ public class Database implements AbstractData {
     return r;
   }
 
-  protected Map<Integer, String> mAccounts;
+  protected Map<Integer, Account> mAccounts;
   protected Map<Long, Transaction> mTransactions;
   protected int m__hashcode;
 
@@ -146,7 +146,7 @@ public class Database implements AbstractData {
       return r;
     }
 
-    public Builder accounts(Map<Integer, String> x) {
+    public Builder accounts(Map<Integer, Account> x) {
       mAccounts = DataUtil.mutableCopyOf((x == null) ? DataUtil.emptyMap() : x);
       return this;
     }

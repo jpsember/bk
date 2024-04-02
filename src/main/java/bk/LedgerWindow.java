@@ -90,14 +90,11 @@ public class LedgerWindow extends JWindow implements FocusHandler {
 
   @Override
   public void processKeyStroke(KeyStroke k) {
-    //    pr(VERT_SP, "ledger keystroke:", k);
-    //    var w = mWindow;
     if (mLastRenderedClipBounds == null) {
       alert("can't process KeyStroke; window has never been rendered");
       return;
     }
 
-    todo("can we support command- sequences without terminal interfering?");
     Integer targetEntry = null;
     int pageSize = mLastRenderedClipBounds.height - 2; // Assume a boundary
     switch (k.getKeyType()) {
@@ -122,17 +119,19 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     case Character: {
       var ch = k.getCharacter();
       switch (ch) {
-      case 'a':
-        TransactionForm.addTransaction();
-        break;
+//      case 'a':
+//        TransactionForm.addTransaction();
+//        break;
       }
     }
-
+      break;
     default:
       break;
     }
 
-    if (targetEntry != null) {
+    if (targetEntry != null)
+
+    {
       int sz = mEntries.size();
       if (sz != 0) {
         int t = MyMath.clamp(targetEntry, 0, sz - 1);

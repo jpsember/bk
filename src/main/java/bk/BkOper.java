@@ -3,11 +3,7 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
-import java.util.List;
-
 import bk.gen.BkConfig;
-import bk.gen.Column;
-import bk.gen.Datatype;
 import js.app.AppOper;
 import js.base.BasePrinter;
 
@@ -59,7 +55,9 @@ public class BkOper extends AppOper {
 
     try {
       mgr.open();
-      LedgerWindow genLedger = new GeneralLedger(); //buildGeneralLedger();
+      LedgerWindow genLedger =
+          new AccountList();
+//          new GeneralLedger(); //buildGeneralLedger();
       // Create a root container
       mgr.pushContainer();
       {

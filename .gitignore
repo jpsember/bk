@@ -27,3 +27,5 @@ _SKIP_*
 # Compile output
 #
 target
+
+accounts.json

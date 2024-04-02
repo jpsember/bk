@@ -46,9 +46,15 @@ public class FormWindow extends JContainer {
     return this;
   }
 
+  public FormWindow fieldWidth(int width) {
+    mPendingWidth = width;
+    return this;
+  }
+
   public WidgetWindow addField(String label) {
     WidgetWindow widget;
-    widget = new WidgetWindow().focusRootWindow(this).label(label);
+    widget = new WidgetWindow().focusRootWindow(this).label(label).width(mPendingWidth);
+    mPendingWidth = WidgetWindow.DEFAULT_WIDTH;
     widget.setSize(1);
     widget.validator(nullTo(mPendingValidator, DEFAULT_VALIDATOR));
     mPendingValidator = null;
@@ -63,4 +69,6 @@ public class FormWindow extends JContainer {
 
   private Validator mPendingValidator;
   private MessageWindow mMessage;
+  private int mPendingWidth = WidgetWindow.DEFAULT_WIDTH;;
+
 }

@@ -16,10 +16,12 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import com.googlecode.lanterna.Symbols;
 
+import bk.gen.Account;
 import bk.gen.Column;
 import bk.gen.Datatype;
 import bk.gen.Transaction;
 import js.base.DateTimeTools;
+import js.geometry.MyMath;
 
 public final class Util {
   public static final boolean EXP = false && alert("experiment in progress");
@@ -208,8 +210,8 @@ public final class Util {
 
   public static final Validator ACCOUNT_VALIDATOR = new Validator() {
     public ValidationResult validate(String value) {
+      final boolean db = true && alert("db is on");
       var result = ValidationResult.NONE;
-      final boolean db = false && alert("db is on");
       if (db)
         pr("validating account number:", value);
 
@@ -221,6 +223,29 @@ public final class Util {
         if (i < 1000 || i > 5999)
           throw badArg("unexpected account number", i);
         result = new ValidationResult(Integer.toString(i), i);
+      } catch (Throwable t) {
+        if (db)
+          pr("failed to validate:", quote(value), "got:", t);
+      }
+      return result;
+    };
+  };
+  public static final Validator ACCOUNT_NAME_VALIDATOR = new Validator() {
+    public ValidationResult validate(String value) {
+      var result = ValidationResult.NONE;
+      final boolean db = false && alert("db is on");
+      if (db)
+        pr("validating account number:", value);
+
+      value = value.trim();
+      try {
+        if (db)
+          pr("parsing:", value);
+        int j = value.length();
+        int k = MyMath.clamp(j, 2, 30);
+        if (k != j)
+          throw badArg("too short or too long");
+        result = new ValidationResult(value, value);
       } catch (Throwable t) {
         if (db)
           pr("failed to validate:", quote(value), "got:", t);
@@ -270,6 +295,10 @@ public final class Util {
     return null;
   }
 
+  public static String validateAccount(Account a) {
+    return null;
+  }
+
   public static Storage storage() {
     if (sStorage == null) {
       sStorage = new Storage();
@@ -291,5 +320,12 @@ public final class Util {
       sep = Long.compare(t1.timestamp(), t2.timestamp());
     return sep;
   };
+
+  public static final Comparator<Account> ACCOUNT_COMPARATOR = (t1, t2) -> {
+    return Integer.compare(t1.number(), t2.number());
+
+  };
+
+  public static final int ACCOUNT_NAME_MAX_LENGTH = 30;
 
 }

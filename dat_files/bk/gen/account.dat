@@ -1,0 +1,5 @@
+fields {
+  int number;
+  string name;
+  int balance;
+}

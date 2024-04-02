@@ -5,6 +5,8 @@ import static js.base.Tools.*;
 
 import java.util.List;
 
+import com.googlecode.lanterna.input.KeyStroke;
+
 import bk.gen.Column;
 import bk.gen.Datatype;
 import bk.gen.Transaction;
@@ -48,4 +50,24 @@ public class GeneralLedger extends LedgerWindow {
     }
   }
 
+  @Override
+  public void processKeyStroke(KeyStroke k) {
+    boolean handled = false;
+    switch (k.getKeyType()) {
+    case Character: {
+      var ch = k.getCharacter();
+      switch (ch) {
+      case 'a':
+        TransactionForm.addTransaction();
+        handled = true;
+        break;
+      }
+    }
+      break;
+    default:
+      break;
+    }
+    if (!handled)
+      super.processKeyStroke(k);
+  }
 }
