@@ -3,11 +3,12 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
+import bk.gen.Account;
 import bk.gen.BkConfig;
 import js.app.AppOper;
 import js.base.BasePrinter;
 
-public class BkOper extends AppOper {
+public class BkOper extends AppOper implements AccountListListener, AccountForm.Listener {
 
   @Override
   public String userCommand() {
@@ -50,14 +51,14 @@ public class BkOper extends AppOper {
     }
 
     storage().read();
-    
+
     var mgr = winMgr();
 
     try {
       mgr.open();
-      LedgerWindow genLedger =
-          new AccountList();
-//          new GeneralLedger(); //buildGeneralLedger();
+      mAccounts = new AccountList(this);
+      mTransactions = new GeneralLedger();
+
       // Create a root container
       mgr.pushContainer();
       {
@@ -65,8 +66,8 @@ public class BkOper extends AppOper {
         {
           // Construct ledger
           mgr.pct(100);
-          mgr.thickBorder();
-          mgr.window(genLedger);
+          mgr.thinBorder();
+          mgr.window(mAccounts);
         }
         //        mgr.pct(75);
         //        {
@@ -91,40 +92,42 @@ public class BkOper extends AppOper {
     }
   }
 
-//  private LedgerWindow buildGeneralLedger() {
-//    var lg = new LedgerWindow();
-//    {
-//      final int NAMED_ACCOUNT_WIDTH = 25;
-//      var x = lg;
-//      x.addColumn(Column.newBuilder().name("Date").datatype(Datatype.DATE));
-//      x.addColumn(VERT_SEP);
-//      x.addColumn(Column.newBuilder().name("Amount").datatype(Datatype.CURRENCY));
-//      x.addColumn(VERT_SEP);
-//      x.addColumn(Column.newBuilder().name("Dr").datatype(Datatype.TEXT).width(NAMED_ACCOUNT_WIDTH));
-//      x.addColumn(VERT_SEP);
-//      x.addColumn(Column.newBuilder().name("Cr").datatype(Datatype.TEXT).width(NAMED_ACCOUNT_WIDTH));
-//      x.addColumn(VERT_SEP);
-//      x.addColumn(Column.newBuilder().name("Description").datatype(Datatype.TEXT).width(40));
-//
-//      for (var i = 0; i < 20; i++) {
-//        var t = generateTransaction();
-//        List<LedgerField> v = arrayList();
-//        v.add(new DateField(t.date()));
-//        v.add(VERT_SEP_FLD);
-//        v.add(new CurrencyField(t.amount()));
-//        v.add(VERT_SEP_FLD);
-//        v.add(new AccountNameField(t.debit(), randomText(20, false)));
-//        v.add(VERT_SEP_FLD);
-//        v.add(new AccountNameField(t.credit(), randomText(20, false)));
-//        v.add(VERT_SEP_FLD);
-//        v.add(new TextField(t.description()));
-//        x.addEntry(v);
-//      }
-//    }
-//    return lg;
-//
-//  }
-
   private BkConfig mConfig;
+  private AccountList mAccounts;
+  private GeneralLedger mTransactions;
+
+  // ------------------------------------------------------------------
+  // AccountListListener
+  // ------------------------------------------------------------------
+
+  @Override
+  public void editAccount(Account account) {
+    var form = new AccountForm(AccountForm.TYPE_EDIT, account, this);
+    form.addFormToScreen();
+    // AccountForm.editAccount(account);
+  }
+
+  @Override
+  public void addAccount() {
+    var form = new AccountForm(AccountForm.TYPE_ADD, null, this);
+    form.addFormToScreen();
+  }
+
+  @Override
+  public void viewAccount(Account account) {
+    todo("view account:", account);
+  }
+
+  //------------------------------------------------------------------
+  // AccountFormListener
+  // ------------------------------------------------------------------
+
+  @Override
+  public void editedAccount(Account account) {
+    pr("editedAccount:",INDENT,account);
+    mAccounts.rebuild();
+    mAccounts.setCurrentRow(account);
+    mAccounts.repaint();
+  }
 
 }

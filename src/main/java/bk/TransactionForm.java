@@ -10,9 +10,11 @@ public class TransactionForm extends FormWindow {
 
   private static final int TYPE_ADD = 0, TYPE_EDIT = 1;
 
-  private TransactionForm(int type) {
+  private TransactionForm(int type, Transaction t) {
+
     todo("!set date to current date if empty");
 
+    mOrig = nullTo(t, Transaction.DEFAULT_INSTANCE).build();
     mType = type;
     mSizeExpr = 12;
 
@@ -29,8 +31,13 @@ public class TransactionForm extends FormWindow {
   }
 
   public static void addTransaction() {
-    var f = new TransactionForm(TYPE_ADD);
+    var f = new TransactionForm(TYPE_ADD, null);
     // Add transaction window to main
+    f.addFormToScreen();
+  }
+
+  public static void editTransaction(Transaction t) {
+    var f = new TransactionForm(TYPE_EDIT, t);
     f.addFormToScreen();
   }
 
@@ -55,8 +62,9 @@ public class TransactionForm extends FormWindow {
 
   private void okHandler() {
     String problem = "One or more fields is invalid.";
+    var tr = Transaction.newBuilder();
+    
     if (mdate.valid() && mamount.valid() && mdr.valid() && mcr.valid() && mdesc.valid()) {
-      var tr = Transaction.newBuilder();
       tr.timestamp(System.currentTimeMillis());
       tr.date(mdate.validResult());
       tr.amount(mamount.validResult());
@@ -69,6 +77,26 @@ public class TransactionForm extends FormWindow {
       setMessage(problem);
       return;
     }
+    
+    
+    
+    if (mType == TYPE_ADD) {
+      storage().addTransaction(tr);
+    } else {
+      var orig = mOrig;
+      tr.timestamp(orig.timestamp());
+      storage().deleteTransaction(orig.timestamp());
+      storage().addTransaction(tr);
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
     removeFormFromScreen();
   }
 
@@ -79,4 +107,5 @@ public class TransactionForm extends FormWindow {
   private int mType;
   private FocusHandler mOldFocus;
   private WidgetWindow mdate, mamount, mdr, mcr, mdesc;
+  Transaction mOrig;
 }

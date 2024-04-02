@@ -13,17 +13,31 @@ import bk.gen.Datatype;
 
 public class AccountList extends LedgerWindow {
 
-  public AccountList() {
-    build();
+  public AccountList(AccountListListener listener) {
+    mListener = listener;
+    addColumns();
+    rebuild();
   }
 
-  private void build() {
+  private void addColumns() {
     final int NAMED_ACCOUNT_WIDTH = 25;
     addColumn(Column.newBuilder().name("#").datatype(Datatype.ACCOUNT_NUMBER));
     addColumn(VERT_SEP);
     addColumn(Column.newBuilder().name("Name").datatype(Datatype.TEXT).width(NAMED_ACCOUNT_WIDTH));
     addColumn(VERT_SEP);
     addColumn(Column.newBuilder().name("Balance").datatype(Datatype.CURRENCY));
+  }
+
+  public void rebuild() {
+    var currentAccount = getCurrentRow();
+
+    clearEntries();
+    //    final int NAMED_ACCOUNT_WIDTH = 25;
+    //    addColumn(Column.newBuilder().name("#").datatype(Datatype.ACCOUNT_NUMBER));
+    //    addColumn(VERT_SEP);
+    //    addColumn(Column.newBuilder().name("Name").datatype(Datatype.TEXT).width(NAMED_ACCOUNT_WIDTH));
+    //    addColumn(VERT_SEP);
+    //    addColumn(Column.newBuilder().name("Balance").datatype(Datatype.CURRENCY));
 
     var accts = storage().accounts();
     List<Account> sorted = arrayList();
@@ -39,24 +53,38 @@ public class AccountList extends LedgerWindow {
       v.add(new CurrencyField(t.balance()));
       addEntry(v, t);
     }
+    setCurrentRow(currentAccount);
+    repaint();
   }
 
   @Override
   public void processKeyStroke(KeyStroke k) {
     boolean handled = false;
+    Account a = getCurrentRow();
+
     switch (k.getKeyType()) {
+
+    case Enter:
+      if (a != null) {
+        mListener.viewAccount(a);
+        handled = true;
+      }
+      break;
+
     case Character: {
       var ch = k.getCharacter();
       switch (ch) {
       case 'a':
-        AccountForm.addAccount();
+        mListener.addAccount();
+        rebuild();
+        // AccountForm.addAccount();
         handled = true;
         break;
       case 'e': {
-        Account a = getCurrentRow();
-        pr("current row:",a);
         if (a != null) {
-          AccountForm.editAccount(a);
+          mListener.editAccount(a);
+          rebuild();
+          //  AccountForm.editAccount(a);
         }
         handled = true;
       }
@@ -70,5 +98,7 @@ public class AccountList extends LedgerWindow {
     if (!handled)
       super.processKeyStroke(k);
   }
+
+  private AccountListListener mListener;
 
 }

@@ -15,7 +15,7 @@ import js.json.JSMap;
 public class Storage extends BaseObject {
 
   public void read() {
-    alertVerbose();
+    //alertVerbose();
     var m = JSMap.fromFileIfExists(file());
     var db = Files.parseAbstractData(Database.DEFAULT_INSTANCE, m);
     mDatabase = db.toBuilder();
@@ -74,6 +74,10 @@ public class Storage extends BaseObject {
     return mDatabase.accounts().get(accountNumber);
   }
 
+  public Transaction transaction(long timestamp) {
+    return mDatabase.transactions().get(timestamp);
+  }
+
   public String accountName(int accountNumber) {
     var account = account(accountNumber);
     if (account == null)
@@ -92,6 +96,20 @@ public class Storage extends BaseObject {
 
   public void deleteAccount(int number) {
     accounts().remove(number);
+    setModified();
+  }
+
+  public void addTransaction(Transaction t) {
+    t = t.build();
+    var existing = transaction(t.timestamp());
+    if (existing != null)
+      badState("transaction already exists!", INDENT, existing);
+    transactions().put(t.timestamp(), t);
+    setModified();
+  }
+
+  public void deleteTransaction(long timestamp) {
+    transactions().remove(timestamp);
     setModified();
   }
 

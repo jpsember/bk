@@ -120,14 +120,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
       break;
     case Character: {
       var ch = k.getCharacter();
-      // These will get me in trouble
       switch (ch) {
-      case VIM_UP_CHAR:
-        targetEntry = mCursorRow - 1;
-        break;
-      case VIM_DOWN_CHAR:
-        targetEntry = mCursorRow + 1;
-        break;
       }
     }
       break;
@@ -176,6 +169,10 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     mColumns.add(column.build());
   }
 
+  public void clearEntries() {
+    mEntries.clear();
+  }
+
   public void addEntry(List<LedgerField> fields) {
     addEntry(fields, null);
   }
@@ -216,6 +213,19 @@ public class LedgerWindow extends JWindow implements FocusHandler {
       return null;
     var ent = mEntries.get(mCursorRow);
     return (T) ent.auxData;
+  }
+
+  public <T> void setCurrentRow(T auxData) {
+    int newCursor = 0;
+    if (auxData != null) {
+      int pos = mEntries.indexOf(auxData);
+      if (pos >= 0)
+        newCursor = pos;
+    }
+    if (mCursorRow != newCursor) {
+      mCursorRow = newCursor;
+      repaint();
+    }
   }
 
   private static class Entry {
