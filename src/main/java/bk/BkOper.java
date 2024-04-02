@@ -42,8 +42,9 @@ public class BkOper extends AppOper implements AccountListListener, AccountForm.
   public void perform() {
 
     if (EXP) {
-      String ss[] = { "2024/10/04", "10/04", "10/4", "8/4", "024/10/2", "24/10/2", };
+      String ss[] = { "", "2024/10/04", "10/04", "10/4", "8/4", "024/10/2", "24/10/2", };
       for (var s : ss) {
+        pr(VERT_SP, "about to validate:", s);
         var c = DATE_VALIDATOR.validate(s);
         pr("validated:", INDENT, s, "=>", c);
       }

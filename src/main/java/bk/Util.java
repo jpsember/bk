@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
@@ -26,7 +27,7 @@ import js.base.DateTimeTools;
 import js.geometry.MyMath;
 
 public final class Util {
-  public static final boolean EXP = false && alert("experiment in progress");
+  public static final boolean EXP = true && alert("experiment in progress");
 
   public static final int BORDER_NONE = 0;
   public static final int BORDER_THIN = 1;
@@ -158,28 +159,54 @@ public final class Util {
     }
 
     public ValidationResult validate(String value) {
-      final boolean db = false && alert("db is on");
+      final boolean db = true && alert("db is on for DATE_VALIDATOR");
       if (db)
         pr("validating:", quote(value));
       value = value.trim();
-      int dateInSeconds = 0;
+     long dateInSeconds = 0;
 
       String strDate = "";
 
       try {
         todo("clean this up; allow multiple formats");
-        var temp = sDateParser.parse(value);
-        Instant instant = Instant.from(temp);
-        var z = instant.atZone(sLocalTimeZoneId);
-        // pr("instant from parsing:", value, "is:", z.toString());
-        dateInSeconds = (int) Instant.EPOCH.until(instant, ChronoUnit.SECONDS);
-        var inst = Instant.ofEpochSecond(dateInSeconds).atZone(sLocalTimeZoneId);
-        var dt = LocalDate.from(inst);
+        LocalDate dt;
+        if (value.isEmpty()) {
+          dt = sCurrentDate;
+        } else {
+          if (db)
+            pr("parsing:", value);
+          var temp = sDateParser.parse(value);
+          if (db)
+            pr("result:", temp.toString(), temp.getClass());
+
+          var z = ZonedDateTime.from(temp);
+          pr("ZonedDateTime:", z);
+
+          //          
+          //          Instant instant = Instant.from(temp);
+          //          if (db)
+          //            pr("instant:", instant.toString());
+          //          var z = instant.atZone(sLocalTimeZoneId);
+          if (db)
+            pr("instant at zone:", z.toString());
+          dateInSeconds = (int) z.toEpochSecond();
+          if (db)
+            pr("date in seconds:", dateInSeconds);
+
+         dt =  z.toLocalDate();
+          
+//          var inst = Instant.ofEpochSecond(dateInSeconds).atZone(sLocalTimeZoneId);
+//
+//          dt = LocalDate.from(inst);
+        }
         var y = dt.getYear();
         if (y < 1970 || y > 2050)
           throw badArg("unexpected year:", y);
-        dateInSeconds = (int) Instant.EPOCH.until(z, ChronoUnit.SECONDS);
-        strDate = formatDate(dateInSeconds);
+        
+        
+        
+//        dateInSeconds = (int) Instant.EPOCH.until(dt, ChronoUnit.SECONDS);
+//        strDate = formatDate(dateInSeconds);
       } catch (Throwable t) {
         if (db)
           pr("failed validating:", value, "got:", INDENT, t);
@@ -379,7 +406,7 @@ public final class Util {
 
   public static FocusHandler addToMainView(JWindow window) {
 
-    pr("addToMainView:",window);
+    pr("addToMainView:", window);
     FocusHandler focusToRestoreLater = null;
 
     var m = winMgr();
@@ -387,19 +414,18 @@ public final class Util {
     c.addChild(window);
     c.setLayoutInvalid();
 
-//    if (window instanceof FocusHandler) 
+    //    if (window instanceof FocusHandler) 
     {
       var fm = focusManager();
       var handlerList = fm.handlers(window);
-      pr("focus handler list:",handlerList);
+      pr("focus handler list:", handlerList);
       if (!handlerList.isEmpty()) {
         focusToRestoreLater = fm.focus();
-        pr("...setting focus to first:",handlerList.get(0));
+        pr("...setting focus to first:", handlerList.get(0));
         fm.set(handlerList.get(0));
       }
     }
-    
-    
+
     return focusToRestoreLater;
   }
 
