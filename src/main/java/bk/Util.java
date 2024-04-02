@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -277,5 +278,18 @@ public final class Util {
   }
 
   private static Storage sStorage;
+
+  public static final Comparator<Transaction> TRANSACTION_COMPARATOR = (t1, t2) -> {
+    int sep = Integer.compare(t1.date(), t2.date());
+    if (sep == 0)
+      sep = Integer.compare(t1.debit(), t2.debit());
+    if (sep == 0)
+      sep = Integer.compare(t1.credit(), t2.credit());
+    if (sep == 0)
+      sep = Integer.compare(t1.amount(), t2.amount());
+    if (sep == 0)
+      sep = Long.compare(t1.timestamp(), t2.timestamp());
+    return sep;
+  };
 
 }

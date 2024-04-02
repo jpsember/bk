@@ -71,6 +71,14 @@ public class Storage extends BaseObject {
     return value;
   }
 
+  public String accountName(int accountNumber) {
+    var acct = mDatabase.accounts().get(accountNumber);
+    if (acct == null) {
+      return "<not found!>";
+    }
+    return acct;
+  }
+
   private Database.Builder mDatabase;
   private Map<Integer, Integer> mAccountBalanceMap;
   private File mFile;
