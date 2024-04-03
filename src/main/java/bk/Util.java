@@ -10,8 +10,8 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
-import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -129,9 +129,10 @@ public final class Util {
       s.append('0');
     s.append(date);
     var str = s.toString();
-    var ldate = LocalDateTime.parse(str, parseFormatter).atZone(sLocalTimeZoneId);
-    var tm = ldate.toEpochSecond();
-    return (int) tm;
+    var ldate = LocalDateTime.parse(str, parseFormatter); //.atZone(sLocalTimeZoneId);
+    //    var tm = ldate.toEpochSecond();
+    //  return (int) tm;
+    throw notFinished();
   }
 
   private static Random sRandom = new Random(1965);
@@ -148,7 +149,9 @@ public final class Util {
   public static final LedgerField EMPTY_FIELD = new TextField("");
   public static final Validator DEFAULT_VALIDATOR = new Validator() {
   };
+
   public static final Validator DATE_VALIDATOR = new Validator() {
+   
     public String encode(Object value) {
       var out = "";
       if (value != null) {
@@ -163,7 +166,7 @@ public final class Util {
       if (db)
         pr("validating:", quote(value));
       value = value.trim();
-     long dateInSeconds = 0;
+      long dateInSeconds = 0;
 
       String strDate = "";
 
@@ -193,20 +196,18 @@ public final class Util {
           if (db)
             pr("date in seconds:", dateInSeconds);
 
-         dt =  z.toLocalDate();
-          
-//          var inst = Instant.ofEpochSecond(dateInSeconds).atZone(sLocalTimeZoneId);
-//
-//          dt = LocalDate.from(inst);
+          dt = z.toLocalDate();
+
+          //          var inst = Instant.ofEpochSecond(dateInSeconds).atZone(sLocalTimeZoneId);
+          //
+          //          dt = LocalDate.from(inst);
         }
         var y = dt.getYear();
         if (y < 1970 || y > 2050)
           throw badArg("unexpected year:", y);
-        
-        
-        
-//        dateInSeconds = (int) Instant.EPOCH.until(dt, ChronoUnit.SECONDS);
-//        strDate = formatDate(dateInSeconds);
+
+        //        dateInSeconds = (int) Instant.EPOCH.until(dt, ChronoUnit.SECONDS);
+        //        strDate = formatDate(dateInSeconds);
       } catch (Throwable t) {
         if (db)
           pr("failed validating:", value, "got:", INDENT, t);
