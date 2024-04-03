@@ -463,23 +463,37 @@ public final class Util {
 
   /**
    * Convert a KeyStroke to a string that includes information about Alt, Shift,
-   * Control keys. Returns null if it wasn't a KeyType.Character, otherwise
-   * "[A][C][S]:<character>"
+   * Control keys. Returns "[A][C][S]:{character or KeyType name}"
    */
   public static String getCharSummary(KeyStroke k) {
-    if (k.getKeyType() == KeyType.Character) {
-      var sb = new StringBuilder(4);
-      if (k.isAltDown())
-        sb.append('A');
-      if (k.isCtrlDown())
-        sb.append('C');
-      if (k.isShiftDown())
-        sb.append('S');
-      sb.append(':');
+    var sb = new StringBuilder();
+    if (k.isAltDown())
+      sb.append('A');
+    if (k.isCtrlDown())
+      sb.append('C');
+    if (k.isShiftDown())
+      sb.append('S');
+    sb.append(':');
+    switch (k.getKeyType()) {
+    case Character:
       sb.append(k.getCharacter());
-      return sb.toString();
+      break;
+    default:
+      sb.append(k.getKeyType().name());
+      break;
     }
-    return null;
+    return sb.toString();
+  }
+
+  public static boolean quitCommand(KeyStroke k) {
+    if (true) {
+      alert("!can't seem to use command keys reliably, so have user ctrl-c out of program");
+      return false;
+    } else {
+      var s = getCharSummary(k);
+      pr("char summary for:", k, k.isAltDown(), k.isCtrlDown(), k.isShiftDown(), INDENT, s);
+      return s.equals("C:Escape") || s.equals(":Escape");
+    }
   }
 
   public static JWindow sTransactionsView;
