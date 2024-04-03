@@ -1,12 +1,13 @@
 package bk;
 
+import static bk.Util.*;
 import static js.base.Tools.*;
 
 import java.util.List;
+import java.util.Stack;
 
 import js.base.BaseObject;
 import js.geometry.MyMath;
-import static bk.Util.*;
 
 public class FocusManager extends BaseObject {
 
@@ -42,18 +43,6 @@ public class FocusManager extends BaseObject {
     mFocus = h;
     h.gainFocus();
     h.repaint();
-  }
-
-  public void restore() {
-    var focusList = handlers(null);
-    if (focusList.isEmpty()) {
-      alert("attempt to restore focus, but none are available");
-      return;
-    }
-    if (focusList.size() > 1) {
-      pr("multiple focus handlers to choose from!");
-    }
-    set(focusList.get(0));
   }
 
   public void move(JWindow rootWindowOrNull, int amount) {
@@ -97,4 +86,57 @@ public class FocusManager extends BaseObject {
     SHARED_INSTANCE = new FocusManager();
   }
 
+  public void push(FocusHandler focus) {
+    checkNotNull(focus);
+    checkArgument(focus != FOCUS_NONE, "attempt to push FOCUS_NONE");
+    if (mFocus != FOCUS_NONE)
+      mStack.push(mFocus);
+
+    JWindow w = (JWindow) focus;
+    if (w.parent() == null) {
+      switchToView(w);
+    }
+    set(focus);
+  }
+
+  public void pop() {
+    FocusHandler r = null;
+    if (mStack.isEmpty()) {
+      alert("FocusHandler stack is empty");
+
+      var focusList = handlers(null);
+      if (focusList.isEmpty()) {
+        alert("attempt to restore focus, but none are available");
+        return;
+      }
+      if (focusList.size() > 1) {
+        pr("multiple focus handlers to choose from!");
+      }
+      r = focusList.get(0);
+    } else {
+      r = mStack.pop();
+    }
+
+    var f = (FocusHandler) r;
+
+    // JContainer c = winMgr().topLevelContainer();
+    JWindow w = (JWindow) f;
+    if (w.parent() == null) {
+      switchToView(w);
+      //      // Replace the top-level contents with this window
+      //      c.removeChildren();
+      //      w.mSizeExpr = 100;
+      //      c.addChild(w);
+    } else
+      set(f);
+  }
+
+  private Stack<FocusHandler> mStack = new Stack<>();
+
+  public boolean popIfPossible() {
+    if (mStack.isEmpty())
+      return false;
+    pop();
+    return true;
+  }
 }

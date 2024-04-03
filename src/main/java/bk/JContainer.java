@@ -119,4 +119,5 @@ public class JContainer extends JWindow {
 
   boolean mHorzFlag;
 
+
 }

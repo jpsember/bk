@@ -16,7 +16,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import com.googlecode.lanterna.Symbols;
 import com.googlecode.lanterna.input.KeyStroke;
-import com.googlecode.lanterna.input.KeyType;
 
 import bk.gen.Account;
 import bk.gen.Column;
@@ -423,7 +422,7 @@ public final class Util {
     }
     if (target == null)
       return;
-    switchToView(target);
+    focusManager().push((FocusHandler) target);
   }
 
   public static FocusHandler addToMainView(JWindow window) {

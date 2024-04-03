@@ -48,6 +48,11 @@ public class JWindow extends BaseObject {
     setLayoutInvalid();
   }
 
+  public void removeChildren() {
+    while (!mChildren.isEmpty())
+      removeChild(mChildren.get(0));
+  }
+
   public void addChild(JWindow child) {
     mChildren.add(child);
     child.mParent = this;

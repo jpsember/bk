@@ -8,6 +8,7 @@ import java.util.Stack;
 import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.input.KeyStroke;
+import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.AbstractScreen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
@@ -192,7 +193,11 @@ public class WinMgr extends BaseObject {
           quit();
           return;
         }
-        focusManager().focus().processKeyStroke(keyStroke);
+
+        if (keyStroke.getKeyType() == KeyType.Escape && focusManager().popIfPossible())
+          ;
+        else
+          focusManager().focus().processKeyStroke(keyStroke);
       }
 
       var c = m.topLevelContainer();

@@ -42,7 +42,6 @@ public class BkOper extends AppOper
 
   @Override
   public void perform() {
-todo("cursor isn't being restored after transaction edit");
 
     if (EXP) {
 
@@ -77,6 +76,7 @@ todo("cursor isn't being restored after transaction edit");
       sAccountsView = mAccounts;
       sTransactionsView = mTransactions;
 
+      
       // Create a root container
       mgr.pushContainer();
       {
@@ -104,6 +104,7 @@ todo("cursor isn't being restored after transaction edit");
         //        }
       }
       mgr.doneConstruction();
+      focusManager().push(mAccounts);
       mgr.mainLoop();
     } catch (Throwable t) {
       setError(mgr.closeIfError(t));
@@ -136,7 +137,8 @@ todo("cursor isn't being restored after transaction edit");
         this);
     todo("remove filter, or make it internal based on account number");
     ledger.accountNumber(account.number());
-    switchToView(ledger);
+    
+    focusManager().push(ledger);
   }
 
   //------------------------------------------------------------------
@@ -154,9 +156,7 @@ todo("cursor isn't being restored after transaction edit");
     mAccounts.rebuild();
     mAccounts.setCurrentRow(account);
     mAccounts.repaint();
-
-    // Restore focus to the AccountList
-    focusManager().set(mAccounts);
+    focusManager().pop();
   }
 
   //------------------------------------------------------------------
@@ -181,17 +181,12 @@ todo("cursor isn't being restored after transaction edit");
 
   @Override
   public void editedTransaction(TransactionForm form, Transaction t) {
-
     form.remove();
-
     if (t == null)
       return;
     mTransactions.rebuild();
     mTransactions.setCurrentRow(t);
     mTransactions.repaint();
-
-    // Restore focus
-    pr("restoring focus to transactions");
-    focusManager().restore();
+    focusManager().pop();
   }
 }
