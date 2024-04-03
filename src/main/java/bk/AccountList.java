@@ -32,13 +32,6 @@ public class AccountList extends LedgerWindow {
     var currentAccount = getCurrentRow();
 
     clearEntries();
-    //    final int NAMED_ACCOUNT_WIDTH = 25;
-    //    addColumn(Column.newBuilder().name("#").datatype(Datatype.ACCOUNT_NUMBER));
-    //    addColumn(VERT_SEP);
-    //    addColumn(Column.newBuilder().name("Name").datatype(Datatype.TEXT).width(NAMED_ACCOUNT_WIDTH));
-    //    addColumn(VERT_SEP);
-    //    addColumn(Column.newBuilder().name("Balance").datatype(Datatype.CURRENCY));
-
     var accts = storage().accounts();
     List<Account> sorted = arrayList();
     sorted.addAll(accts.values());

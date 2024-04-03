@@ -194,8 +194,6 @@ public class WinMgr extends BaseObject {
           quit();
           return;
         }
-        //var w = m.focus();
-        todo("do we need to prepare handler?");
         focusManager().focus().processKeyStroke(keyStroke);
       }
 
@@ -210,7 +208,6 @@ public class WinMgr extends BaseObject {
         c.setLayoutInvalid();
       }
 
-      //      m.chooseFocus();
       updateView(c);
 
       // Make changes visible

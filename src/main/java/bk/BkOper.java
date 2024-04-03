@@ -5,10 +5,12 @@ import static js.base.Tools.*;
 
 import bk.gen.Account;
 import bk.gen.BkConfig;
+import bk.gen.Transaction;
 import js.app.AppOper;
 import js.base.BasePrinter;
 
-public class BkOper extends AppOper implements AccountListListener, AccountForm.Listener {
+public class BkOper extends AppOper
+    implements AccountListListener, AccountForm.Listener, TransactionListener, TransactionForm.Listener {
 
   @Override
   public String userCommand() {
@@ -70,7 +72,7 @@ public class BkOper extends AppOper implements AccountListListener, AccountForm.
     try {
       mgr.open();
       mAccounts = new AccountList(this);
-      mTransactions = new TransactionLedger(null);
+      mTransactions = new TransactionLedger(null, this);
       sAccountsView = mAccounts;
       sTransactionsView = mTransactions;
 
@@ -129,9 +131,8 @@ public class BkOper extends AppOper implements AccountListListener, AccountForm.
 
   @Override
   public void viewAccount(Account account) {
-    todo("view account:", account);
-    var ledger = new TransactionLedger(
-        (t) -> t.credit() == account.number() || t.debit() == account.number());
+    var ledger = new TransactionLedger((t) -> t.credit() == account.number() || t.debit() == account.number(),
+        this);
     switchToView(ledger);
   }
 
@@ -155,4 +156,38 @@ public class BkOper extends AppOper implements AccountListListener, AccountForm.
     focusManager().set(mAccounts);
   }
 
+  //------------------------------------------------------------------
+  // TransactionListener
+  // ------------------------------------------------------------------
+
+  @Override
+  public void editTransaction(int forAccount, Transaction t) {
+    var form = new TransactionForm(TransactionForm.TYPE_EDIT, t, this, forAccount);
+    addToMainView(form);
+  }
+
+  @Override
+  public void addTransaction(int forAccount) {
+    var form = new TransactionForm(TransactionForm.TYPE_ADD, null, this, forAccount);
+    addToMainView(form);
+  }
+
+  //------------------------------------------------------------------
+  // TransactionFormListener
+  // ------------------------------------------------------------------
+
+  @Override
+  public void editedTransaction(TransactionForm form, Transaction t) {
+
+    form.remove();
+
+    if (t == null)
+      return;
+    mTransactions.rebuild();
+    mTransactions.setCurrentRow(t);
+    mTransactions.repaint();
+
+    // Restore focus to the AccountList
+    focusManager().set(mAccounts);
+  }
 }

@@ -25,6 +25,7 @@ import bk.gen.Transaction;
 import js.base.DateTimeTools;
 import js.data.DataUtil;
 import js.geometry.MyMath;
+import js.json.JSMap;
 
 public final class Util {
   public static final boolean EXP = false && alert("experiment in progress");
@@ -48,6 +49,17 @@ public final class Util {
 
   public static WinMgr winMgr() {
     return WinMgr.SHARED_INSTANCE;
+  }
+
+  public static final JSMap db(Object obj) {
+    var m = map();
+    if (obj == null)
+      m.put("", "NULL");
+    else {
+      m.put("str", obj.toString());
+      m.put("class", obj.getClass().getName());
+    }
+    return m;
   }
 
   public static String randomText(int maxLength, boolean withLinefeeds) {
@@ -92,8 +104,11 @@ public final class Util {
   private static final String sYearsToday;
   private static final DateTimeFormatter sDateFormatter;
 
+  public static long epochSecondsToday() {
+    return sEpochSecondsToday;
+  }
+
   public static String formatDate(long epochSeconds) {
-    pr("formatDate, epoch seconds:", epochSeconds);
     final long years20 = 31_536_000 * 20;
     long min = sEpochSecondsToday - years20;
     long max = sEpochSecondsToday + years20;
@@ -127,11 +142,7 @@ public final class Util {
         pt.set(1, Integer.toString(1 + mi));
     }
 
-    if (pt.size() == 3) {
-    }
-
     str = String.join("/", DataUtil.toStringArray(pt));
-    pr("str:", str);
 
     LocalDateTime dateTime = null;
     for (var p : sDateParsers) {
@@ -145,13 +156,9 @@ public final class Util {
     if (dateTime != null) {
       var localDateTime = dateTime.atZone(sLocalTimeZoneId);
       result = localDateTime.toEpochSecond();
-      //      int toInt = (int) epochSeconds;
-      //      if (toInt == epochSeconds)
-      //        result = toInt;
     }
     if (result == 0)
       badArg("Failed to parse date expression:", quote(dateExpr));
-
     return result;
   }
 
@@ -230,11 +237,14 @@ public final class Util {
 
   public static final Validator DATE_VALIDATOR = new Validator() {
 
+    /**
+     * Encode a long to a string
+     */
     public String encode(Object value) {
       var out = "";
       if (value != null) {
-        int dateInSeconds = (int) value;
-        out = epochSecondsToDateString(dateInSeconds);
+        var epochSeconds = (Long) value;
+        out = epochSecondsToDateString(epochSeconds);
       }
       return out;
     }
@@ -247,12 +257,16 @@ public final class Util {
       String strDate = "";
       try {
         dateInSeconds = dateToEpochSeconds(value);
+        strDate = epochSecondsToDateString(dateInSeconds);
       } catch (Throwable t) {
         if (db)
           pr("failed validating:", value, "got:", INDENT, t);
       }
-      return new ValidationResult(strDate, dateInSeconds);
-    };
+      var result = new ValidationResult(strDate, dateInSeconds);
+      if (db)
+        pr("result:", result);
+      return result;
+    }
   };
 
   public static final Validator CURRENCY_VALIDATOR = new Validator() {
@@ -296,37 +310,8 @@ public final class Util {
     };
   };
 
-  public static final Validator ACCOUNT_VALIDATOR = new Validator() {
-    public ValidationResult validate(String value) {
-      final boolean db = false && alert("db is on");
-      var result = ValidationResult.NONE;
-      if (db)
-        pr("validating account number:", value);
+  public static final Validator ACCOUNT_VALIDATOR = new AccountValidator();
 
-      value = value.trim();
-      try {
-        if (db)
-          pr("parsing:", value);
-        var i = Integer.parseInt(value);
-        if (i < 1000 || i > 5999)
-          throw badArg("unexpected account number", i);
-        result = new ValidationResult(Integer.toString(i), i);
-      } catch (Throwable t) {
-        if (db)
-          pr("failed to validate:", quote(value), "got:", t);
-      }
-      return result;
-    }
-
-    @Override
-    public String encode(Object value) {
-      var out = "";
-      if (value != null) {
-        out = Integer.toString((Integer) value);
-      }
-      return out;
-    }
-  };
   public static final Validator ACCOUNT_NAME_VALIDATOR = new Validator() {
     public ValidationResult validate(String value) {
       var result = ValidationResult.NONE;
@@ -445,8 +430,6 @@ public final class Util {
   }
 
   public static FocusHandler addToMainView(JWindow window) {
-
-    pr("addToMainView:", window);
     FocusHandler focusToRestoreLater = null;
 
     var m = winMgr();
@@ -454,14 +437,11 @@ public final class Util {
     c.addChild(window);
     c.setLayoutInvalid();
 
-    //    if (window instanceof FocusHandler) 
     {
       var fm = focusManager();
       var handlerList = fm.handlers(window);
-      pr("focus handler list:", handlerList);
       if (!handlerList.isEmpty()) {
         focusToRestoreLater = fm.focus();
-        pr("...setting focus to first:", handlerList.get(0));
         fm.set(handlerList.get(0));
       }
     }
@@ -478,7 +458,6 @@ public final class Util {
     while (!ch.isEmpty())
       ch.get(0).remove();
 
-    pr("adding:", target);
     target.setSize(-100); // fill entire view
     parent.addChild(target);
     if (target instanceof FocusHandler)

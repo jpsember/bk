@@ -6,6 +6,10 @@ public interface Validator {
     return ValidationResult.NONE;
   }
 
+  /**
+   * Convert a value from its internal representation to its textual
+   * representation
+   */
   default String encode(Object data) {
     var out = "";
     if (data != null)

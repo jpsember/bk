@@ -1,28 +1,39 @@
 package bk;
 
+import static bk.Util.*;
 import static js.base.Tools.*;
 
 import bk.gen.Transaction;
 
-import static bk.Util.*;
-
 public class TransactionForm extends FormWindow {
 
-  private static final int TYPE_ADD = 0, TYPE_EDIT = 1;
+  public interface Listener {
+    /**
+     * Called when user has either modified a transaction or cancelled edits.
+     * Returns modified transaction, or null if cancel
+     */
+    void editedTransaction(TransactionForm form, Transaction t);
+  }
 
-  private TransactionForm(int type, Transaction t) {
+  public static final int TYPE_ADD = 0, TYPE_EDIT = 1;
 
-    todo("!set date to current date if empty");
+  public TransactionForm(int type, Transaction t, Listener listener, int forAccount) {
+    todo("account number is switching from blank to zero");
+    t = nullTo(t, Transaction.DEFAULT_INSTANCE);
+    mListener = listener;
 
-    mOrig = nullTo(t, Transaction.DEFAULT_INSTANCE).build();
+    mOrig = t.build();
     mType = type;
     mSizeExpr = 12;
 
-    mdate = validator(DATE_VALIDATOR).addField("Date");
-    mamount = validator(CURRENCY_VALIDATOR).addField("Amount");
-    mdr = validator(ACCOUNT_VALIDATOR).addField("Dr");
-    mcr = validator(ACCOUNT_VALIDATOR).addField("Cr");
-    mdesc = validator(DESCRIPTION_VALIDATOR).addField("Description");
+    var dt = t.date();
+    if (dt == 0)
+      dt = epochSecondsToday();
+    mdate = validator(DATE_VALIDATOR).value(dt).addField("Date");
+    mamount = validator(CURRENCY_VALIDATOR).value(t.amount()).addField("Amount");
+    mdr = validator(ACCOUNT_VALIDATOR).value(t.debit()).addField("Dr");
+    mcr = validator(ACCOUNT_VALIDATOR).value(t.credit()).addField("Cr");
+    mdesc = validator(DESCRIPTION_VALIDATOR).value(t.description()).addField("Description");
     addVertSpace(1);
     addButton("Ok", () -> okHandler());
     addButton("Cancel", () -> cancelHandler());
@@ -34,17 +45,6 @@ public class TransactionForm extends FormWindow {
     mAccountNumber = accountNumber;
   }
 
-  public static TransactionForm buildAddTransaction() {
-    var f = new TransactionForm(TYPE_ADD, null);
-    return f;
-  }
-
-  public static TransactionForm buildEditTransaction(Transaction t) {
-    var f = new TransactionForm(TYPE_EDIT, t);
-     return f;
-  }
-
- 
   private void removeFormFromScreen() {
     var m = winMgr();
     var c = m.topLevelContainer();
@@ -66,9 +66,8 @@ public class TransactionForm extends FormWindow {
       tr.credit(mcr.validResult());
       tr.description(mdesc.validResult());
       problem = validateTransaction(tr);
-      if (problem == null) {
-        if (mAccountNumber != 0 && (Integer) mdr.validResult() != mAccountNumber
-            && (Integer) mcr.validResult() != mAccountNumber)
+      if (problem == null && mAccountNumber != 0) {
+        if ((Integer) mdr.validResult() != mAccountNumber && (Integer) mcr.validResult() != mAccountNumber)
           problem = "Transaction must involve this account";
       }
     }
@@ -77,22 +76,26 @@ public class TransactionForm extends FormWindow {
       return;
     }
 
+    Transaction edited = null;
+
     if (mType == TYPE_ADD) {
-      storage().addTransaction(tr);
+      edited = tr.build();
+      storage().addTransaction(edited);
     } else {
       var orig = mOrig;
       tr.timestamp(orig.timestamp());
+      edited = tr;
       storage().deleteTransaction(orig.timestamp());
-      storage().addTransaction(tr);
+      storage().addTransaction(edited);
     }
-
-    removeFormFromScreen();
+    mListener.editedTransaction(this, edited);
   }
 
   private void cancelHandler() {
     removeFormFromScreen();
   }
 
+  private Listener mListener;
   private int mType;
   private FocusHandler mOldFocus;
   private WidgetWindow mdate, mamount, mdr, mcr, mdesc;

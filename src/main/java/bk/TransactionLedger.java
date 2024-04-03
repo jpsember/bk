@@ -19,8 +19,9 @@ public class TransactionLedger extends LedgerWindow {
 
   public static final Filter ACCEPT_ALL = (t) -> true;
 
-  public TransactionLedger(Filter filter) {
+  public TransactionLedger(Filter filter, TransactionListener listener) {
     mFilter = nullTo(filter, ACCEPT_ALL);
+    mListener = listener;
     addColumns();
     rebuild();
   }
@@ -42,7 +43,7 @@ public class TransactionLedger extends LedgerWindow {
     addColumn(Column.newBuilder().name("Description").datatype(Datatype.TEXT).width(40));
   }
 
-  private void rebuild() {
+  public void rebuild() {
 
     var currentTrans = getCurrentRow();
     clearEntries();
@@ -74,25 +75,22 @@ public class TransactionLedger extends LedgerWindow {
   @Override
   public void processKeyStroke(KeyStroke k) {
     boolean handled = false;
+    Transaction a = getCurrentRow();
     switch (k.getKeyType()) {
     case Character: {
       switch (getCharSummary(k)) {
-      case ":a": {
-        var f = TransactionForm.buildAddTransaction();
-        f.forAccount(mAccountNumber);
-        addToMainView(f);
+
+      case ":a":
+        mListener.addTransaction(mAccountNumber);
+        rebuild();
         handled = true;
-        
-      }
         break;
-      case ":e": {
-        Transaction a = getCurrentRow();
+      case ":e":
         if (a != null) {
-          var f = TransactionForm.buildEditTransaction(a);
-          f.forAccount(mAccountNumber);
+          mListener.editTransaction(mAccountNumber, a);
+          rebuild();
         }
         handled = true;
-      }
         break;
       }
     }
@@ -105,5 +103,6 @@ public class TransactionLedger extends LedgerWindow {
   }
 
   private Filter mFilter;
+  private TransactionListener mListener;
   private int mAccountNumber;
 }

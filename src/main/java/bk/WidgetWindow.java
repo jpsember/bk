@@ -8,7 +8,7 @@ import com.googlecode.lanterna.input.KeyStroke;
 import js.geometry.MyMath;
 
 public class WidgetWindow extends JWindow implements FocusHandler {
-public static final int DEFAULT_WIDTH = 16;
+  public static final int DEFAULT_WIDTH = 16;
 
   public WidgetWindow width(int width) {
     mWidth = width;
@@ -31,10 +31,11 @@ public static final int DEFAULT_WIDTH = 16;
   }
 
   public WidgetWindow value(Object value) {
-   mContent =  mValidator.encode(value);
-   return this;
+    mContent = mValidator.encode(value);
+    pr("set content to:", quote(mContent), "after encoding:", db(value));
+    return this;
   }
-  
+
   public WidgetWindow button(ButtonListener listener) {
     mButtonListener = listener;
     return this;
@@ -50,7 +51,7 @@ public static final int DEFAULT_WIDTH = 16;
     mValidationResult = mValidator.validate(mContent);
     mContent = mValidationResult.string();
     if (mContent.isEmpty())
-      todo("handle a failed validation");
+      todo("!handle a failed validation");
   }
 
   @Override
@@ -68,15 +69,18 @@ public static final int DEFAULT_WIDTH = 16;
     var valueWidth = mWidth;
 
     boolean hf = hasFocus();
-    r.pushStyle(hf ? STYLE_INVERSE : STYLE_NORMAL);
 
     boolean isButton = mButtonListener != null;
-    {
-      var ef = mLabel + (isButton ? " " : ":");
+
+    if (isButton) {
+      r.pushStyle(hf ? STYLE_INVERSE : STYLE_NORMAL);
+      r.drawString(b.x + labelWidth + SEP, b.y, labelWidth, mLabel);
+      r.pop();
+    } else {
+
+      var ef = mLabel + ":";
       r.drawString(b.x + labelWidth - ef.length(), b.y, labelWidth, ef);
-    }
-   
-    if (!isButton) {
+
       var lx = b.x + labelWidth + SEP;
       var ly = b.y;
       var s = truncate(mContent, mWidth);
@@ -98,7 +102,7 @@ public static final int DEFAULT_WIDTH = 16;
       r.drawString(lx, ly, valueWidth, s);
       r.pop();
     }
-    r.pop();
+
   }
 
   public ValidationResult validationResult() {

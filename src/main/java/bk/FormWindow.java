@@ -70,8 +70,6 @@ public class FormWindow extends JContainer {
   }
 
   public FormWindow value(Object obj) {
-    //    checkState(mPendingValidator != null,"specify validator before value");
-    //    String strVal = mPendingValidator.compile(obj) ;
     mPendingValue = obj;
     return this;
   }

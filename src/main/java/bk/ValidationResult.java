@@ -1,6 +1,7 @@
 package bk;
 
 import static js.base.Tools.*;
+import static bk.Util.*;
 
 public class ValidationResult {
 
@@ -11,8 +12,10 @@ public class ValidationResult {
 
   @Override
   public String toString() {
-    return map().put("string", mStringValue).put("value", nullTo(mValidatedValue, "<none>").toString())
-        .toString();
+    var m = map();
+    m.put("string", mStringValue);
+    m.put("value", db(mValidatedValue));
+    return m.toString();
   }
 
   private String mStringValue;
