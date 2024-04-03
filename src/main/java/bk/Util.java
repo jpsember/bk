@@ -85,21 +85,62 @@ public final class Util {
     return t.build();
   }
 
-  private static ZoneId sLocalTimeZoneId = ZoneId.systemDefault();
-  private static LocalDate sCurrentDate = LocalDate.now();
-  private static DateTimeFormatter sDateFormatter = new DateTimeFormatterBuilder().appendPattern("yyyy/MM/dd")
-      .parseDefaulting(ChronoField.YEAR_OF_ERA, sCurrentDate.getYear())
-      .parseDefaulting(ChronoField.HOUR_OF_DAY, 0).parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
-      .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0).toFormatter().withZone(ZoneId.systemDefault());
+  private static final ZoneId sLocalTimeZoneId;
+  private static final DateTimeFormatter sDateParser;
 
-  private static DateTimeFormatter sDateParser = new DateTimeFormatterBuilder().appendPattern("[yyyy/]M/d")
-      .parseDefaulting(ChronoField.YEAR_OF_ERA, sCurrentDate.getYear())
-      .parseDefaulting(ChronoField.HOUR_OF_DAY, 0).parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
-      .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0).toFormatter().withZone(ZoneId.systemDefault());
+  private static final int sEpochSecondsToday;
+  private static final String sYearsToday;
+  private static LocalDate sCurrentDate = LocalDate.now();
+  private static final DateTimeFormatter sDateFormatter;
 
   public static String formatDate(int epochSeconds) {
+    final int years20 = 631200000;
+    checkArgument(epochSeconds == MyMath.clamp(epochSeconds, sEpochSecondsToday - years20,
+        sEpochSecondsToday + years20));
     var inst = Instant.ofEpochSecond(epochSeconds);
     return sDateFormatter.format(inst);
+  }
+
+  public static int dateToEpochSeconds(String dateExpr) {
+    var str = dateExpr.trim();
+    if (str.isEmpty())
+      return sEpochSecondsToday;
+    // Replace spaces with '/'
+    str = str.replace(' ', '/');
+
+    
+    
+    todo("try multiple parsers");
+    int parts = split(str, '/').size();
+    pr("dateExpr:", dateExpr, "str:", str, "parts:", parts);
+    if (parts == 2)
+      str = sYearsToday + str;
+    LocalDateTime dateTime = sDateParser.parse(str, LocalDateTime::from);
+    //    var parsed = sDateParser.parseBest(str, LocalDate::from);
+    var localDateTime = dateTime.atZone(sLocalTimeZoneId);
+    int epochSeconds = (int) localDateTime.toEpochSecond();
+    return epochSeconds;
+  }
+
+  public static String epochSecondsToDateString(int epochSeconds) {
+    LocalDate date = Instant.ofEpochSecond(epochSeconds).atZone(sLocalTimeZoneId).toLocalDate();
+    var str = sDateFormatter.format(date);
+    pr("epochSecondsToDateString:", epochSeconds, quote(str));
+    return str;
+  }
+
+  static {
+    // This was very helpful:  https://www.baeldung.com/java-localdate-epoch
+    sLocalTimeZoneId = ZoneId.systemDefault();
+    var now = LocalDate.now();
+    sEpochSecondsToday = (int) now.atStartOfDay().atZone(sLocalTimeZoneId).toEpochSecond();
+    sDateParser = new DateTimeFormatterBuilder().appendPattern("u/M/d")
+        .parseDefaulting(ChronoField.YEAR_OF_ERA, now.getYear()).parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+        .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0).parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
+        .toFormatter();
+    sDateFormatter = new DateTimeFormatterBuilder().appendPattern("uuuu/MM/dd").toFormatter();
+    var s = epochSecondsToDateString(sEpochSecondsToday);
+    sYearsToday = s.substring(0, 5);
   }
 
   private static final int MAX_CURRENCY = 10_000_000_00;
@@ -151,12 +192,12 @@ public final class Util {
   };
 
   public static final Validator DATE_VALIDATOR = new Validator() {
-   
+
     public String encode(Object value) {
       var out = "";
       if (value != null) {
         int dateInSeconds = (int) value;
-        out = formatDate(dateInSeconds);
+        out = epochSecondsToDateString(dateInSeconds);
       }
       return out;
     }
@@ -165,49 +206,13 @@ public final class Util {
       final boolean db = true && alert("db is on for DATE_VALIDATOR");
       if (db)
         pr("validating:", quote(value));
-      value = value.trim();
-      long dateInSeconds = 0;
+      //      value = value.trim();
+      int dateInSeconds = 0;
 
       String strDate = "";
 
       try {
-        todo("clean this up; allow multiple formats");
-        LocalDate dt;
-        if (value.isEmpty()) {
-          dt = sCurrentDate;
-        } else {
-          if (db)
-            pr("parsing:", value);
-          var temp = sDateParser.parse(value);
-          if (db)
-            pr("result:", temp.toString(), temp.getClass());
-
-          var z = ZonedDateTime.from(temp);
-          pr("ZonedDateTime:", z);
-
-          //          
-          //          Instant instant = Instant.from(temp);
-          //          if (db)
-          //            pr("instant:", instant.toString());
-          //          var z = instant.atZone(sLocalTimeZoneId);
-          if (db)
-            pr("instant at zone:", z.toString());
-          dateInSeconds = (int) z.toEpochSecond();
-          if (db)
-            pr("date in seconds:", dateInSeconds);
-
-          dt = z.toLocalDate();
-
-          //          var inst = Instant.ofEpochSecond(dateInSeconds).atZone(sLocalTimeZoneId);
-          //
-          //          dt = LocalDate.from(inst);
-        }
-        var y = dt.getYear();
-        if (y < 1970 || y > 2050)
-          throw badArg("unexpected year:", y);
-
-        //        dateInSeconds = (int) Instant.EPOCH.until(dt, ChronoUnit.SECONDS);
-        //        strDate = formatDate(dateInSeconds);
+        dateInSeconds = dateToEpochSeconds(value);
       } catch (Throwable t) {
         if (db)
           pr("failed validating:", value, "got:", INDENT, t);
