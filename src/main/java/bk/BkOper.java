@@ -42,6 +42,7 @@ public class BkOper extends AppOper
 
   @Override
   public void perform() {
+todo("cursor isn't being restored after transaction edit");
 
     if (EXP) {
 
@@ -133,6 +134,8 @@ public class BkOper extends AppOper
   public void viewAccount(Account account) {
     var ledger = new TransactionLedger((t) -> t.credit() == account.number() || t.debit() == account.number(),
         this);
+    todo("remove filter, or make it internal based on account number");
+    ledger.accountNumber(account.number());
     switchToView(ledger);
   }
 
@@ -187,7 +190,8 @@ public class BkOper extends AppOper
     mTransactions.setCurrentRow(t);
     mTransactions.repaint();
 
-    // Restore focus to the AccountList
-    focusManager().set(mAccounts);
+    // Restore focus
+    pr("restoring focus to transactions");
+    focusManager().restore();
   }
 }

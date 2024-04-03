@@ -37,9 +37,23 @@ public class FocusManager extends BaseObject {
       mFocus.loseFocus();
       mFocus.repaint();
     }
+    if (h != null && h instanceof JWindow)
+      checkArgument(((JWindow) h).parent() != null, "attempt to focus a window that isn't visible:", h);
     mFocus = h;
     h.gainFocus();
     h.repaint();
+  }
+
+  public void restore() {
+    var focusList = handlers(null);
+    if (focusList.isEmpty()) {
+      alert("attempt to restore focus, but none are available");
+      return;
+    }
+    if (focusList.size() > 1) {
+      pr("multiple focus handlers to choose from!");
+    }
+    set(focusList.get(0));
   }
 
   public void move(JWindow rootWindowOrNull, int amount) {

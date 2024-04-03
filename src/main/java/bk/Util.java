@@ -167,9 +167,7 @@ public final class Util {
 
   public static String epochSecondsToDateString(long epochSeconds) {
     LocalDate date = Instant.ofEpochSecond(epochSeconds).atZone(sLocalTimeZoneId).toLocalDate();
-    var str = sDateFormatter.format(date);
-    pr("epochSecondsToDateString:", epochSeconds, quote(str));
-    return str;
+    return sDateFormatter.format(date);
   }
 
   static {
@@ -177,7 +175,6 @@ public final class Util {
     sLocalTimeZoneId = ZoneId.systemDefault();
     var now = LocalDate.now().atStartOfDay();
     sEpochSecondsToday = (int) now.atZone(sLocalTimeZoneId).toEpochSecond();
-    pr("sEpochSecondsToday:", sEpochSecondsToday);
 
     {
       List<DateTimeFormatter> p = arrayList();
@@ -204,11 +201,11 @@ public final class Util {
     sYearsToday = s.substring(0, 4);
   }
 
-  private static final int MAX_CURRENCY = 10_000_000_00;
+  private static final long MAX_CURRENCY = 100_000_000_00L;
 
-  public static String formatCurrency(int cents) {
+  public static String formatCurrency(long cents) {
     checkArgument(cents >= 0 && cents < MAX_CURRENCY, "currency value out of range:", cents);
-    var s = Integer.toString(cents);
+    var s = Long.toString(cents);
     var k = s.length();
     int leadZeros = Math.max(0, 3 - k);
     s = "000".substring(0, leadZeros) + s;
@@ -274,7 +271,7 @@ public final class Util {
     public String encode(Object value) {
       var out = "";
       if (value != null) {
-        var i = (int) value;
+        var i = (Long) value;
         out = formatCurrency(i);
       }
       return out;
@@ -285,7 +282,7 @@ public final class Util {
       if (db)
         pr("validating currency:", value);
       value = value.trim();
-      Integer amount = null;
+      Long amount = null;
       var result = ValidationResult.NONE;
       try {
         if (!value.isEmpty()) {
@@ -298,9 +295,9 @@ public final class Util {
           pr("parsing:", value);
         var d = Double.parseDouble(value);
         var asInt = Math.round(d * 100);
-        if (asInt < 0 || asInt >= MAX_CURRENCY)
+        if (Math.abs(asInt) >= MAX_CURRENCY)
           throw badArg("failed to convert", value);
-        amount = (int) asInt;
+        amount = asInt;
         result = new ValidationResult(formatCurrency(amount), amount);
       } catch (Throwable t) {
         if (db)
@@ -401,7 +398,7 @@ public final class Util {
     if (sep == 0)
       sep = Integer.compare(t1.credit(), t2.credit());
     if (sep == 0)
-      sep = Integer.compare(t1.amount(), t2.amount());
+      sep = Long.compare(t1.amount(), t2.amount());
     if (sep == 0)
       sep = Long.compare(t1.timestamp(), t2.timestamp());
     return sep;

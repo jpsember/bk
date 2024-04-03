@@ -1,7 +1,7 @@
 fields {
   long timestamp;
   long date;  // epoch seconds
-  int amount;
+  long amount;
   int debit;
   int credit;
   string description;

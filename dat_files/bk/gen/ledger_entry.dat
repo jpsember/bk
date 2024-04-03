@@ -1,6 +1,0 @@
-fields {
-  int timestamp;
-  int account_number;
-  int debit;
-  int credit;
-}

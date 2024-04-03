@@ -1,5 +1,5 @@
 fields {
   int number;
   string name;
-  int balance;
+  long balance;
 }

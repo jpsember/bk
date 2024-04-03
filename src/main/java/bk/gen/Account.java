@@ -13,7 +13,7 @@ public class Account implements AbstractData {
     return mName;
   }
 
-  public int balance() {
+  public long balance() {
     return mBalance;
   }
 
@@ -53,7 +53,7 @@ public class Account implements AbstractData {
   private Account(JSMap m) {
     mNumber = m.opt(_0, 0);
     mName = m.opt(_1, "");
-    mBalance = m.opt(_2, 0);
+    mBalance = m.opt(_2, 0L);
   }
 
   public static Builder newBuilder() {
@@ -85,7 +85,7 @@ public class Account implements AbstractData {
       r = 1;
       r = r * 37 + mNumber;
       r = r * 37 + mName.hashCode();
-      r = r * 37 + mBalance;
+      r = r * 37 + (int)mBalance;
       m__hashcode = r;
     }
     return r;
@@ -93,7 +93,7 @@ public class Account implements AbstractData {
 
   protected int mNumber;
   protected String mName;
-  protected int mBalance;
+  protected long mBalance;
   protected int m__hashcode;
 
   public static final class Builder extends Account {
@@ -134,7 +134,7 @@ public class Account implements AbstractData {
       return this;
     }
 
-    public Builder balance(int x) {
+    public Builder balance(long x) {
       mBalance = x;
       return this;
     }

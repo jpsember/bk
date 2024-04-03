@@ -2,7 +2,7 @@ package bk;
 
 public class CurrencyField implements LedgerField {
 
-  public CurrencyField(int amount) {
+  public CurrencyField(long amount) {
     mAmount = amount;
   }
 
@@ -30,6 +30,6 @@ public class CurrencyField implements LedgerField {
     return "$" + s;
   }
 
-  private int mAmount;
+  private long mAmount;
 
 }

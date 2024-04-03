@@ -19,30 +19,35 @@ public class TransactionForm extends FormWindow {
 
   public TransactionForm(int type, Transaction t, Listener listener, int forAccount) {
     todo("account number is switching from blank to zero");
-    t = nullTo(t, Transaction.DEFAULT_INSTANCE);
+    var b = nullTo(t, Transaction.DEFAULT_INSTANCE).toBuilder();
     mListener = listener;
+    mAccountNumber = forAccount;
 
-    mOrig = t.build();
+    mOrig = b.build();
+    if (forAccount != 0) {
+      if (b.debit() == 0)
+        b.debit(forAccount);
+      if (b.credit() == 0)
+        b.credit(forAccount);
+    }
+
+    pr(VERT_SP, "forAccount:",forAccount,"type:", type, "orig:", mOrig, CR, "editing:", b);
     mType = type;
     mSizeExpr = 12;
 
-    var dt = t.date();
+    var dt = b.date();
     if (dt == 0)
       dt = epochSecondsToday();
     mdate = validator(DATE_VALIDATOR).value(dt).addField("Date");
-    mamount = validator(CURRENCY_VALIDATOR).value(t.amount()).addField("Amount");
-    mdr = validator(ACCOUNT_VALIDATOR).value(t.debit()).addField("Dr");
-    mcr = validator(ACCOUNT_VALIDATOR).value(t.credit()).addField("Cr");
-    mdesc = validator(DESCRIPTION_VALIDATOR).value(t.description()).addField("Description");
+    mamount = validator(CURRENCY_VALIDATOR).value(b.amount()).addField("Amount");
+    mdr = validator(ACCOUNT_VALIDATOR).value(b.debit()).addField("Dr");
+    mcr = validator(ACCOUNT_VALIDATOR).value(b.credit()).addField("Cr");
+    mdesc = validator(DESCRIPTION_VALIDATOR).value(b.description()).addField("Description");
     addVertSpace(1);
     addButton("Ok", () -> okHandler());
     addButton("Cancel", () -> cancelHandler());
     addVertSpace(1);
     addMessageLine();
-  }
-
-  public void forAccount(int accountNumber) {
-    mAccountNumber = accountNumber;
   }
 
   private void removeFormFromScreen() {
@@ -58,24 +63,34 @@ public class TransactionForm extends FormWindow {
     String problem = "One or more fields is invalid.";
     var tr = Transaction.newBuilder();
 
-    if (mdate.valid() && mamount.valid() && mdr.valid() && mcr.valid() && mdesc.valid()) {
+    do {
+      if (!(mdate.valid() && mamount.valid() && mdr.valid() && mcr.valid() && mdesc.valid()))
+        break;
+      problem = null;
+
       tr.timestamp(System.currentTimeMillis());
       tr.date(mdate.validResult());
       tr.amount(mamount.validResult());
       tr.debit(mdr.validResult());
       tr.credit(mcr.validResult());
       tr.description(mdesc.validResult());
+
       problem = validateTransaction(tr);
-      if (problem == null && mAccountNumber != 0) {
+      if (problem != null)
+        break;
+
+      problem = "Transaction must involve this account";
+      if (mAccountNumber != 0) {
         if ((Integer) mdr.validResult() != mAccountNumber && (Integer) mcr.validResult() != mAccountNumber)
-          problem = "Transaction must involve this account";
+          break;
       }
-    }
+      problem = null;
+    } while (false);
+
     if (problem != null) {
       setMessage(problem);
       return;
     }
-
     Transaction edited = null;
 
     if (mType == TYPE_ADD) {

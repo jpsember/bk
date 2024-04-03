@@ -77,6 +77,15 @@ public class TransactionLedger extends LedgerWindow {
     boolean handled = false;
     Transaction a = getCurrentRow();
     switch (k.getKeyType()) {
+
+    case Enter:
+      if (a != null) {
+        mListener.editTransaction(mAccountNumber, a);
+        rebuild();
+        handled = true;
+      }
+      break;
+
     case Character: {
       switch (getCharSummary(k)) {
 
