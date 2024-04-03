@@ -18,7 +18,6 @@ public class TransactionForm extends FormWindow {
   public static final int TYPE_ADD = 0, TYPE_EDIT = 1;
 
   public TransactionForm(int type, Transaction t, Listener listener, int forAccount) {
-    todo("account number is switching from blank to zero");
     var b = nullTo(t, Transaction.DEFAULT_INSTANCE).toBuilder();
     mListener = listener;
     mAccountNumber = forAccount;
@@ -31,7 +30,6 @@ public class TransactionForm extends FormWindow {
         b.credit(forAccount);
     }
 
-    pr(VERT_SP, "forAccount:",forAccount,"type:", type, "orig:", mOrig, CR, "editing:", b);
     mType = type;
     mSizeExpr = 12;
 

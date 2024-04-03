@@ -370,6 +370,11 @@ public final class Util {
     todo("ensure accounts exist");
     if (t.debit() == t.credit())
       return "The account numbers cannot be the same!";
+    for (int pass = 0; pass < 2; pass++) {
+      int n = pass == 0 ? t.debit() : t.credit();
+      if (account(n) == null)
+        return "No such account: " + n;
+    }
     return null;
   }
 

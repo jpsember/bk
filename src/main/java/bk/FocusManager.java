@@ -119,14 +119,9 @@ public class FocusManager extends BaseObject {
 
     var f = (FocusHandler) r;
 
-    // JContainer c = winMgr().topLevelContainer();
     JWindow w = (JWindow) f;
     if (w.parent() == null) {
       switchToView(w);
-      //      // Replace the top-level contents with this window
-      //      c.removeChildren();
-      //      w.mSizeExpr = 100;
-      //      c.addChild(w);
     } else
       set(f);
   }

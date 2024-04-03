@@ -32,7 +32,6 @@ public class WidgetWindow extends JWindow implements FocusHandler {
 
   public WidgetWindow value(Object value) {
     mContent = mValidator.encode(value);
-    pr("set content to:", quote(mContent), "after encoding:", db(value));
     return this;
   }
 
