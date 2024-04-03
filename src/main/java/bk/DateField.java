@@ -5,7 +5,7 @@ import static bk.Util.*;
 
 public class DateField implements LedgerField {
 
-  public DateField(int epochSeconds) {
+  public DateField(long epochSeconds) {
     loadTools();
     mEpochSeconds = epochSeconds;
   }
@@ -18,7 +18,7 @@ public class DateField implements LedgerField {
     return mString;
   }
 
-  private int mEpochSeconds;
+  private long mEpochSeconds;
   private String mString;
 
 }

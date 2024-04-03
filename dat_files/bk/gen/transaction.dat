@@ -1,6 +1,6 @@
 fields {
   long timestamp;
-  int date;
+  long date;  // epoch seconds
   int amount;
   int debit;
   int credit;

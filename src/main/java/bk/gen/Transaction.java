@@ -9,7 +9,7 @@ public class Transaction implements AbstractData {
     return mTimestamp;
   }
 
-  public int date() {
+  public long date() {
     return mDate;
   }
 
@@ -70,7 +70,7 @@ public class Transaction implements AbstractData {
 
   private Transaction(JSMap m) {
     mTimestamp = m.opt(_0, 0L);
-    mDate = m.opt(_1, 0);
+    mDate = m.opt(_1, 0L);
     mAmount = m.opt(_2, 0);
     mDebit = m.opt(_3, 0);
     mCredit = m.opt(_4, 0);
@@ -111,7 +111,7 @@ public class Transaction implements AbstractData {
     if (r == 0) {
       r = 1;
       r = r * 37 + (int)mTimestamp;
-      r = r * 37 + mDate;
+      r = r * 37 + (int)mDate;
       r = r * 37 + mAmount;
       r = r * 37 + mDebit;
       r = r * 37 + mCredit;
@@ -122,7 +122,7 @@ public class Transaction implements AbstractData {
   }
 
   protected long mTimestamp;
-  protected int mDate;
+  protected long mDate;
   protected int mAmount;
   protected int mDebit;
   protected int mCredit;
@@ -168,7 +168,7 @@ public class Transaction implements AbstractData {
       return this;
     }
 
-    public Builder date(int x) {
+    public Builder date(long x) {
       mDate = x;
       return this;
     }

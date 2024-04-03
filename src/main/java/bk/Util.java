@@ -6,12 +6,11 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 import java.util.Comparator;
-import java.util.Date;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -24,10 +23,11 @@ import bk.gen.Column;
 import bk.gen.Datatype;
 import bk.gen.Transaction;
 import js.base.DateTimeTools;
+import js.data.DataUtil;
 import js.geometry.MyMath;
 
 public final class Util {
-  public static final boolean EXP = true && alert("experiment in progress");
+  public static final boolean EXP = false && alert("experiment in progress");
 
   public static final int BORDER_NONE = 0;
   public static final int BORDER_THIN = 1;
@@ -86,43 +86,79 @@ public final class Util {
   }
 
   private static final ZoneId sLocalTimeZoneId;
-  private static final DateTimeFormatter sDateParser;
+  private static final List<DateTimeFormatter> sDateParsers;
 
-  private static final int sEpochSecondsToday;
+  private static final long sEpochSecondsToday;
   private static final String sYearsToday;
-  private static LocalDate sCurrentDate = LocalDate.now();
   private static final DateTimeFormatter sDateFormatter;
 
-  public static String formatDate(int epochSeconds) {
-    final int years20 = 631200000;
-    checkArgument(epochSeconds == MyMath.clamp(epochSeconds, sEpochSecondsToday - years20,
-        sEpochSecondsToday + years20));
-    var inst = Instant.ofEpochSecond(epochSeconds);
+  public static String formatDate(long epochSeconds) {
+    pr("formatDate, epoch seconds:", epochSeconds);
+    final long years20 = 31_536_000 * 20;
+    long min = sEpochSecondsToday - years20;
+    long max = sEpochSecondsToday + years20;
+    if (epochSeconds < min || epochSeconds > max)
+      badArg("epoch seconds:", epochSeconds, "is out of range of", min, max);
+    var inst = Instant.ofEpochSecond(epochSeconds).atZone(sLocalTimeZoneId);
     return sDateFormatter.format(inst);
   }
 
-  public static int dateToEpochSeconds(String dateExpr) {
+  public static long dateToEpochSeconds(String dateExpr) {
     var str = dateExpr.trim();
     if (str.isEmpty())
       return sEpochSecondsToday;
+
     // Replace spaces with '/'
     str = str.replace(' ', '/');
+    var pt = split(str, '/');
 
-    
-    
-    todo("try multiple parsers");
-    int parts = split(str, '/').size();
-    pr("dateExpr:", dateExpr, "str:", str, "parts:", parts);
-    if (parts == 2)
-      str = sYearsToday + str;
-    LocalDateTime dateTime = sDateParser.parse(str, LocalDateTime::from);
-    //    var parsed = sDateParser.parseBest(str, LocalDate::from);
-    var localDateTime = dateTime.atZone(sLocalTimeZoneId);
-    int epochSeconds = (int) localDateTime.toEpochSecond();
-    return epochSeconds;
+    // If year has been omitted, add current year
+    if (pt.size() == 2)
+      pt.add(0, sYearsToday);
+
+    if (pt.size() == 3) {
+      var first = pt.get(0);
+      if (first.length() == 2)
+        pt.set(0, sYearsToday.substring(0, 2) + first);
+
+      var second = pt.get(1).toLowerCase();
+      var mi = sMonthAbbrev.indexOf(second);
+      if (mi >= 0)
+        pt.set(1, Integer.toString(1 + mi));
+    }
+
+    if (pt.size() == 3) {
+    }
+
+    str = String.join("/", DataUtil.toStringArray(pt));
+    pr("str:", str);
+
+    LocalDateTime dateTime = null;
+    for (var p : sDateParsers) {
+      try {
+        dateTime = p.parse(str, LocalDateTime::from);
+        break;
+      } catch (Throwable t) {
+      }
+    }
+    long result = 0;
+    if (dateTime != null) {
+      var localDateTime = dateTime.atZone(sLocalTimeZoneId);
+      result = localDateTime.toEpochSecond();
+      //      int toInt = (int) epochSeconds;
+      //      if (toInt == epochSeconds)
+      //        result = toInt;
+    }
+    if (result == 0)
+      badArg("Failed to parse date expression:", quote(dateExpr));
+
+    return result;
   }
 
-  public static String epochSecondsToDateString(int epochSeconds) {
+  private static final List<String> sMonthAbbrev = split("jan feb mar apr may jun jul aug sep oct nov dec",
+      ' ');
+
+  public static String epochSecondsToDateString(long epochSeconds) {
     LocalDate date = Instant.ofEpochSecond(epochSeconds).atZone(sLocalTimeZoneId).toLocalDate();
     var str = sDateFormatter.format(date);
     pr("epochSecondsToDateString:", epochSeconds, quote(str));
@@ -132,15 +168,33 @@ public final class Util {
   static {
     // This was very helpful:  https://www.baeldung.com/java-localdate-epoch
     sLocalTimeZoneId = ZoneId.systemDefault();
-    var now = LocalDate.now();
-    sEpochSecondsToday = (int) now.atStartOfDay().atZone(sLocalTimeZoneId).toEpochSecond();
-    sDateParser = new DateTimeFormatterBuilder().appendPattern("u/M/d")
-        .parseDefaulting(ChronoField.YEAR_OF_ERA, now.getYear()).parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
-        .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0).parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
-        .toFormatter();
+    var now = LocalDate.now().atStartOfDay();
+    sEpochSecondsToday = (int) now.atZone(sLocalTimeZoneId).toEpochSecond();
+    pr("sEpochSecondsToday:", sEpochSecondsToday);
+
+    {
+      List<DateTimeFormatter> p = arrayList();
+
+      p.add(new DateTimeFormatterBuilder().appendPattern("u/M/d").parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+          .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0).parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
+          .toFormatter());
+      p.add(new DateTimeFormatterBuilder().appendPattern("M/d")
+          .parseDefaulting(ChronoField.YEAR_OF_ERA, now.getYear())
+          .parseDefaulting(ChronoField.YEAR_OF_ERA, now.getYear()).parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+          .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0).parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
+          .toFormatter());
+      p.add(new DateTimeFormatterBuilder().appendPattern("u/MMM/dd")
+          .parseDefaulting(ChronoField.YEAR_OF_ERA, now.getYear())
+          .parseDefaulting(ChronoField.YEAR_OF_ERA, now.getYear()).parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+          .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0).parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
+          .toFormatter());
+
+      sDateParsers = p;
+
+    }
     sDateFormatter = new DateTimeFormatterBuilder().appendPattern("uuuu/MM/dd").toFormatter();
     var s = epochSecondsToDateString(sEpochSecondsToday);
-    sYearsToday = s.substring(0, 5);
+    sYearsToday = s.substring(0, 4);
   }
 
   private static final int MAX_CURRENCY = 10_000_000_00;
@@ -155,25 +209,8 @@ public final class Util {
     return s.substring(0, h) + "." + s.substring(h);
   }
 
-  public static int generateDate() {
-    var r = random();
-    var parseFormatter = sDateFormatter;
-    var s = new StringBuilder();
-    s.append("2024/");
-    var month = r.nextInt(12) + 1;
-    if (month < 10)
-      s.append('0');
-    s.append(month);
-    s.append('/');
-    var date = r.nextInt(28) + 1;
-    if (date < 10)
-      s.append('0');
-    s.append(date);
-    var str = s.toString();
-    var ldate = LocalDateTime.parse(str, parseFormatter); //.atZone(sLocalTimeZoneId);
-    //    var tm = ldate.toEpochSecond();
-    //  return (int) tm;
-    throw notFinished();
+  public static long generateDate() {
+    return sEpochSecondsToday + random().nextInt(31_536_000);
   }
 
   private static Random sRandom = new Random(1965);
@@ -203,14 +240,11 @@ public final class Util {
     }
 
     public ValidationResult validate(String value) {
-      final boolean db = true && alert("db is on for DATE_VALIDATOR");
+      final boolean db = false && alert("db is on for DATE_VALIDATOR");
       if (db)
         pr("validating:", quote(value));
-      //      value = value.trim();
-      int dateInSeconds = 0;
-
+      long dateInSeconds = 0;
       String strDate = "";
-
       try {
         dateInSeconds = dateToEpochSeconds(value);
       } catch (Throwable t) {
@@ -376,7 +410,7 @@ public final class Util {
   private static Storage sStorage;
 
   public static final Comparator<Transaction> TRANSACTION_COMPARATOR = (t1, t2) -> {
-    int sep = Integer.compare(t1.date(), t2.date());
+    int sep = Long.compare(t1.date(), t2.date());
     if (sep == 0)
       sep = Integer.compare(t1.debit(), t2.debit());
     if (sep == 0)

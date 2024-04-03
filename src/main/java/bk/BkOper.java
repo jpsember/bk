@@ -3,14 +3,6 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.temporal.ChronoField;
-
 import bk.gen.Account;
 import bk.gen.BkConfig;
 import js.app.AppOper;
@@ -51,13 +43,14 @@ public class BkOper extends AppOper implements AccountListListener, AccountForm.
 
     if (EXP) {
 
-      int todaySeconds = dateToEpochSeconds("");
+      long todaySeconds = dateToEpochSeconds("");
       pr("today epoch seconds:", todaySeconds);
       var dateStr = epochSecondsToDateString(todaySeconds);
       pr("today:", dateStr);
 
       var m = map();
-      String ss[] = { "", "2024/10/04", "10/04", "/10/4", "10/4", "8/4", "024/10/2", "24/10/2","apr 1", };
+      String ss[] = { "", "2024/10/04", "10/04", "/10/4", "2024  10  04", "10/4", "8/4", "024/10/2",
+          "24/10/2", "apr 1", "2023 Apr 1", };
       for (var s : ss) {
         var c = DATE_VALIDATOR.validate(s);
         int epochSeconds = c.typedValue();
