@@ -34,36 +34,6 @@ public class AccountForm extends FormWindow {
     addMessageLine();
   }
 
-  //  public static void addAccount() {
-  //    var f = new AccountForm(TYPE_ADD, null);
-  //    f.addFormToScreen();
-  //  }
-  //
-  //  public static void editAccount(Account account) {
-  //    var f = new AccountForm(TYPE_EDIT, account);
-  //    f.addFormToScreen();
-  //  }
-
-//  public void addFormToScreen() {
-//    todo("do this elsewhere");
-//    var m = winMgr();
-//    var c = m.topLevelContainer();
-//    c.addChild(this);
-//    c.setLayoutInvalid();
-//
-//    var fm = focusManager();
-//    mOldFocus = fm.focus();
-//    fm.set(fm.handlers(this).get(0));
-//  }
-
-  //  private void removeFormFromScreen() {
-  //    var m = winMgr();
-  //    var c = m.topLevelContainer();
-  //    c.children().remove(this);
-  //    c.setLayoutInvalid();
-  //    focusManager().set(mOldFocus);
-  //  }
-
   private void okHandler() {
     String problem = "One or more fields is invalid.";
     var ac = Account.newBuilder();
@@ -112,8 +82,6 @@ public class AccountForm extends FormWindow {
       editedAccount = mod.build();
       storage().addAccount(editedAccount);
     }
-    todo("call handler, remove form from view");
-    // removeFormFromScreen();
     mListener.editedAccount(this, editedAccount);
   }
 
@@ -122,7 +90,6 @@ public class AccountForm extends FormWindow {
   }
 
   private int mType;
-  //private FocusHandler mOldFocus;
   private WidgetWindow mNumber, mName;
   private Account mOriginalAccount;
   private Listener mListener;

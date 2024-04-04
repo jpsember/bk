@@ -5,8 +5,6 @@ import static js.base.Tools.*;
 
 import java.util.List;
 
-import com.googlecode.lanterna.input.KeyStroke;
-
 import bk.gen.Alignment;
 import bk.gen.Column;
 import bk.gen.Datatype;
@@ -62,7 +60,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     for (var t : trans.values())
       if (mFilter.accept(t)) {
         sorted.add(t);
-    //    pr("adding transaction to be sorted:",INDENT,t);
+        //    pr("adding transaction to be sorted:",INDENT,t);
       }
     sorted.sort(TRANSACTION_COMPARATOR);
 
@@ -84,14 +82,14 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   }
 
   @Override
-  public void processKeyStroke(KeyStroke k) {
+  public void processKeyEvent(KeyEvent k) {
     boolean handled = false;
     Transaction a = getCurrentRow();
 
     todo("the 'rebuild' should be a more general call for all, either add, edit, or delete");
-    switch (k.getKeyType()) {
+    switch (k.toString()) {
 
-    case Enter:
+    case KeyEvent.ENTER:
       if (a != null) {
         mListener.editTransaction(mAccountNumber, a);
         rebuild();
@@ -99,36 +97,28 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       }
       break;
 
-    case Character: {
-      switch (getCharSummary(k)) {
-
-      case KEY_DELETE_TRANSACTION:
-        if (a != null) {
-          mListener.deleteTransaction(a);
-        }
-        handled = true;
-        break;
-
-      case ":a":
-        mListener.addTransaction(mAccountNumber);
-        rebuild();
-        handled = true;
-        break;
-      case ":e":
-        if (a != null) {
-          mListener.editTransaction(mAccountNumber, a);
-          rebuild();
-        }
-        handled = true;
-        break;
+    case KEY_DELETE_TRANSACTION:
+      if (a != null) {
+        mListener.deleteTransaction(a);
       }
-    }
+      handled = true;
       break;
-    default:
+
+    case ":a":
+      mListener.addTransaction(mAccountNumber);
+      rebuild();
+      handled = true;
+      break;
+    case ":e":
+      if (a != null) {
+        mListener.editTransaction(mAccountNumber, a);
+        rebuild();
+      }
+      handled = true;
       break;
     }
     if (!handled)
-      super.processKeyStroke(k);
+      super.processKeyEvent(k);
   }
 
   @Override

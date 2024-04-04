@@ -215,7 +215,8 @@ public final class Util {
   private static final long MAX_CURRENCY = 100_000_000_00L;
 
   public static String formatCurrency(long cents) {
-    if (cents == 0) return "";
+    if (cents == 0)
+      return "";
     var absCents = Math.abs(cents);
     checkArgument(absCents < MAX_CURRENCY, "currency value out of range:", cents);
     var s = Long.toString(absCents);
@@ -455,11 +456,11 @@ public final class Util {
 
   };
 
-  public static void switchToView(String keySummary) {
+  public static void switchToView(KeyEvent keySummary) {
     pr(VERT_SP, "switch to view:", keySummary);
 
     JWindow target = null;
-    switch (keySummary) {
+    switch (keySummary.toString()) {
     case KEY_VIEW_TRANSACTIONS:
       target = sTransactionsView;
       break;
@@ -477,7 +478,8 @@ public final class Util {
    * Convert a KeyStroke to a string that includes information about Alt, Shift,
    * Control keys. Returns "[A][C][S]:{character or KeyType name}"
    */
-  public static String getCharSummary(KeyStroke k) {
+  @Deprecated
+  public static String keyInfo(KeyStroke k) {
     var sb = new StringBuilder();
     if (k.isAltDown())
       sb.append('A');
@@ -497,15 +499,9 @@ public final class Util {
     return sb.toString();
   }
 
-  public static boolean quitCommand(KeyStroke k) {
-    if (true) {
-      alert("!can't seem to use command keys reliably, so have user ctrl-c out of program");
-      return false;
-    } else {
-      var s = getCharSummary(k);
-      pr("char summary for:", k, k.isAltDown(), k.isCtrlDown(), k.isShiftDown(), INDENT, s);
-      return s.equals("C:Escape") || s.equals(":Escape");
-    }
+  public static boolean quitCommand(KeyEvent k) {
+    alert("!can't seem to use command keys reliably, so have user ctrl-c out of program");
+    return false;
   }
 
   public static void rebuild(TransactionLedger ledger) {

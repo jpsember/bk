@@ -3,8 +3,6 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
-import com.googlecode.lanterna.input.KeyStroke;
-
 import js.geometry.MyMath;
 
 public class WidgetWindow extends JWindow implements FocusHandler {
@@ -75,9 +73,8 @@ public class WidgetWindow extends JWindow implements FocusHandler {
 
     boolean hf = hasFocus();
 
-    boolean isButton = mButtonListener != null;
 
-    if (isButton) {
+    if (isButton()) {
       r.pushStyle(hf ? STYLE_INVERSE : STYLE_NORMAL);
       r.drawString(b.x + labelWidth + SEP, b.y, labelWidth, mLabel);
       r.pop();
@@ -124,19 +121,29 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     return validationResult().typedValue();
   }
 
+  public boolean isButton() {
+    return mButtonListener != null;
+  }
+
   @Override
-  public void processKeyStroke(KeyStroke k) {
+  public void processKeyEvent(KeyEvent k) {
     //pr("keyType:", k.getKeyType(), k);
-    switch (k.getKeyType()) {
+
+    switch (k.keyType()) {
     case Enter: {
-      if (mButtonListener != null)
+      if (isButton())
         mButtonListener.buttonPressed();
       else
         focusManager().move(mFocusRootWindow, 1);
     }
       break;
-    case ArrowDown:
+
     case Tab:
+      // Move to next button (e.g. Ok or Cancel)
+      focusManager().moveToNextButton(mFocusRootWindow);
+      break;
+
+    case ArrowDown:
       focusManager().move(mFocusRootWindow, 1);
       break;
     case ArrowUp:

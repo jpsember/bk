@@ -1,7 +1,5 @@
 package bk;
 
-import com.googlecode.lanterna.input.KeyStroke;
-
 public interface FocusHandler {
 
   default void gainFocus() {
@@ -10,7 +8,7 @@ public interface FocusHandler {
   default void loseFocus() {
   }
 
-  default void processKeyStroke(KeyStroke k) {
+  default void processKeyEvent(KeyEvent k) {
   }
 
   default void repaint() {

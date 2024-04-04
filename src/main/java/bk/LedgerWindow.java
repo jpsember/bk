@@ -6,8 +6,6 @@ import static js.base.Tools.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.googlecode.lanterna.input.KeyStroke;
-
 import bk.gen.Alignment;
 import bk.gen.Column;
 import js.geometry.IRect;
@@ -78,7 +76,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
         } else {
 
           var ent = mEntries.get(entNum);
-//pr("rendering entry number:",entNum, ent.fields);
+          //pr("rendering entry number:",entNum, ent.fields);
           // Render the fields
           var j = INIT_INDEX;
           for (var col : mColumns) {
@@ -95,7 +93,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
   }
 
   @Override
-  public void processKeyStroke(KeyStroke k) {
+  public void processKeyEvent(KeyEvent k) {
     if (mLastRenderedClipBounds == null) {
       alert("can't process KeyStroke; window has never been rendered");
       return;
@@ -104,7 +102,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     Integer targetEntry = null;
     int pageSize = mLastRenderedClipBounds.height - 2; // Assume a boundary
 
-    switch (k.getKeyType()) {
+    switch (k.keyType()) {
     case ArrowUp:
       targetEntry = mCursorRow - 1;
       break;
@@ -123,17 +121,13 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     case End:
       targetEntry = mEntries.size();
       break;
-    case Character: {
-      var su = getCharSummary(k);
-      switch (su) {
-      case KEY_VIEW_TRANSACTIONS:
+    default:
+      switch (k.toString()) {
+      case Util.KEY_VIEW_TRANSACTIONS:
       case KEY_VIEW_ACCOUNTS:
-        switchToView(su);
+        switchToView(k);
         break;
       }
-    }
-      break;
-    default:
       break;
     }
 

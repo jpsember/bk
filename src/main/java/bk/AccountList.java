@@ -5,8 +5,6 @@ import static js.base.Tools.*;
 
 import java.util.List;
 
-import com.googlecode.lanterna.input.KeyStroke;
-
 import bk.gen.Account;
 import bk.gen.Alignment;
 import bk.gen.Column;
@@ -52,42 +50,40 @@ public class AccountList extends LedgerWindow implements ChangeListener {
   }
 
   @Override
-  public void processKeyStroke(KeyStroke k) {
+  public void processKeyEvent(KeyEvent k) {
     boolean handled = false;
     Account a = getCurrentRow();
 
-    switch (k.getKeyType()) {
+    switch (k.toString()) {
 
-    case Enter:
+    case KeyEvent.ENTER:
       if (a != null) {
         mListener.viewAccount(a);
         handled = true;
       }
       break;
 
-    case Character: {
-      var sum = getCharSummary(k);
-      switch (sum) {
-      case ":a":
-        mListener.addAccount();
+    //    case Character: {
+    //      var sum = keyInfo(k);
+    //      switch (sum) {
+    case ":a":
+      mListener.addAccount();
+      rebuild();
+      handled = true;
+      break;
+    case ":e":
+      if (a != null) {
+        mListener.editAccount(a);
         rebuild();
-        handled = true;
-        break;
-      case ":e":
-        if (a != null) {
-          mListener.editAccount(a);
-          rebuild();
-        }
-        handled = true;
-        break;
       }
-    }
+      handled = true;
       break;
-    default:
-      break;
+    //      }
+    //    }
+    //      break;
     }
     if (!handled)
-      super.processKeyStroke(k);
+      super.processKeyEvent(k);
   }
 
   @Override

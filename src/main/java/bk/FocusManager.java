@@ -64,6 +64,22 @@ public class FocusManager extends BaseObject {
     set(focusList.get(slot));
   }
 
+  public void moveToNextButton(JWindow rootWindowOrNull) {
+    var focusList = handlers(rootWindowOrNull);
+    int slot = focusList.indexOf(mFocus);
+    int j = slot + 1;
+    for (int i = j; i < j + focusList.size(); i++) {
+      var f = focusList.get(i % focusList.size());
+      if (f instanceof WidgetWindow) {
+        var w = (WidgetWindow) f;
+        if (w.isButton()) {
+          set(f);
+          return;
+        }
+      }
+    }
+  }
+
   public final List<FocusHandler> handlers(JWindow topLevelWindowOrNull) {
     var w = nullTo(topLevelWindowOrNull, winMgr().topLevelContainer());
     List<FocusHandler> out = arrayList();
