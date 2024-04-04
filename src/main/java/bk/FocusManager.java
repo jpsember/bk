@@ -14,7 +14,7 @@ public class FocusManager extends BaseObject {
   public static final FocusManager SHARED_INSTANCE;
 
   private FocusManager() {
-    alertVerbose();
+    //alertVerbose();
   }
 
   public FocusHandler focus() {

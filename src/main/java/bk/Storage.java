@@ -1,8 +1,10 @@
 package bk;
 
+import static bk.Util.*;
 import static js.base.Tools.*;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 
 import bk.gen.Account;
@@ -19,8 +21,8 @@ public class Storage extends BaseObject {
     var m = JSMap.fromFileIfExists(file());
     var db = Files.parseAbstractData(Database.DEFAULT_INSTANCE, m);
     mDatabase = db.toBuilder();
-    mAccountBalanceMap = hashMap();
     log("read", accounts().size(), "accounts and", transactions().size(), "transactions");
+    verifyAccountBalances();
   }
 
   public void setModified() {
@@ -30,7 +32,8 @@ public class Storage extends BaseObject {
   public void flush() {
     if (!mModified)
       return;
-    Files.S.writeWithPrettyIf(file(), mDatabase, alert("!writing pretty"));
+    if (false && !alert("disabling writing for now"))
+      Files.S.writeWithPrettyIf(file(), mDatabase, alert("!writing pretty"));
     mModified = false;
   }
 
@@ -50,24 +53,42 @@ public class Storage extends BaseObject {
     return mDatabase.transactions();
   }
 
-  public int accountBalance(int accountNumber) {
-    Integer key = accountNumber;
-    var value = mAccountBalanceMap.get(key);
-    if (value == null) {
-      long sum = 0;
-      for (var trans : transactions().values()) {
-        if (trans.debit() == accountNumber) {
-          sum += trans.amount();
-        } else if (trans.credit() == accountNumber) {
-          sum -= trans.amount();
-        }
-      }
-      value = (int) sum;
-      if (value != sum)
-        badState("account balance has overflowed:", accountNumber);
-      mAccountBalanceMap.put(key, value);
+  public void verifyAccountBalances() {
+    Map<Integer, Account.Builder> map = hashMap();
+    for (var a : accounts().values()) {
+      map.put(a.number(), a.toBuilder().balance(0));
+      pr("stored", a.number(), "=>", a);
     }
-    return value;
+
+    List<Long> deleteTransList = arrayList();
+    for (var t : transactions().values()) {
+      {
+        var dAccount = map.get(t.debit());
+        var cAccount = map.get(t.credit());
+        if (dAccount == null || cAccount == null) {
+          pr("*** transaction references missing account(s):", INDENT, t);
+          deleteTransList.add(t.timestamp());
+          continue;
+        }
+        dAccount.balance(dAccount.balance() + t.amount());
+        cAccount.balance(cAccount.balance() - t.amount());
+      }
+    }
+
+    for (var tnum : deleteTransList) {
+      deleteTransaction(tnum);
+    }
+
+    for (var a : map.values()) {
+      var orig = accounts().get(a.number());
+      if (a.balance() != orig.balance()) {
+        pr("*** account", a.number(), ":", a.name(), "balance was incorrect:", INDENT,
+            formatCurrency(orig.balance()), ", should be:", CR, formatCurrency(a.balance()));
+        accounts().put(a.number(), a.build());
+        setModified();
+      }
+    }
+    flush();
   }
 
   public Account account(int accountNumber) {
@@ -105,16 +126,38 @@ public class Storage extends BaseObject {
     if (existing != null)
       badState("transaction already exists!", INDENT, existing);
     transactions().put(t.timestamp(), t);
+    // Apply transaction to account balances
+    {
+      // Undo the effect of the transaction on account balances
+      adjustBalance(t.debit(), t.amount());
+      adjustBalance(t.credit(), -t.amount());
+    }
     setModified();
   }
 
   public void deleteTransaction(long timestamp) {
-    transactions().remove(timestamp);
+    var t = transactions().remove(timestamp);
+    if (t == null) {
+      alert("deleteTransaction, not found; timestamp:", timestamp);
+    } else {
+      // Undo the effect of the transaction on account balances
+      adjustBalance(t.debit(), -t.amount());
+      adjustBalance(t.credit(), t.amount());
+    }
     setModified();
   }
 
+  private void adjustBalance(int accountNumber, long currencyAmount) {
+    var a = account(accountNumber);
+    if (a == null) {
+      alert("adjustBalance, no such account number:", accountNumber);
+      return;
+    }
+    a = a.toBuilder().balance(a.balance() + currencyAmount).build();
+    accounts().put(a.number(), a);
+  }
+
   private Database.Builder mDatabase;
-  private Map<Integer, Integer> mAccountBalanceMap;
   private File mFile;
   private boolean mModified;
 

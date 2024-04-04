@@ -1,5 +1,6 @@
 package bk;
 
+import static bk.Util.*;
 public class CurrencyField implements LedgerField {
 
   public CurrencyField(long amount) {
@@ -12,22 +13,8 @@ public class CurrencyField implements LedgerField {
 
   @Override
   public String toString() {
-    var s = "" + mAmount;
-    var k = s.length();
-    // Ensure there are at least 3 zeroes displayed (i.e. "$0.00")
-    if (k < 3)
-      s = "000".substring(k) + s;
-
-    // Insert decimal points or commas 
-    int i = s.length() - 2;
-    s = insert(s, ".", i);
-    while (true) {
-      i -= 3;
-      if (i <= 0)
-        break;
-      s = insert(s, ",", i);
-    }
-    return "$" + s;
+    var s = formatCurrency(mAmount);
+    return s;
   }
 
   private long mAmount;

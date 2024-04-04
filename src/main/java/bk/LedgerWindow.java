@@ -224,6 +224,16 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     return (T) ent.auxData;
   }
 
+  private int indexOfAuxData(Object auxData) {
+    int j = INIT_INDEX;
+    for (var x : mEntries) {
+      j++;
+      if (x.auxData.equals(auxData))
+        return j;
+    }
+    return -1;
+  }
+
   public <T> void setCurrentRow(T auxData) {
     boolean db = false && alert("verbosity");
     if (db)
@@ -247,16 +257,6 @@ public class LedgerWindow extends JWindow implements FocusHandler {
   private static class Entry {
     Object auxData;
     List<LedgerField> fields;
-  }
-
-  private int indexOfAuxData(Object auxData) {
-    int j = INIT_INDEX;
-    for (var x : mEntries) {
-      j++;
-      if (x.auxData.equals(auxData))
-        return j;
-    }
-    return -1;
   }
 
   private List<Column> mColumns = arrayList();

@@ -203,13 +203,30 @@ public final class Util {
   private static final long MAX_CURRENCY = 100_000_000_00L;
 
   public static String formatCurrency(long cents) {
-    checkArgument(cents >= 0 && cents < MAX_CURRENCY, "currency value out of range:", cents);
-    var s = Long.toString(cents);
+    var absCents = Math.abs(cents);
+    checkArgument(absCents < MAX_CURRENCY, "currency value out of range:", cents);
+    var s = Long.toString(absCents);
     var k = s.length();
     int leadZeros = Math.max(0, 3 - k);
     s = "000".substring(0, leadZeros) + s;
     var h = s.length() - 2;
-    return s.substring(0, h) + "." + s.substring(h);
+
+    // Insert . and , where appropriate
+    var sb = new StringBuilder(s);
+    int source = sb.length() - 2;
+    char c = '.';
+    while (source > 0) {
+      sb.insert(source, c);
+      source -= 3;
+      c = ',';
+    }
+
+    sb.insert(0, '$');
+    if (cents < 0) {
+      sb.insert(0, '(');
+      sb.append(')');
+    }
+    return sb.toString();
   }
 
   public static long generateDate() {
@@ -281,9 +298,20 @@ public final class Util {
       if (db)
         pr("validating currency:", value);
       value = value.trim();
+      value = value.replace("$", "");
+      value = value.replace(",", "");
       Long amount = null;
       var result = ValidationResult.NONE;
       try {
+        boolean neg = false;
+        if (value.startsWith("(") && value.endsWith(")")) {
+          neg = true;
+          value = value.substring(1, value.length() - 1);
+        } else if (value.startsWith("-")) {
+          neg = true;
+          value = value.substring(1);
+        }
+
         if (!value.isEmpty()) {
           int j = value.lastIndexOf('.');
           if (j < 0) {
@@ -293,10 +321,12 @@ public final class Util {
         if (db)
           pr("parsing:", value);
         var d = Double.parseDouble(value);
-        var asInt = Math.round(d * 100);
-        if (Math.abs(asInt) >= MAX_CURRENCY)
+        var toLong = Math.round(d * 100);
+        if (toLong >= MAX_CURRENCY)
           throw badArg("failed to convert", value);
-        amount = asInt;
+        amount = toLong;
+        if (neg)
+          amount = -amount;
         result = new ValidationResult(formatCurrency(amount), amount);
       } catch (Throwable t) {
         if (db)
@@ -427,7 +457,7 @@ public final class Util {
     }
     if (target == null)
       return;
-    
+
     focusManager().pushReplace(target);
   }
 
@@ -466,6 +496,20 @@ public final class Util {
     }
   }
 
+  public static void rebuild(TransactionLedger ledger) {
+    if (ledger == null)
+      return;
+    ledger.rebuild();
+  }
+
+  public static void applyTransaction(Transaction t) {
+
+  }
+
+  public static void undoTransaction(Transaction t) {
+
+  }
+
   public static JWindow sTransactionsView;
   public static JWindow sAccountsView;
 
@@ -473,5 +517,20 @@ public final class Util {
 
   public static final String KEY_VIEW_TRANSACTIONS = "C:t";
   public static final String KEY_VIEW_ACCOUNTS = "C:a";
+  public static final String KEY_DELETE_TRANSACTION = "C:d";
+
+  //  static {
+  //    var m = map();
+  //    long amt = 0;
+  //    while (amt < MAX_CURRENCY) {
+  //      var x = formatCurrency(amt);
+  //      m.putNumbered("+" + amt, x);
+  //        x = formatCurrency(-amt);
+  //      m.putNumbered("-" + amt, x);
+  //      amt = amt * 10 + 9;
+  //    }
+  //    pr(m);
+  //    halt();
+  //  }
 
 }

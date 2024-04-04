@@ -76,6 +76,8 @@ public class TransactionLedger extends LedgerWindow {
   public void processKeyStroke(KeyStroke k) {
     boolean handled = false;
     Transaction a = getCurrentRow();
+
+    todo("the 'rebuild' should be a more general call for all, either add, edit, or delete");
     switch (k.getKeyType()) {
 
     case Enter:
@@ -88,6 +90,13 @@ public class TransactionLedger extends LedgerWindow {
 
     case Character: {
       switch (getCharSummary(k)) {
+
+      case KEY_DELETE_TRANSACTION:
+        if (a != null) {
+          mListener.deleteTransaction(a);
+        }
+        handled = true;
+        break;
 
       case ":a":
         mListener.addTransaction(mAccountNumber);

@@ -72,9 +72,9 @@ public class BkOper extends AppOper
     try {
       mgr.open();
       mAccounts = new AccountList(this);
-      mTransactions = new TransactionLedger(null, this);
+      mAllTransactionsLedger = new TransactionLedger(null, this);
       sAccountsView = mAccounts;
-      sTransactionsView = mTransactions;
+      sTransactionsView = mAllTransactionsLedger;
 
       // Create a root container
       mgr.pushContainer();
@@ -112,7 +112,8 @@ public class BkOper extends AppOper
 
   private BkConfig mConfig;
   private AccountList mAccounts;
-  private TransactionLedger mTransactions;
+  private TransactionLedger mAllTransactionsLedger;
+  private TransactionLedger mSpecificAccountLedger;
 
   // ------------------------------------------------------------------
   // AccountListListener
@@ -132,11 +133,11 @@ public class BkOper extends AppOper
 
   @Override
   public void viewAccount(Account account) {
-    var ledger = new TransactionLedger((t) -> t.credit() == account.number() || t.debit() == account.number(),
-        this);
+    mSpecificAccountLedger = new TransactionLedger(
+        (t) -> t.credit() == account.number() || t.debit() == account.number(), this);
     todo("!remove filter, or make it internal based on account number");
-    ledger.accountNumber(account.number());
-    focusManager().pushReplace(ledger);
+    mSpecificAccountLedger.accountNumber(account.number());
+    focusManager().pushReplace(mSpecificAccountLedger);
   }
 
   //------------------------------------------------------------------
@@ -165,14 +166,23 @@ public class BkOper extends AppOper
   public void editTransaction(int forAccount, Transaction t) {
     var form = new TransactionForm(TransactionForm.TYPE_EDIT, t, this, forAccount);
     focusManager().pushAppend(form);
-    //    addToMainView(form);
   }
 
   @Override
   public void addTransaction(int forAccount) {
     var form = new TransactionForm(TransactionForm.TYPE_ADD, null, this, forAccount);
     focusManager().pushAppend(form);
-    // addToMainView(form);
+  }
+
+  @Override
+  public void deleteTransaction(Transaction t) {
+    storage().deleteTransaction(t.timestamp());
+    
+    // Rebuild any ledgers that might contain this transaction
+    if (mAllTransactionsLedger != null)
+      mAllTransactionsLedger.rebuild();
+    if (mSpecificAccountLedger != null)
+      mSpecificAccountLedger.rebuild();
   }
 
   //------------------------------------------------------------------
@@ -184,9 +194,9 @@ public class BkOper extends AppOper
     form.remove();
     if (t == null)
       return;
-    mTransactions.rebuild();
-    mTransactions.setCurrentRow(t);
-    mTransactions.repaint();
+    mAllTransactionsLedger.rebuild();
+    mAllTransactionsLedger.setCurrentRow(t);
+    mAllTransactionsLedger.repaint();
     focusManager().pop();
   }
 }

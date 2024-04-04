@@ -7,4 +7,6 @@ public interface TransactionListener {
   void editTransaction(int forAccount, Transaction t);
 
   void addTransaction(int forAccount);
+  
+  void deleteTransaction(Transaction t);
 }
