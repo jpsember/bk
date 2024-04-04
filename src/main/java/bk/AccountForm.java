@@ -22,7 +22,7 @@ public class AccountForm extends FormWindow {
     account = nullTo(account, Account.DEFAULT_INSTANCE).build();
     mOriginalAccount = account;
     mType = type;
-    mSizeExpr = 12;
+    setSizeChars(12);
     mListener = listener;
     mNumber = validator(ACCOUNT_VALIDATOR).value(account.number()).addField("#");
     mName = validator(ACCOUNT_NAME_VALIDATOR).value(account.name()).fieldWidth(ACCOUNT_NAME_MAX_LENGTH)

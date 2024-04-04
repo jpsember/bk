@@ -31,7 +31,7 @@ public class TransactionForm extends FormWindow {
     }
 
     mType = type;
-    mSizeExpr = 12;
+    setSizeChars(12);
 
     var dt = b.date();
     if (dt == 0)

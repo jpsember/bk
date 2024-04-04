@@ -61,8 +61,9 @@ public class JWindow extends BaseObject {
   }
 
   public void addChild(JWindow child) {
-    if (mChildren.contains(child)) badState("attempt to add child twice!");
-    checkState(child != this,"attempt to add window as child to itself");
+    if (mChildren.contains(child))
+      badState("attempt to add child twice!");
+    checkState(child != this, "attempt to add window as child to itself");
     mChildren.add(child);
     child.mParent = this;
     setLayoutInvalid();
@@ -157,6 +158,16 @@ public class JWindow extends BaseObject {
     setPartialPaintValid(false);
   }
 
+  public void setSizeChars(int chars) {
+    checkArgument(chars >= 1, "illegal number of chars");
+    mSizeExpr = chars;
+  }
+
+  public void setSizePct(int pct) {
+    checkArgument(pct >= 1 && pct <= 100, "illegal percentage");
+    mSizeExpr = -pct;
+  }
+
   void layout() {
   }
 
@@ -203,8 +214,7 @@ public class JWindow extends BaseObject {
     mFlags = (mFlags & ~FLG_BORDER) | type;
   }
 
-  
-  int mSizeExpr;
+  private int mSizeExpr = -50;
 
   private int mFlags;
   private static final int FLG_BORDER = 0x3;

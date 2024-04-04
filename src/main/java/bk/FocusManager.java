@@ -142,11 +142,9 @@ public class FocusManager extends BaseObject {
         break;
       case METHOD_REPLACE:
         top.removeChildren();
-        window.mSizeExpr = -100;
         top.addChild(window);
         break;
       case METHOD_APPEND:
-        window.mSizeExpr = -100;
         top.addChild(window);
         break;
       }
@@ -203,8 +201,6 @@ public class FocusManager extends BaseObject {
     List<JWindow> windows;
   }
 
-  private Stack<StackEntry> mStack = new Stack<>();
-
   public boolean popIfPossible() {
     // Don't pop the last container
     if (mStack.size() == 0)
@@ -212,4 +208,7 @@ public class FocusManager extends BaseObject {
     pop();
     return true;
   }
+
+  private Stack<StackEntry> mStack = new Stack<>();
+
 }
