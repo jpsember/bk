@@ -19,6 +19,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
   public static final Filter ACCEPT_ALL = (t) -> true;
 
+  @Deprecated // Recycle these objects so we can attach ChangeListeners without worrying about memory leaks
   public TransactionLedger(Filter filter, TransactionListener listener) {
     mFilter = nullTo(filter, ACCEPT_ALL);
     mListener = listener;
