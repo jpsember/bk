@@ -337,4 +337,17 @@ public class WinMgr extends BaseObject {
   private Terminal mTerminal;
   private AbstractScreen mScreen;
 
+  public boolean inView(JWindow window) {
+    checkNotNull(window);
+    var tc = topLevelContainer();
+    while (true) {
+      if (window == null)
+        break;
+      if (window == tc)
+        return true;
+      window = window.parent();
+    }
+    return false;
+  }
+
 }

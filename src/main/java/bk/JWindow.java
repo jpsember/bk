@@ -41,11 +41,18 @@ public class JWindow extends BaseObject {
   }
 
   public void removeChild(JWindow child) {
+    boolean removed = removeChildIfExists(child);
+    checkState(removed, "window", child, "is not a child of", this);
+  }
+
+  public boolean removeChildIfExists(JWindow child) {
     var i = mChildren.indexOf(child);
-    checkState(i >= 0, "window", child, "is not a child of", this);
+    if (i < 0)
+      return false;
     mChildren.remove(i);
     child.mParent = null;
     setLayoutInvalid();
+    return true;
   }
 
   public void removeChildren() {
@@ -54,6 +61,8 @@ public class JWindow extends BaseObject {
   }
 
   public void addChild(JWindow child) {
+    if (mChildren.contains(child)) badState("attempt to add child twice!");
+    checkState(child != this,"attempt to add window as child to itself");
     mChildren.add(child);
     child.mParent = this;
     setLayoutInvalid();
@@ -185,7 +194,7 @@ public class JWindow extends BaseObject {
   }
 
   int getSizeExpr() {
-    checkArgument(mSizeExpr != 0, "size expression must not be zero");
+    checkArgument(mSizeExpr != 0, "size expression must not be zero; window:", this);
     return mSizeExpr;
   }
 

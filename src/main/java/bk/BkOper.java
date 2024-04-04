@@ -76,7 +76,6 @@ public class BkOper extends AppOper
       sAccountsView = mAccounts;
       sTransactionsView = mTransactions;
 
-      
       // Create a root container
       mgr.pushContainer();
       {
@@ -104,7 +103,7 @@ public class BkOper extends AppOper
         //        }
       }
       mgr.doneConstruction();
-      focusManager().push(mAccounts);
+      focusManager().pushReplace(mAccounts);
       mgr.mainLoop();
     } catch (Throwable t) {
       setError(mgr.closeIfError(t));
@@ -122,23 +121,22 @@ public class BkOper extends AppOper
   @Override
   public void editAccount(Account account) {
     var form = new AccountForm(AccountForm.TYPE_EDIT, account, this);
-    addToMainView(form);
+    focusManager().pushAppend(form);
   }
 
   @Override
   public void addAccount() {
     var form = new AccountForm(AccountForm.TYPE_ADD, null, this);
-    addToMainView(form);
+    focusManager().pushAppend(form);
   }
 
   @Override
   public void viewAccount(Account account) {
     var ledger = new TransactionLedger((t) -> t.credit() == account.number() || t.debit() == account.number(),
         this);
-    todo("remove filter, or make it internal based on account number");
+    todo("!remove filter, or make it internal based on account number");
     ledger.accountNumber(account.number());
-    
-    focusManager().push(ledger);
+    focusManager().pushReplace(ledger);
   }
 
   //------------------------------------------------------------------
@@ -166,13 +164,15 @@ public class BkOper extends AppOper
   @Override
   public void editTransaction(int forAccount, Transaction t) {
     var form = new TransactionForm(TransactionForm.TYPE_EDIT, t, this, forAccount);
-    addToMainView(form);
+    focusManager().pushAppend(form);
+    //    addToMainView(form);
   }
 
   @Override
   public void addTransaction(int forAccount) {
     var form = new TransactionForm(TransactionForm.TYPE_ADD, null, this, forAccount);
-    addToMainView(form);
+    focusManager().pushAppend(form);
+    // addToMainView(form);
   }
 
   //------------------------------------------------------------------

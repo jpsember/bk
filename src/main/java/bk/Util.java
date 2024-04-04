@@ -427,42 +427,9 @@ public final class Util {
     }
     if (target == null)
       return;
-    focusManager().push((FocusHandler) target);
-  }
-
-  public static FocusHandler addToMainView(JWindow window) {
-    FocusHandler focusToRestoreLater = null;
-
-    var m = winMgr();
-    var c = m.topLevelContainer();
-    c.addChild(window);
-    c.setLayoutInvalid();
-
-    {
-      var fm = focusManager();
-      var handlerList = fm.handlers(window);
-      if (!handlerList.isEmpty()) {
-        focusToRestoreLater = fm.focus();
-        fm.set(handlerList.get(0));
-      }
-    }
-
-    return focusToRestoreLater;
-  }
-
-  public static void switchToView(JWindow target) {
-    var m = winMgr();
-    var parent = m.topLevelContainer();
-    var ch = parent.children();
-    if (ch.contains(target))
-      return;
-    while (!ch.isEmpty())
-      ch.get(0).remove();
-
-    target.setSize(-100); // fill entire view
-    parent.addChild(target);
-    if (target instanceof FocusHandler)
-      focusManager().set((FocusHandler) target);
+    
+    // If the focused view is already 
+    focusManager().pushReplace(target);
   }
 
   /**
