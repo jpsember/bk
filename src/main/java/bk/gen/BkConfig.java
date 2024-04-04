@@ -1,12 +1,14 @@
 package bk.gen;
 
+import java.io.File;
 import js.data.AbstractData;
+import js.file.Files;
 import js.json.JSMap;
 
 public class BkConfig implements AbstractData {
 
-  public String notUsedYet() {
-    return mNotUsedYet;
+  public File file() {
+    return mFile;
   }
 
   @Override
@@ -14,7 +16,7 @@ public class BkConfig implements AbstractData {
     return new Builder(this);
   }
 
-  protected static final String _0 = "not_used_yet";
+  protected static final String _0 = "file";
 
   @Override
   public String toString() {
@@ -24,7 +26,7 @@ public class BkConfig implements AbstractData {
   @Override
   public JSMap toJson() {
     JSMap m = new JSMap();
-    m.putUnsafe(_0, mNotUsedYet);
+    m.putUnsafe(_0, mFile.toString());
     return m;
   }
 
@@ -39,7 +41,13 @@ public class BkConfig implements AbstractData {
   }
 
   private BkConfig(JSMap m) {
-    mNotUsedYet = m.opt(_0, "");
+    {
+      mFile = Files.DEFAULT;
+      String x = m.opt(_0, (String) null);
+      if (x != null) {
+        mFile = new File(x);
+      }
+    }
   }
 
   public static Builder newBuilder() {
@@ -55,7 +63,7 @@ public class BkConfig implements AbstractData {
     BkConfig other = (BkConfig) object;
     if (other.hashCode() != hashCode())
       return false;
-    if (!(mNotUsedYet.equals(other.mNotUsedYet)))
+    if (!(mFile.equals(other.mFile)))
       return false;
     return true;
   }
@@ -65,19 +73,19 @@ public class BkConfig implements AbstractData {
     int r = m__hashcode;
     if (r == 0) {
       r = 1;
-      r = r * 37 + mNotUsedYet.hashCode();
+      r = r * 37 + mFile.hashCode();
       m__hashcode = r;
     }
     return r;
   }
 
-  protected String mNotUsedYet;
+  protected File mFile;
   protected int m__hashcode;
 
   public static final class Builder extends BkConfig {
 
     private Builder(BkConfig m) {
-      mNotUsedYet = m.mNotUsedYet;
+      mFile = m.mFile;
     }
 
     @Override
@@ -94,12 +102,12 @@ public class BkConfig implements AbstractData {
     @Override
     public BkConfig build() {
       BkConfig r = new BkConfig();
-      r.mNotUsedYet = mNotUsedYet;
+      r.mFile = mFile;
       return r;
     }
 
-    public Builder notUsedYet(String x) {
-      mNotUsedYet = (x == null) ? "" : x;
+    public Builder file(File x) {
+      mFile = (x == null) ? Files.DEFAULT : x;
       return this;
     }
 
@@ -108,7 +116,7 @@ public class BkConfig implements AbstractData {
   public static final BkConfig DEFAULT_INSTANCE = new BkConfig();
 
   private BkConfig() {
-    mNotUsedYet = "";
+    mFile = Files.DEFAULT;
   }
 
 }

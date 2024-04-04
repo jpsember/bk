@@ -1,3 +1,4 @@
 fields {
-  string not_used_yet;
+  // The location of the database
+  File file;
 }

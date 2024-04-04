@@ -3,11 +3,15 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
+import java.io.File;
+
 import bk.gen.Account;
 import bk.gen.BkConfig;
 import bk.gen.Transaction;
 import js.app.AppOper;
+import js.app.HelpFormatter;
 import js.base.BasePrinter;
+import js.file.Files;
 
 public class BkOper extends AppOper
     implements AccountListListener, AccountForm.Listener, TransactionListener, TransactionForm.Listener {
@@ -29,7 +33,9 @@ public class BkOper extends AppOper
 
   @Override
   protected void longHelp(BasePrinter b) {
-    todo("more longHelp to come later...");
+    var hf = new HelpFormatter();
+    hf.addItem("[ file <filename> ]", "file containing database (default: books.json)");
+    b.pr(hf);
     super.longHelp(b);
   }
 
@@ -45,7 +51,13 @@ public class BkOper extends AppOper
     if (EXP)
       doExp();
 
-    storage().read();
+    {
+      var f = Files.ifEmpty(config().file(), new File("database.json"));
+      f = Files.addExpectedExtension(f, Files.EXT_JSON);
+      if (!f.exists())
+        setError("Cannot locate database file:", f);
+      storage().read(f);
+    }
 
     var mgr = winMgr();
 
@@ -148,12 +160,7 @@ public class BkOper extends AppOper
   @Override
   public void deleteTransaction(Transaction t) {
     storage().deleteTransaction(t.timestamp());
-changeManager().registerModifiedTransaction(t);
-//    // Rebuild any ledgers that might contain this transaction
-//    if (mAllTransactionsLedger != null)
-//      mAllTransactionsLedger.rebuild();
-//    if (mSpecificAccountLedger != null)
-//      mSpecificAccountLedger.rebuild();
+    changeManager().registerModifiedTransaction(t);
   }
 
   //------------------------------------------------------------------

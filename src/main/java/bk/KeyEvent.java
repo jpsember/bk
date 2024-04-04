@@ -34,7 +34,7 @@ public class KeyEvent {
       break;
     }
     mString = sb.toString();
-    pr("built KeyEvent from keystroke:", k, "string:", mString);
+    //pr("built KeyEvent from keystroke:", k, "string:", mString);
   }
 
   @Override

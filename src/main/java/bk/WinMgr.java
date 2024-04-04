@@ -190,8 +190,6 @@ public class WinMgr extends BaseObject {
       if (keyStroke2 != null) {
         var key = new KeyEvent(keyStroke2);
 
-        pr("key:", key);
-
         if (quitCommand(key)) {
           quit();
           return;
@@ -200,12 +198,9 @@ public class WinMgr extends BaseObject {
         boolean processed = false;
 
         if (key.is(KeyEvent.ESCAPE)) {
-          pr("...ESCAPE pressed...");
           if (focusManager().popIfPossible()) {
-            pr(".....pop was possible");
             processed = true;
           }
-          pr("....no pop");
         }
 
         if (!processed)

@@ -38,11 +38,6 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     return this;
   }
 
-  public WidgetWindow setShortcut(String shortcutDescr) {
-    mShortcut = shortcutDescr;
-    return this;
-  }
-
   public WidgetWindow focusRootWindow(JWindow rootWindow) {
     mFocusRootWindow = rootWindow;
     return this;
@@ -72,7 +67,6 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     var valueWidth = mWidth;
 
     boolean hf = hasFocus();
-
 
     if (isButton()) {
       r.pushStyle(hf ? STYLE_INVERSE : STYLE_NORMAL);
@@ -109,6 +103,18 @@ public class WidgetWindow extends JWindow implements FocusHandler {
 
   public ValidationResult validationResult() {
     return nullTo(mValidationResult, ValidationResult.NONE);
+  }
+
+  /**
+   * If the field is invalid, make it the focus and return true; else, return
+   * false
+   */
+  public boolean alert() {
+    if (!valid()) {
+      focusManager().set(this);
+      return true;
+    }
+    return false;
   }
 
   public boolean valid() {
@@ -224,6 +230,5 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   private JWindow mFocusRootWindow;
   private ButtonListener mButtonListener;
   private ValidationResult mValidationResult;
-  private String mShortcut;
 
 }

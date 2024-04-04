@@ -11,13 +11,15 @@ import bk.gen.Account;
 import bk.gen.Database;
 import bk.gen.Transaction;
 import js.base.BaseObject;
+import js.file.BackupManager;
 import js.file.Files;
 import js.json.JSMap;
 
 public class Storage extends BaseObject {
 
-  public void read() {
+  public void read(File file) {
     //alertVerbose();
+    withFile(file);
     var m = JSMap.fromFileIfExists(file());
     var db = Files.parseAbstractData(Database.DEFAULT_INSTANCE, m);
     mDatabase = db.toBuilder();
@@ -33,16 +35,33 @@ public class Storage extends BaseObject {
   public void flush() {
     if (!mModified)
       return;
-    if (true || !alert("disabling writing for now"))
-      Files.S.writeWithPrettyIf(file(), mDatabase, alert("!writing pretty"));
+
+    if (file().exists()) {
+      // Write to a temporary file; then, if successful,
+      // rename the old file (if it exists) to something, rename the temp file to 
+      // the target file, and delete the old (or place somewhere for safety)
+
+      todo("once happy with backup manager, avoid temporary stuff; just backup the file then overwrite");
+      var tmp = Files.createTempFile("_bk_", null);
+      Files.S.write(tmp, mDatabase);
+      bkup().makeBackup(file());
+      Files.S.deleteFile(file());
+      Files.S.moveFile(tmp, file());
+      Files.S.deleteFile(tmp);
+    } else {
+    //  if (true || !alert("disabling writing for now"))
+        Files.S.writeWithPrettyIf(file(), mDatabase, alert("!writing pretty"));
+    }
     mModified = false;
   }
 
+  private void withFile(File file) {
+    file = Files.absolute(Files.ifEmpty(file, "database.json"));
+    mFile = file;
+    log("storage file:", INDENT, Files.infoMap(mFile));
+  }
+
   private File file() {
-    if (mFile == null) {
-      mFile = new File("accounts.json");
-      log("storage file:", INDENT, Files.infoMap(mFile));
-    }
     return mFile;
   }
 
@@ -197,6 +216,15 @@ public class Storage extends BaseObject {
     accounts().put(a.number(), a);
   }
 
+  private BackupManager bkup() {
+    if (mBackups == null) {
+      mBackups = new BackupManager(Files.S, Files.parent(file()));
+      mBackups.alertVerbose();
+    }
+    return mBackups;
+  }
+
+  private BackupManager mBackups;
   private Database.Builder mDatabase;
   private File mFile;
   private boolean mModified;

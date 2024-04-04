@@ -36,11 +36,11 @@ public class TransactionForm extends FormWindow {
     var dt = b.date();
     if (dt == 0)
       dt = epochSecondsToday();
-    mdate = validator(DATE_VALIDATOR).value(dt).addField("Date");
-    mamount = validator(CURRENCY_VALIDATOR).value(b.amount()).addField("Amount");
-    mdr = validator(ACCOUNT_VALIDATOR).value(b.debit()).addField("Dr");
-    mcr = validator(ACCOUNT_VALIDATOR).value(b.credit()).addField("Cr");
-    mdesc = validator(DESCRIPTION_VALIDATOR).value(b.description()).fieldWidth(80).addField("Description");
+    mDate = validator(DATE_VALIDATOR).value(dt).addField("Date");
+    mAmount = validator(CURRENCY_VALIDATOR).value(b.amount()).addField("Amount");
+    mDr = validator(ACCOUNT_VALIDATOR).value(b.debit()).addField("Dr");
+    mCr = validator(ACCOUNT_VALIDATOR).value(b.credit()).addField("Cr");
+    mDesc = validator(DESCRIPTION_VALIDATOR).value(b.description()).fieldWidth(80).addField("Description");
     addVertSpace(1);
     addButton("Ok", () -> okHandler());
     addButton("Cancel", () -> cancelHandler());
@@ -58,37 +58,46 @@ public class TransactionForm extends FormWindow {
   }
 
   private void okHandler() {
+
     String problem = "One or more fields is invalid.";
     var tr = Transaction.newBuilder();
 
     do {
-      if (!(mdate.valid() && mamount.valid() && mdr.valid() && mcr.valid() && mdesc.valid()))
+      if (!mDate.valid()) {
+        focusManager().set(mDate);
+      }
+      if (mDate.alert() || mAmount.alert() || mDr.alert() || mCr.alert() || mDesc.alert()) {
         break;
+      }
       problem = null;
 
       tr.timestamp(System.currentTimeMillis());
-      tr.date(mdate.validResult());
-      tr.amount(mamount.validResult());
-      tr.debit(mdr.validResult());
-      tr.credit(mcr.validResult());
-      tr.description(mdesc.validResult());
+      tr.date(mDate.validResult());
+      tr.amount(mAmount.validResult());
+      tr.debit(mDr.validResult());
+      tr.credit(mCr.validResult());
+      tr.description(mDesc.validResult());
 
       problem = validateTransaction(tr);
-      if (problem != null)
+      if (problem != null) {
+        pr("problem:", problem);
         break;
+      }
 
       problem = "Transaction must involve this account";
       if (mAccountNumber != 0) {
-        if ((Integer) mdr.validResult() != mAccountNumber && (Integer) mcr.validResult() != mAccountNumber)
+        if ((Integer) mDr.validResult() != mAccountNumber && (Integer) mCr.validResult() != mAccountNumber)
           break;
       }
       problem = null;
     } while (false);
 
     if (problem != null) {
+      pr("setMessage:",problem);
       setMessage(problem);
       return;
     }
+
     Transaction edited = null;
 
     if (mType == TYPE_ADD) {
@@ -115,7 +124,7 @@ public class TransactionForm extends FormWindow {
   private Listener mListener;
   private int mType;
   private FocusHandler mOldFocus;
-  private WidgetWindow mdate, mamount, mdr, mcr, mdesc;
+  private WidgetWindow mDate, mAmount, mDr, mCr, mDesc;
   private int mAccountNumber;
   private Transaction mOrig;
 }
