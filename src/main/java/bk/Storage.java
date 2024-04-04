@@ -32,7 +32,7 @@ public class Storage extends BaseObject {
   public void flush() {
     if (!mModified)
       return;
-    if (false && !alert("disabling writing for now"))
+    if (true || !alert("disabling writing for now"))
       Files.S.writeWithPrettyIf(file(), mDatabase, alert("!writing pretty"));
     mModified = false;
   }
