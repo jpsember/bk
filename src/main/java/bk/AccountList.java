@@ -8,6 +8,7 @@ import java.util.List;
 import com.googlecode.lanterna.input.KeyStroke;
 
 import bk.gen.Account;
+import bk.gen.Alignment;
 import bk.gen.Column;
 import bk.gen.Datatype;
 
@@ -21,12 +22,11 @@ public class AccountList extends LedgerWindow implements ChangeListener {
   }
 
   private void addColumns() {
-    final int NAMED_ACCOUNT_WIDTH = 25;
     addColumn(Column.newBuilder().name("#").datatype(Datatype.ACCOUNT_NUMBER));
     addColumn(VERT_SEP);
-    addColumn(Column.newBuilder().name("Name").datatype(Datatype.TEXT).width(NAMED_ACCOUNT_WIDTH));
+    addColumn(Column.newBuilder().name("Name").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NAME));
     addColumn(VERT_SEP);
-    addColumn(Column.newBuilder().name("Balance").datatype(Datatype.CURRENCY));
+    addColumn(Column.newBuilder().name("Balance").alignment(Alignment.RIGHT).datatype(Datatype.CURRENCY));
   }
 
   public void rebuild() {
@@ -89,11 +89,11 @@ public class AccountList extends LedgerWindow implements ChangeListener {
     if (!handled)
       super.processKeyStroke(k);
   }
-  
+
   @Override
   public void dataChanged(List<Integer> accountIds, List<Long> transactionIds) {
-rebuild();
-todo("!verify that it attempts to restore cursor to more or less the same location");
+    rebuild();
+    todo("!verify that it attempts to restore cursor to more or less the same location");
   }
 
   private AccountListListener mListener;

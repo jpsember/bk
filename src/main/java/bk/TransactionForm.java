@@ -40,7 +40,7 @@ public class TransactionForm extends FormWindow {
     mamount = validator(CURRENCY_VALIDATOR).value(b.amount()).addField("Amount");
     mdr = validator(ACCOUNT_VALIDATOR).value(b.debit()).addField("Dr");
     mcr = validator(ACCOUNT_VALIDATOR).value(b.credit()).addField("Cr");
-    mdesc = validator(DESCRIPTION_VALIDATOR).value(b.description()).addField("Description");
+    mdesc = validator(DESCRIPTION_VALIDATOR).value(b.description()).fieldWidth(80).addField("Description");
     addVertSpace(1);
     addButton("Ok", () -> okHandler());
     addButton("Cancel", () -> cancelHandler());

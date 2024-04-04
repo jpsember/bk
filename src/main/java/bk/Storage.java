@@ -71,6 +71,7 @@ public class Storage extends BaseObject {
         }
         dAccount.balance(dAccount.balance() + t.amount());
         cAccount.balance(cAccount.balance() - t.amount());
+        //pr("credit balance for:",cAccount.number(),"sub:",formatCurrency(t.amount()),"now:",formatCurrency(cAccount.balance()),"desc:",t.description());
       }
     }
 

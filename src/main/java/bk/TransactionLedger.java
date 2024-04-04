@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.googlecode.lanterna.input.KeyStroke;
 
+import bk.gen.Alignment;
 import bk.gen.Column;
 import bk.gen.Datatype;
 import bk.gen.Transaction;
@@ -20,7 +21,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   public static final Filter ACCEPT_ALL = (t) -> true;
 
   public TransactionLedger() {
-  changeManager().addListener(this);
+    changeManager().addListener(this);
   }
 
   public void prepare(Filter filter, TransactionListener listener) {
@@ -37,29 +38,32 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   private void addColumns() {
     if (mColumnsAdded)
       return;
-    final int NAMED_ACCOUNT_WIDTH = 25;
-    addColumn(Column.newBuilder().name("Date").datatype(Datatype.DATE));
+    addColumn(Column.newBuilder().name("Date").datatype(Datatype.DATE).width(CHARS_DATE));
     addColumn(VERT_SEP);
-    addColumn(Column.newBuilder().name("Amount").datatype(Datatype.CURRENCY));
+    addColumn(Column.newBuilder().name("Amount").alignment(Alignment.RIGHT).datatype(Datatype.CURRENCY)
+        .width(CHARS_CURRENCY));
     addColumn(VERT_SEP);
-    addColumn(Column.newBuilder().name("Dr").datatype(Datatype.TEXT).width(NAMED_ACCOUNT_WIDTH));
+    addColumn(Column.newBuilder().name("Dr").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NUMBER_AND_NAME));
     addColumn(VERT_SEP);
-    addColumn(Column.newBuilder().name("Cr").datatype(Datatype.TEXT).width(NAMED_ACCOUNT_WIDTH));
+    addColumn(Column.newBuilder().name("Cr").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NUMBER_AND_NAME));
     addColumn(VERT_SEP);
-    addColumn(Column.newBuilder().name("Description").datatype(Datatype.TEXT).width(40));
+    addColumn(
+        Column.newBuilder().name("Description").datatype(Datatype.TEXT).width(CHARS_TRANSACTION_DESCRIPTION));
     mColumnsAdded = true;
   }
 
   public void rebuild() {
-
+    checkState(prepared());
     var currentTrans = getCurrentRow();
     clearEntries();
 
     var trans = storage().transactions();
     List<Transaction> sorted = arrayList();
     for (var t : trans.values())
-      if (mFilter.accept(t))
+      if (mFilter.accept(t)) {
         sorted.add(t);
+    //    pr("adding transaction to be sorted:",INDENT,t);
+      }
     sorted.sort(TRANSACTION_COMPARATOR);
 
     for (var t : sorted) {
@@ -129,8 +133,14 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
   @Override
   public void dataChanged(List<Integer> accountIds, List<Long> transactionIds) {
+    if (!prepared())
+      return;
     rebuild();
     todo("!verify that it attempts to restore cursor to more or less the same location");
+  }
+
+  private boolean prepared() {
+    return mFilter != null;
   }
 
   private Filter mFilter;

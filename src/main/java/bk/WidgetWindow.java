@@ -64,7 +64,9 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     var b = r.clipBounds();
     b = b.withInset(1, 0);
     var SEP = 1;
-    var labelWidth = b.width / 2;
+    
+    
+    var labelWidth = Math.min(b.width / 2,16);
     var valueWidth = mWidth;
 
     boolean hf = hasFocus();

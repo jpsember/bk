@@ -9,12 +9,15 @@ import java.util.Stack;
 import js.base.BaseObject;
 import js.geometry.MyMath;
 
+/**
+ * Manages keyboard focus, and handles a stack of windows that have the focus.
+ */
 public class FocusManager extends BaseObject {
 
   public static final FocusManager SHARED_INSTANCE;
 
   private FocusManager() {
-    alertVerbose();
+    //alertVerbose();
   }
 
   public FocusHandler focus() {
@@ -87,6 +90,18 @@ public class FocusManager extends BaseObject {
 
   private static final int METHOD_APPEND = 0, METHOD_REPLACE = 1;
 
+  public void setTopLevelContainer(JContainer c) {
+    mOurTopLevelContainer = c;
+  }
+
+  /**
+   * Have next pushed window be the new top level container
+   */
+  public FocusManager asNewTopLevel() {
+    mNewTopLevelFlag = true;
+    return this;
+  }
+
   /**
    * Push focus on stack, append window to top level container, and make it the
    * new focus
@@ -125,13 +140,14 @@ public class FocusManager extends BaseObject {
 
     var mgr = winMgr();
     checkNotNull(window);
-    var top = mgr.topLevelContainer();
+    var top = ourTopLevelContainer();
     checkState(top != window);
 
     var ent = new StackEntry(method, mFocus);
+    ent.oldTopLevelContainer = top;
     ent.windows.addAll(top.children());
 
-    // If window is already in the hierarchy, make sure it's parent is the top level container
+    // If window is already in the hierarchy, make sure its parent is the top level container
     if (mgr.inView(window)) {
       checkState(window.parent() == top, "window is not within top level container, instead it's within",
           window.parent().name());
@@ -149,6 +165,10 @@ public class FocusManager extends BaseObject {
         break;
       }
     }
+    if (mNewTopLevelFlag) {
+      mOurTopLevelContainer = window;
+    }
+    mNewTopLevelFlag = false;
     mStack.push(ent);
     log("...pushed entry to stack, size now:", mStack.size());
     trySettingFocus(window);
@@ -178,26 +198,25 @@ public class FocusManager extends BaseObject {
       badState("FocusHandler stack is empty");
     }
 
-    var mgr = winMgr();
     var ent = mStack.pop();
-    var top = mgr.topLevelContainer();
+    var top = ourTopLevelContainer();
     top.removeChildren();
     for (var child : ent.windows) {
       top.addChild(child);
     }
-
+    mOurTopLevelContainer = ent.oldTopLevelContainer;
     set(ent.oldFocusHandler);
   }
 
   private static class StackEntry {
     StackEntry(int method, FocusHandler handlerToSave) {
-      //this.method = method;
       this.windows = arrayList();
       this.oldFocusHandler = handlerToSave;
+
     }
 
     FocusHandler oldFocusHandler;
-    //int method;
+    JWindow oldTopLevelContainer;
     List<JWindow> windows;
   }
 
@@ -209,6 +228,15 @@ public class FocusManager extends BaseObject {
     return true;
   }
 
+  private JWindow ourTopLevelContainer() {
+    var c = mOurTopLevelContainer;
+    if (c == null)
+      c = winMgr().topLevelContainer();
+    return c;
+  }
+
   private Stack<StackEntry> mStack = new Stack<>();
+  private boolean mNewTopLevelFlag;
+  private JWindow mOurTopLevelContainer;
 
 }

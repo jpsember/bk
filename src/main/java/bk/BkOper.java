@@ -58,34 +58,23 @@ public class BkOper extends AppOper
       sAccountsView = mAccounts;
       sTransactionsView = mAllTransactionsLedger;
 
-      // Create a root container
-      mgr.pushContainer();
-      {
+      // Create a root container that has a horizontal layout, with accounts on the left
+      mgr.horz().pushContainer();
 
-        {
-          mgr.pct(30);
-          mgr.thickBorder();
-          mgr.window(mAccounts);
-          
-        }
-        //        mgr.pct(75);
-        //        {
-        //          //mgr.horz().pushContainer();
-        //          {
-        //            // mgr.chars(15).window();
-        //            mgr.roundedBorder();
-        //            //            if (false)
-        //            //              mgr.handler(ourLedger);
-        //            // mgr.handler(form);
-        //            mgr.window(form);
-        //            //            mgr.thinBorder();
-        //            //            mgr.pct(20).window();
-        //          }
-        //          //mgr.popContainer();
-        //        }
+      {
+        mgr.pct(30);
+        mgr.thickBorder();
+        mgr.window(mAccounts);
       }
+      {
+        mgr.pct(70);
+        var c = new JContainer();
+        mgr.pushContainer(c);
+        focusManager().setTopLevelContainer(c);
+        mgr.popContainer();
+      }
+
       mgr.doneConstruction();
-     // focusManager().pushReplace(mAccounts);
       mgr.mainLoop();
     } catch (Throwable t) {
       setError(mgr.closeIfError(t));
@@ -159,12 +148,12 @@ public class BkOper extends AppOper
   @Override
   public void deleteTransaction(Transaction t) {
     storage().deleteTransaction(t.timestamp());
-
-    // Rebuild any ledgers that might contain this transaction
-    if (mAllTransactionsLedger != null)
-      mAllTransactionsLedger.rebuild();
-    if (mSpecificAccountLedger != null)
-      mSpecificAccountLedger.rebuild();
+changeManager().registerModifiedTransaction(t);
+//    // Rebuild any ledgers that might contain this transaction
+//    if (mAllTransactionsLedger != null)
+//      mAllTransactionsLedger.rebuild();
+//    if (mSpecificAccountLedger != null)
+//      mSpecificAccountLedger.rebuild();
   }
 
   //------------------------------------------------------------------

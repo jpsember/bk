@@ -78,7 +78,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
         } else {
 
           var ent = mEntries.get(entNum);
-
+//pr("rendering entry number:",entNum, ent.fields);
           // Render the fields
           var j = INIT_INDEX;
           for (var col : mColumns) {
@@ -192,6 +192,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     var ent = new Entry();
     ent.auxData = auxData;
     ent.fields = new ArrayList<>(fields);
+    //pr("added entry #",mEntries.size(),"fields:",ent.fields);
     mEntries.add(ent);
   }
 

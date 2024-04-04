@@ -112,7 +112,7 @@ public final class Util {
     long min = sEpochSecondsToday - years20;
     long max = sEpochSecondsToday + years20;
     if (epochSeconds < min || epochSeconds > max)
-      badArg("epoch seconds:", epochSeconds, "is out of range of", min, max);
+     pr("epoch seconds:", epochSeconds, "is out of range of", min, max);
     var inst = Instant.ofEpochSecond(epochSeconds).atZone(sLocalTimeZoneId);
     return sDateFormatter.format(inst);
   }
@@ -550,4 +550,11 @@ public final class Util {
   }
 
   private static ChangeManager sChangeManager;
+
+  public static final int CHARS_ACCOUNT_NAME = 16;
+  public static final int CHARS_DATE = 10;
+  public static final int CHARS_CURRENCY = 13;
+  public static final int CHARS_TRANSACTION_DESCRIPTION = 30;
+  public static final int CHARS_ACCOUNT_NUMBER_AND_NAME = 18;
+
 }
