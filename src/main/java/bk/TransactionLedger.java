@@ -19,11 +19,14 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
   public static final Filter ACCEPT_ALL = (t) -> true;
 
-  @Deprecated // Recycle these objects so we can attach ChangeListeners without worrying about memory leaks
-  public TransactionLedger(Filter filter, TransactionListener listener) {
+  public TransactionLedger() {
+  changeManager().addListener(this);
+  }
+
+  public void prepare(Filter filter, TransactionListener listener) {
+    addColumns();
     mFilter = nullTo(filter, ACCEPT_ALL);
     mListener = listener;
-    addColumns();
     rebuild();
   }
 
@@ -32,6 +35,8 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   }
 
   private void addColumns() {
+    if (mColumnsAdded)
+      return;
     final int NAMED_ACCOUNT_WIDTH = 25;
     addColumn(Column.newBuilder().name("Date").datatype(Datatype.DATE));
     addColumn(VERT_SEP);
@@ -42,6 +47,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     addColumn(Column.newBuilder().name("Cr").datatype(Datatype.TEXT).width(NAMED_ACCOUNT_WIDTH));
     addColumn(VERT_SEP);
     addColumn(Column.newBuilder().name("Description").datatype(Datatype.TEXT).width(40));
+    mColumnsAdded = true;
   }
 
   public void rebuild() {
@@ -121,13 +127,15 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       super.processKeyStroke(k);
   }
 
+  @Override
+  public void dataChanged(List<Integer> accountIds, List<Long> transactionIds) {
+    rebuild();
+    todo("!verify that it attempts to restore cursor to more or less the same location");
+  }
+
   private Filter mFilter;
   private TransactionListener mListener;
   private int mAccountNumber;
+  private boolean mColumnsAdded;
 
-  @Override
-  public void dataChanged(List<Integer> accountIds, List<Long> transactionIds) {
-rebuild();
-todo("!verify that it attempts to restore cursor to more or less the same location");
-  }
 }

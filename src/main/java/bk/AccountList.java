@@ -14,6 +14,7 @@ import bk.gen.Datatype;
 public class AccountList extends LedgerWindow implements ChangeListener {
 
   public AccountList(AccountListListener listener) {
+    changeManager().addListener(this);
     mListener = listener;
     addColumns();
     rebuild();

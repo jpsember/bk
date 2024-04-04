@@ -72,7 +72,9 @@ public class BkOper extends AppOper
     try {
       mgr.open();
       mAccounts = new AccountList(this);
-      mAllTransactionsLedger = new TransactionLedger(null, this);
+      mAllTransactionsLedger = new TransactionLedger();
+      mAllTransactionsLedger.prepare(null, this);
+      mSpecificAccountLedger = new TransactionLedger();
       sAccountsView = mAccounts;
       sTransactionsView = mAllTransactionsLedger;
 
@@ -133,8 +135,8 @@ public class BkOper extends AppOper
 
   @Override
   public void viewAccount(Account account) {
-    mSpecificAccountLedger = new TransactionLedger(
-        (t) -> t.credit() == account.number() || t.debit() == account.number(), this);
+    mSpecificAccountLedger.prepare((t) -> t.credit() == account.number() || t.debit() == account.number(),
+        this);
     todo("!remove filter, or make it internal based on account number");
     mSpecificAccountLedger.accountNumber(account.number());
     focusManager().pushReplace(mSpecificAccountLedger);
@@ -177,7 +179,7 @@ public class BkOper extends AppOper
   @Override
   public void deleteTransaction(Transaction t) {
     storage().deleteTransaction(t.timestamp());
-    
+
     // Rebuild any ledgers that might contain this transaction
     if (mAllTransactionsLedger != null)
       mAllTransactionsLedger.rebuild();

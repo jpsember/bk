@@ -5,7 +5,6 @@ import static js.base.Tools.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
 import bk.gen.Account;
 import bk.gen.Transaction;
@@ -15,6 +14,13 @@ public class ChangeManager extends BaseObject {
 
   public ChangeManager() {
     alertVerbose();
+  }
+
+  public ChangeManager addListener(ChangeListener listener) {
+    checkNotNull(listener);
+    checkState(!mListeners.contains(listener), "listener added twice");
+    mListeners.add(listener);
+    return this;
   }
 
   public ChangeManager registerModifiedTransactions(Transaction... t) {
@@ -62,22 +68,13 @@ public class ChangeManager extends BaseObject {
 
     log("====== dispatching changes");
 
-    List<Integer> modifiedAccountNumbers = arrayList();
-    List<Long> modifiedTransactionIds = arrayList();
-    modifiedAccountNumbers.addAll(mAc.keySet());
-    modifiedTransactionIds.addAll(mTr.keySet());
-    var mgr = winMgr();
-    var stack = new Stack<JWindow>();
-    stack.add(mgr.topLevelContainer());
-    while (!stack.empty()) {
-      var w = stack.pop();
-      if (w instanceof ChangeListener) {
-        var m = (ChangeListener) w;
-        log("....notifying window", w.name());
-        m.dataChanged(modifiedAccountNumbers, modifiedTransactionIds);
-      }
-      for (var c : w.children())
-        stack.push(c);
+    List<Integer> aIds = arrayList();
+    List<Long> tIds = arrayList();
+    aIds.addAll(mAc.keySet());
+    tIds.addAll(mTr.keySet());
+
+    for (var x : mListeners) {
+      x.dataChanged(aIds, tIds);
     }
 
     mTr.clear();
@@ -87,4 +84,5 @@ public class ChangeManager extends BaseObject {
 
   private Map<Long, Transaction> mTr = hashMap();
   private Map<Integer, Account> mAc = hashMap();
+  private List<ChangeListener> mListeners = arrayList();
 }
