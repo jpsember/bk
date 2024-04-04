@@ -209,7 +209,6 @@ public final class Util {
     var k = s.length();
     int leadZeros = Math.max(0, 3 - k);
     s = "000".substring(0, leadZeros) + s;
-    var h = s.length() - 2;
 
     // Insert . and , where appropriate
     var sb = new StringBuilder(s);
