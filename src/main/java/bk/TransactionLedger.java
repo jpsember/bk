@@ -11,7 +11,7 @@ import bk.gen.Column;
 import bk.gen.Datatype;
 import bk.gen.Transaction;
 
-public class TransactionLedger extends LedgerWindow {
+public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
   public interface Filter {
     boolean accept(Transaction t);
@@ -123,4 +123,10 @@ public class TransactionLedger extends LedgerWindow {
   private Filter mFilter;
   private TransactionListener mListener;
   private int mAccountNumber;
+
+  @Override
+  public void dataChanged(List<Integer> accountIds, List<Long> transactionIds) {
+rebuild();
+todo("!verify that it attempts to restore cursor to more or less the same location");
+  }
 }

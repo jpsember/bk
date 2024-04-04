@@ -11,7 +11,7 @@ import bk.gen.Account;
 import bk.gen.Column;
 import bk.gen.Datatype;
 
-public class AccountList extends LedgerWindow {
+public class AccountList extends LedgerWindow implements ChangeListener {
 
   public AccountList(AccountListListener listener) {
     mListener = listener;
@@ -87,6 +87,12 @@ public class AccountList extends LedgerWindow {
     }
     if (!handled)
       super.processKeyStroke(k);
+  }
+  
+  @Override
+  public void dataChanged(List<Integer> accountIds, List<Long> transactionIds) {
+rebuild();
+todo("!verify that it attempts to restore cursor to more or less the same location");
   }
 
   private AccountListListener mListener;

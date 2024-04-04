@@ -200,6 +200,8 @@ public class WinMgr extends BaseObject {
           focusManager().focus().processKeyStroke(keyStroke);
       }
 
+      changeManager().dispatch();
+
       var c = m.topLevelContainer();
 
       // Update size of terminal

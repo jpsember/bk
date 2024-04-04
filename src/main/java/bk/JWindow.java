@@ -203,6 +203,7 @@ public class JWindow extends BaseObject {
     mFlags = (mFlags & ~FLG_BORDER) | type;
   }
 
+  
   int mSizeExpr;
 
   private int mFlags;

@@ -518,18 +518,36 @@ public final class Util {
   public static final String KEY_VIEW_ACCOUNTS = "C:a";
   public static final String KEY_DELETE_TRANSACTION = "C:d";
 
-  //  static {
-  //    var m = map();
-  //    long amt = 0;
-  //    while (amt < MAX_CURRENCY) {
-  //      var x = formatCurrency(amt);
-  //      m.putNumbered("+" + amt, x);
-  //        x = formatCurrency(-amt);
-  //      m.putNumbered("-" + amt, x);
-  //      amt = amt * 10 + 9;
-  //    }
-  //    pr(m);
-  //    halt();
-  //  }
+  public static int accountNumber(Transaction t, int index) {
+    checkArgument(index >= 0 && index < 2);
+    return (index == 0) ? t.debit() : t.credit();
+  }
 
+  public static int id(Account account) {
+    return account.number();
+  }
+
+  public static long id(Transaction transaction) {
+    return transaction.timestamp();
+  }
+
+  public static Account account(Transaction t, int index) {
+    var anum = accountNumber(t, index);
+    var acc = account(anum);
+    return acc;
+  }
+
+  public static Account ensureNotNull(Account a, int number) {
+    if (a == null)
+      badState("Account with number", number, "doesn't exist");
+    return a;
+  }
+
+  public static ChangeManager changeManager() {
+    if (sChangeManager == null)
+      sChangeManager = new ChangeManager();
+    return sChangeManager;
+  }
+
+  private static ChangeManager sChangeManager;
 }
