@@ -107,12 +107,24 @@ public final class Util {
     return sEpochSecondsToday;
   }
 
-  public static String formatDate(long epochSeconds) {
+  public static boolean validDate(long epochSeconds) {
     final long years20 = 31_536_000 * 20;
     long min = sEpochSecondsToday - years20;
     long max = sEpochSecondsToday + years20;
-    if (epochSeconds < min || epochSeconds > max)
-     pr("epoch seconds:", epochSeconds, "is out of range of", min, max);
+    return !(epochSeconds < min || epochSeconds > max);
+  }
+
+  public static String formatDate(long epochSeconds) {
+    if (!validDate(epochSeconds)) {
+      alert("invalidate date:", epochSeconds);
+      return "?" + epochSeconds + "?";
+    }
+    checkArgument(validDate(epochSeconds), "invalid date:", epochSeconds);
+    //    final long years20 = 31_536_000 * 20;
+    //    long min = sEpochSecondsToday - years20;
+    //    long max = sEpochSecondsToday + years20;
+    //    if (epochSeconds < min || epochSeconds > max)
+    //      pr("epoch seconds:", epochSeconds, "is out of range of", min, max);
     var inst = Instant.ofEpochSecond(epochSeconds).atZone(sLocalTimeZoneId);
     return sDateFormatter.format(inst);
   }
@@ -203,6 +215,7 @@ public final class Util {
   private static final long MAX_CURRENCY = 100_000_000_00L;
 
   public static String formatCurrency(long cents) {
+    if (cents == 0) return "";
     var absCents = Math.abs(cents);
     checkArgument(absCents < MAX_CURRENCY, "currency value out of range:", cents);
     var s = Long.toString(absCents);
@@ -517,6 +530,8 @@ public final class Util {
   public static final String KEY_VIEW_TRANSACTIONS = "C:t";
   public static final String KEY_VIEW_ACCOUNTS = "C:a";
   public static final String KEY_DELETE_TRANSACTION = "C:d";
+
+  public static final String KEY_CONTROL_ENTER = "C:Enter";
 
   public static int accountNumber(Transaction t, int index) {
     checkArgument(index >= 0 && index < 2);

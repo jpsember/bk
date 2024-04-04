@@ -40,6 +40,11 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     return this;
   }
 
+  public WidgetWindow setShortcut(String shortcutDescr) {
+    mShortcut = shortcutDescr;
+    return this;
+  }
+
   public WidgetWindow focusRootWindow(JWindow rootWindow) {
     mFocusRootWindow = rootWindow;
     return this;
@@ -64,9 +69,8 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     var b = r.clipBounds();
     b = b.withInset(1, 0);
     var SEP = 1;
-    
-    
-    var labelWidth = Math.min(b.width / 2,16);
+
+    var labelWidth = Math.min(b.width / 2, 16);
     var valueWidth = mWidth;
 
     boolean hf = hasFocus();
@@ -180,6 +184,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     }
       break;
     default:
+      pr("did not handle the keypress:", k);
       todo("have some sort of fallback");
       break;
     }
@@ -212,4 +217,6 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   private JWindow mFocusRootWindow;
   private ButtonListener mButtonListener;
   private ValidationResult mValidationResult;
+  private String mShortcut;
+
 }

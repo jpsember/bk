@@ -16,6 +16,10 @@ public class Database implements AbstractData {
     return mTransactions;
   }
 
+  public Map<Long, Transaction> damagedTransactions() {
+    return mDamagedTransactions;
+  }
+
   @Override
   public Builder toBuilder() {
     return new Builder(this);
@@ -23,6 +27,7 @@ public class Database implements AbstractData {
 
   protected static final String _0 = "accounts";
   protected static final String _1 = "transactions";
+  protected static final String _2 = "damaged_transactions";
 
   @Override
   public String toString() {
@@ -43,6 +48,12 @@ public class Database implements AbstractData {
       for (Map.Entry<Long, Transaction> e : mTransactions.entrySet())
         j.put(e.getKey().toString(), e.getValue().toJson());
       m.put(_1, j);
+    }
+    {
+      JSMap j = new JSMap();
+      for (Map.Entry<Long, Transaction> e : mDamagedTransactions.entrySet())
+        j.put(e.getKey().toString(), e.getValue().toJson());
+      m.put(_2, j);
     }
     return m;
   }
@@ -82,6 +93,18 @@ public class Database implements AbstractData {
         }
       }
     }
+    {
+      mDamagedTransactions = DataUtil.emptyMap();
+      {
+        JSMap m2 = m.optJSMap("damaged_transactions");
+        if (m2 != null && !m2.isEmpty()) {
+          Map<Long, Transaction> mp = new ConcurrentHashMap<>();
+          for (Map.Entry<String, Object> e : m2.wrappedMap().entrySet())
+            mp.put(Long.parseLong(e.getKey()), Transaction.DEFAULT_INSTANCE.parse((JSMap) e.getValue()));
+          mDamagedTransactions = mp;
+        }
+      }
+    }
   }
 
   public static Builder newBuilder() {
@@ -101,6 +124,8 @@ public class Database implements AbstractData {
       return false;
     if (!(mTransactions.equals(other.mTransactions)))
       return false;
+    if (!(mDamagedTransactions.equals(other.mDamagedTransactions)))
+      return false;
     return true;
   }
 
@@ -111,6 +136,7 @@ public class Database implements AbstractData {
       r = 1;
       r = r * 37 + mAccounts.hashCode();
       r = r * 37 + mTransactions.hashCode();
+      r = r * 37 + mDamagedTransactions.hashCode();
       m__hashcode = r;
     }
     return r;
@@ -118,6 +144,7 @@ public class Database implements AbstractData {
 
   protected Map<Integer, Account> mAccounts;
   protected Map<Long, Transaction> mTransactions;
+  protected Map<Long, Transaction> mDamagedTransactions;
   protected int m__hashcode;
 
   public static final class Builder extends Database {
@@ -125,6 +152,7 @@ public class Database implements AbstractData {
     private Builder(Database m) {
       mAccounts = DataUtil.mutableCopyOf(m.mAccounts);
       mTransactions = DataUtil.mutableCopyOf(m.mTransactions);
+      mDamagedTransactions = DataUtil.mutableCopyOf(m.mDamagedTransactions);
     }
 
     @Override
@@ -143,6 +171,7 @@ public class Database implements AbstractData {
       Database r = new Database();
       r.mAccounts = DataUtil.immutableCopyOf(mAccounts);
       r.mTransactions = DataUtil.immutableCopyOf(mTransactions);
+      r.mDamagedTransactions = DataUtil.immutableCopyOf(mDamagedTransactions);
       return r;
     }
 
@@ -156,6 +185,11 @@ public class Database implements AbstractData {
       return this;
     }
 
+    public Builder damagedTransactions(Map<Long, Transaction> x) {
+      mDamagedTransactions = DataUtil.mutableCopyOf((x == null) ? DataUtil.emptyMap() : x);
+      return this;
+    }
+
   }
 
   public static final Database DEFAULT_INSTANCE = new Database();
@@ -163,6 +197,7 @@ public class Database implements AbstractData {
   private Database() {
     mAccounts = DataUtil.emptyMap();
     mTransactions = DataUtil.emptyMap();
+    mDamagedTransactions = DataUtil.emptyMap();
   }
 
 }

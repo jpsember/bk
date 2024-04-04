@@ -1,4 +1,5 @@
 fields {
   map int Account accounts;
   map long Transaction transactions;
+  map long Transaction damaged_transactions;
 }

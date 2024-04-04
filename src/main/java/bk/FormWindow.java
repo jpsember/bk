@@ -14,10 +14,17 @@ public class FormWindow extends JContainer {
     setBorder(BORDER_ROUNDED);
   }
 
+  public FormWindow shortcut(String keySpec) {
+  mPendingShortcut = keySpec;
+  return this;
+  }
+  
   public FormWindow addButton(String label, ButtonListener listener) {
     WidgetWindow widget;
     widget = new WidgetWindow().focusRootWindow(this).label(label).button(listener);
     widget.setSize(1);
+    widget.setShortcut(mPendingShortcut);
+    mPendingShortcut = null;
     addChild(widget);
     return this;
   }
@@ -78,5 +85,5 @@ public class FormWindow extends JContainer {
   private Object mPendingValue;
   private MessageWindow mMessage;
   private int mPendingWidth = WidgetWindow.DEFAULT_WIDTH;;
-
+private String mPendingShortcut;
 }

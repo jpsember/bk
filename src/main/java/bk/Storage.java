@@ -22,6 +22,7 @@ public class Storage extends BaseObject {
     var db = Files.parseAbstractData(Database.DEFAULT_INSTANCE, m);
     mDatabase = db.toBuilder();
     log("read", accounts().size(), "accounts and", transactions().size(), "transactions");
+    scanForProblems();
     verifyAccountBalances();
   }
 
@@ -87,6 +88,45 @@ public class Storage extends BaseObject {
         accounts().put(a.number(), a.build());
         setModified();
       }
+    }
+    flush();
+  }
+
+  public void scanForProblems() {
+
+    List<Transaction> moveList = arrayList();
+    for (var t : transactions().values()) {
+      String problem = null;
+      outer: do {
+        for (int i = 0; i < 2; i++) {
+          int an = accountNumber(t, i);
+          if (account(an) == null) {
+            problem = "missing account";
+            break outer;
+          }
+        }
+        if (t.debit() == t.credit()) {
+          problem = "account numbers are the same";
+          break;
+        }
+        if (t.timestamp() == 0) {
+          problem = "missing timestamp";
+          break;
+        }
+        if (!validDate(t.date())) {
+          problem = "invalid date";
+          break;
+        }
+      } while (false);
+      if (problem != null) {
+        pr("*** Problem with transaction, moved to damaged section:", INDENT, t);
+        moveList.add(t);
+      }
+    }
+    for (var t : moveList) {
+      mDatabase.damagedTransactions().put(id(t), t);
+      mDatabase.transactions().remove(id(t));
+      setModified();
     }
     flush();
   }
