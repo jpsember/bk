@@ -14,7 +14,7 @@ public class FocusManager extends BaseObject {
   public static final FocusManager SHARED_INSTANCE;
 
   private FocusManager() {
-    //alertVerbose();
+    alertVerbose();
   }
 
   public FocusHandler focus() {
@@ -152,7 +152,7 @@ public class FocusManager extends BaseObject {
       }
     }
     mStack.push(ent);
-
+    log("...pushed entry to stack, size now:", mStack.size());
     trySettingFocus(window);
   }
 
@@ -207,7 +207,7 @@ public class FocusManager extends BaseObject {
 
   public boolean popIfPossible() {
     // Don't pop the last container
-    if (mStack.size() <= 1)
+    if (mStack.size() == 0)
       return false;
     pop();
     return true;

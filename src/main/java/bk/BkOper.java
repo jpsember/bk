@@ -42,28 +42,8 @@ public class BkOper extends AppOper
 
   @Override
   public void perform() {
-
-    if (EXP) {
-
-      long todaySeconds = dateToEpochSeconds("");
-      pr("today epoch seconds:", todaySeconds);
-      var dateStr = epochSecondsToDateString(todaySeconds);
-      pr("today:", dateStr);
-
-      var m = map();
-      String ss[] = { "", "2024/10/04", "10/04", "/10/4", "2024  10  04", "10/4", "8/4", "024/10/2",
-          "24/10/2", "apr 1", "2023 Apr 1", };
-      for (var s : ss) {
-        var c = DATE_VALIDATOR.validate(s);
-        int epochSeconds = c.typedValue();
-        String res = "";
-        if (epochSeconds != 0)
-          res = epochSecondsToDateString(epochSeconds);
-        m.putNumbered(s, res);
-      }
-      pr(m);
-      halt();
-    }
+    if (EXP)
+      doExp();
 
     storage().read();
 
@@ -83,10 +63,10 @@ public class BkOper extends AppOper
       {
 
         {
-          // Construct ledger
-          mgr.pct(100);
-          mgr.thinBorder();
+          mgr.pct(30);
+          mgr.thickBorder();
           mgr.window(mAccounts);
+          
         }
         //        mgr.pct(75);
         //        {
@@ -105,7 +85,7 @@ public class BkOper extends AppOper
         //        }
       }
       mgr.doneConstruction();
-      focusManager().pushReplace(mAccounts);
+     // focusManager().pushReplace(mAccounts);
       mgr.mainLoop();
     } catch (Throwable t) {
       setError(mgr.closeIfError(t));
@@ -139,7 +119,7 @@ public class BkOper extends AppOper
         this);
     todo("!remove filter, or make it internal based on account number");
     mSpecificAccountLedger.accountNumber(account.number());
-    focusManager().pushReplace(mSpecificAccountLedger);
+    focusManager().pushAppend(mSpecificAccountLedger);
   }
 
   //------------------------------------------------------------------
@@ -200,5 +180,29 @@ public class BkOper extends AppOper
     mAllTransactionsLedger.setCurrentRow(t);
     mAllTransactionsLedger.repaint();
     focusManager().pop();
+  }
+
+  public static void doExp() {
+    if (EXP) {
+
+      long todaySeconds = dateToEpochSeconds("");
+      pr("today epoch seconds:", todaySeconds);
+      var dateStr = epochSecondsToDateString(todaySeconds);
+      pr("today:", dateStr);
+
+      var m = map();
+      String ss[] = { "", "2024/10/04", "10/04", "/10/4", "2024  10  04", "10/4", "8/4", "024/10/2",
+          "24/10/2", "apr 1", "2023 Apr 1", };
+      for (var s : ss) {
+        var c = DATE_VALIDATOR.validate(s);
+        int epochSeconds = c.typedValue();
+        String res = "";
+        if (epochSeconds != 0)
+          res = epochSecondsToDateString(epochSeconds);
+        m.putNumbered(s, res);
+      }
+      pr(m);
+      halt();
+    }
   }
 }

@@ -13,7 +13,7 @@ import js.base.BaseObject;
 public class ChangeManager extends BaseObject {
 
   public ChangeManager() {
-    alertVerbose();
+    //alertVerbose();
   }
 
   public ChangeManager addListener(ChangeListener listener) {

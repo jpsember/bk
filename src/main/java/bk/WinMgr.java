@@ -194,9 +194,18 @@ public class WinMgr extends BaseObject {
           return;
         }
 
-        if (keyStroke.getKeyType() == KeyType.Escape && focusManager().popIfPossible())
-          ;
-        else
+        boolean processed = false;
+
+        if (keyStroke.getKeyType() == KeyType.Escape) {
+          pr("...ESCAPE pressed...");
+          if (focusManager().popIfPossible()) {
+            pr(".....pop was possible");
+            processed = true;
+          }
+          pr("....no pop");
+        }
+
+        if (!processed)
           focusManager().focus().processKeyStroke(keyStroke);
       }
 

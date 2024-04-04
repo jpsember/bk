@@ -57,7 +57,6 @@ public class Storage extends BaseObject {
     Map<Integer, Account.Builder> map = hashMap();
     for (var a : accounts().values()) {
       map.put(a.number(), a.toBuilder().balance(0));
-      pr("stored", a.number(), "=>", a);
     }
 
     List<Long> deleteTransList = arrayList();
