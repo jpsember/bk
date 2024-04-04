@@ -15,6 +15,10 @@ import js.geometry.MyMath;
 
 public class LedgerWindow extends JWindow implements FocusHandler {
 
+  public LedgerWindow() {
+    setBorder(BORDER_THIN);
+  }
+
   @Override
   protected String supplyName() {
     return "LedgerWindow";
@@ -68,7 +72,8 @@ public class LedgerWindow extends JWindow implements FocusHandler {
         if (entNum >= mEntries.size()) {
           if (includesHeaderFields()) {
             // Plot a row of grey to indicate we're off the ledger
-            r.clearRow(b.y + windowRowNum, '░');
+            if (false)
+              r.clearRow(b.y + windowRowNum, '░');
           }
         } else {
 

@@ -11,7 +11,7 @@ public class FormWindow extends JContainer {
   public FormWindow() {
     todo("incorporate this into WinMgr");
     loadUtil();
-    setBorder(BORDER_THIN);
+    setBorder(BORDER_ROUNDED);
   }
 
   public FormWindow addButton(String label, ButtonListener listener) {

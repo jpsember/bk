@@ -428,7 +428,6 @@ public final class Util {
     if (target == null)
       return;
     
-    // If the focused view is already 
     focusManager().pushReplace(target);
   }
 

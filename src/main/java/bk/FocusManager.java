@@ -22,7 +22,7 @@ public class FocusManager extends BaseObject {
   }
 
   void update() {
-    if (focus() != FOCUS_NONE)
+    if (focus() != null)
       return;
     var lst = handlers(null);
     if (lst.isEmpty())
@@ -31,7 +31,6 @@ public class FocusManager extends BaseObject {
   }
 
   public void set(FocusHandler h) {
-    h = nullTo(h, FOCUS_NONE);
     if (h == mFocus)
       return;
     if (mFocus != null) {
@@ -42,8 +41,10 @@ public class FocusManager extends BaseObject {
     if (h != null && h instanceof JWindow)
       checkArgument(((JWindow) h).parent() != null, "attempt to focus a window that isn't visible:", h);
     mFocus = h;
-    h.gainFocus();
-    h.repaint();
+    if (h != null) {
+      h.gainFocus();
+      h.repaint();
+    }
   }
 
   public void move(JWindow rootWindowOrNull, int amount) {
@@ -78,10 +79,7 @@ public class FocusManager extends BaseObject {
       auxFocusList(list, c);
   }
 
-  private FocusHandler mFocus = FOCUS_NONE;
-
-  public static final FocusHandler FOCUS_NONE = new FocusHandler() {
-  };
+  private FocusHandler mFocus;
 
   static {
     SHARED_INSTANCE = new FocusManager();
@@ -108,13 +106,25 @@ public class FocusManager extends BaseObject {
   private void push(JWindow window, int method) {
     log("push", window.name(), "method:", method);
 
-    
     // If window is already in the stack somewhere, pop to it
-    todo("pop if already in stack");
-    
+    int popTo = -1;
+    for (int i = mStack.size() - 1; i >= 0; i--) {
+      var ent = mStack.get(i);
+      if (ent.oldFocusHandler == window) {
+        log("...found window in stack at:", i);
+        popTo = i;
+      }
+    }
+    if (popTo >= 0) {
+      log("...popping stack to size", popTo, "to restore stacked focus");
+      while (mStack.size() > popTo) {
+        pop();
+      }
+      return;
+    }
+
     var mgr = winMgr();
     checkNotNull(window);
-
     var top = mgr.topLevelContainer();
     checkState(top != window);
 
