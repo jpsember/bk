@@ -21,6 +21,10 @@ public class Column implements AbstractData {
     return mDatatype;
   }
 
+  public int growPct() {
+    return mGrowPct;
+  }
+
   @Override
   public Builder toBuilder() {
     return new Builder(this);
@@ -30,6 +34,7 @@ public class Column implements AbstractData {
   protected static final String _1 = "alignment";
   protected static final String _2 = "width";
   protected static final String _3 = "datatype";
+  protected static final String _4 = "grow_pct";
 
   @Override
   public String toString() {
@@ -43,6 +48,7 @@ public class Column implements AbstractData {
     m.putUnsafe(_1, mAlignment.toString().toLowerCase());
     m.putUnsafe(_2, mWidth);
     m.putUnsafe(_3, mDatatype.toString().toLowerCase());
+    m.putUnsafe(_4, mGrowPct);
     return m;
   }
 
@@ -67,6 +73,7 @@ public class Column implements AbstractData {
       String x = m.opt(_3, "");
       mDatatype = x.isEmpty() ? Datatype.DEFAULT_INSTANCE : Datatype.valueOf(x.toUpperCase());
     }
+    mGrowPct = m.opt(_4, 0);
   }
 
   public static Builder newBuilder() {
@@ -90,6 +97,8 @@ public class Column implements AbstractData {
       return false;
     if (!(mDatatype.equals(other.mDatatype)))
       return false;
+    if (!(mGrowPct == other.mGrowPct))
+      return false;
     return true;
   }
 
@@ -102,6 +111,7 @@ public class Column implements AbstractData {
       r = r * 37 + mAlignment.ordinal();
       r = r * 37 + mWidth;
       r = r * 37 + mDatatype.ordinal();
+      r = r * 37 + mGrowPct;
       m__hashcode = r;
     }
     return r;
@@ -111,6 +121,7 @@ public class Column implements AbstractData {
   protected Alignment mAlignment;
   protected int mWidth;
   protected Datatype mDatatype;
+  protected int mGrowPct;
   protected int m__hashcode;
 
   public static final class Builder extends Column {
@@ -120,6 +131,7 @@ public class Column implements AbstractData {
       mAlignment = m.mAlignment;
       mWidth = m.mWidth;
       mDatatype = m.mDatatype;
+      mGrowPct = m.mGrowPct;
     }
 
     @Override
@@ -140,6 +152,7 @@ public class Column implements AbstractData {
       r.mAlignment = mAlignment;
       r.mWidth = mWidth;
       r.mDatatype = mDatatype;
+      r.mGrowPct = mGrowPct;
       return r;
     }
 
@@ -160,6 +173,11 @@ public class Column implements AbstractData {
 
     public Builder datatype(Datatype x) {
       mDatatype = (x == null) ? Datatype.DEFAULT_INSTANCE : x;
+      return this;
+    }
+
+    public Builder growPct(int x) {
+      mGrowPct = x;
       return this;
     }
 

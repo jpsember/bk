@@ -61,7 +61,6 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     sorted.sort(TRANSACTION_COMPARATOR);
 
     for (var t : sorted) {
-      todo("have builder instead of manipulating the list ourselves");
       openEntry();
       add(new DateField(t.date()));
       add(new CurrencyField(t.amount()));
@@ -69,7 +68,6 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       add(new AccountNameField(t.credit(), storage().accountName(t.credit())));
       add(new TextField(t.description()));
       closeEntry(t);
-
     }
     setCurrentRow(currentTrans);
     repaint();

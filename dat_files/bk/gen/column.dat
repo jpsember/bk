@@ -3,4 +3,6 @@ fields {
   enum Alignment alignment;
   int width;
   enum Datatype datatype;
+  // If not zero, this column will get this percent of any extra space
+  int grow_pct;
 }

@@ -25,10 +25,10 @@ public class AccountList extends LedgerWindow implements ChangeListener {
     spaceSeparators();
     if (MERGED) {
       addColumn(
-          Column.newBuilder().name("Account").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NUMBER_AND_NAME));
+          Column.newBuilder().name("Account").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NUMBER_AND_NAME).growPct(100));
     } else {
       addColumn(Column.newBuilder().name("#").datatype(Datatype.ACCOUNT_NUMBER));
-      addColumn(Column.newBuilder().name("Name").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NAME));
+      addColumn(Column.newBuilder().name("Name").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NAME).growPct(100));
     }
     addColumn(Column.newBuilder().name("Balance").alignment(Alignment.RIGHT).datatype(Datatype.CURRENCY));
   }

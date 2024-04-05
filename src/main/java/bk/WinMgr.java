@@ -138,7 +138,6 @@ public class WinMgr extends BaseObject {
     w.setBorder(mBorderType);
     if (!nullOrEmpty(mPendingName))
       w.setName(mPendingName);
-    pr("set size:", mSizeExpr, "and border", mBorderType, "for window", w.name());
     resetPendingWindowVars();
   }
 
