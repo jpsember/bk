@@ -170,7 +170,6 @@ public class WinMgr extends BaseObject {
   }
 
   public void mainLoop() {
-    //    var js = JScreen.sharedInstance();
     while (isOpen()) {
       update();
       sleepMs(10);
@@ -186,21 +185,21 @@ public class WinMgr extends BaseObject {
 
       focusManager().update();
 
-      KeyStroke keyStroke2 = mScreen.pollInput();
-      if (keyStroke2 != null) {
-        var key = new KeyEvent(keyStroke2);
-
-        if (quitCommand(key)) {
-          quit();
-          return;
-        }
+      KeyStroke keyStroke = mScreen.pollInput();
+      if (keyStroke != null) {
+        var key = new KeyEvent(keyStroke);
 
         boolean processed = false;
 
-        if (key.is(KeyEvent.ESCAPE)) {
+        switch (key.toString()) {
+        case KeyEvent.QUIT:
+          quit();
+          return;
+        case KeyEvent.ESCAPE:
           if (focusManager().popIfPossible()) {
             processed = true;
           }
+          break;
         }
 
         if (!processed)

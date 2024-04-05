@@ -12,8 +12,17 @@ import static js.base.Tools.*;
  */
 public class KeyEvent {
 
-  public static final String ENTER = ":Enter";
-  public static final String ESCAPE = ":Escape";
+  public static final String //
+  ENTER = ":Enter" //
+      , ESCAPE = ":Escape" //
+      , VIEW_TRANSACTIONS = "C:t" //
+      , VIEW_ACCOUNTS = "C:a" //
+      , DELETE_TRANSACTION = "C:d" //
+      , CONTROL_ENTER = "C:Enter" //
+      , ADD = ":a" //
+      , EDIT = ":e" //
+      , QUIT = "C:x" //
+  ;
 
   public KeyEvent(KeyStroke k) {
     mKeyStroke = k;
@@ -34,7 +43,6 @@ public class KeyEvent {
       break;
     }
     mString = sb.toString();
-    //pr("built KeyEvent from keystroke:", k, "string:", mString);
   }
 
   @Override

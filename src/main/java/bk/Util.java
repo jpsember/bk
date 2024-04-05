@@ -15,7 +15,6 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.googlecode.lanterna.Symbols;
-import com.googlecode.lanterna.input.KeyStroke;
 
 import bk.gen.Account;
 import bk.gen.Column;
@@ -456,15 +455,13 @@ public final class Util {
 
   };
 
-  public static void switchToView(KeyEvent keySummary) {
-    pr(VERT_SP, "switch to view:", keySummary);
-
+  public static void switchToView(KeyEvent k) {
     JWindow target = null;
-    switch (keySummary.toString()) {
-    case KEY_VIEW_TRANSACTIONS:
+    switch (k.toString()) {
+    case KeyEvent.VIEW_TRANSACTIONS:
       target = sTransactionsView;
       break;
-    case KEY_VIEW_ACCOUNTS:
+    case KeyEvent.VIEW_ACCOUNTS:
       target = sAccountsView;
       break;
     }
@@ -472,31 +469,6 @@ public final class Util {
       return;
 
     focusManager().pushReplace(target);
-  }
-
-  /**
-   * Convert a KeyStroke to a string that includes information about Alt, Shift,
-   * Control keys. Returns "[A][C][S]:{character or KeyType name}"
-   */
-  @Deprecated
-  public static String keyInfo(KeyStroke k) {
-    var sb = new StringBuilder();
-    if (k.isAltDown())
-      sb.append('A');
-    if (k.isCtrlDown())
-      sb.append('C');
-    if (k.isShiftDown())
-      sb.append('S');
-    sb.append(':');
-    switch (k.getKeyType()) {
-    case Character:
-      sb.append(k.getCharacter());
-      break;
-    default:
-      sb.append(k.getKeyType().name());
-      break;
-    }
-    return sb.toString();
   }
 
   public static boolean quitCommand(KeyEvent k) {
@@ -522,12 +494,6 @@ public final class Util {
   public static JWindow sAccountsView;
 
   public static final int ACCOUNT_NAME_MAX_LENGTH = 30;
-
-  public static final String KEY_VIEW_TRANSACTIONS = "C:t";
-  public static final String KEY_VIEW_ACCOUNTS = "C:a";
-  public static final String KEY_DELETE_TRANSACTION = "C:d";
-
-  public static final String KEY_CONTROL_ENTER = "C:Enter";
 
   public static int accountNumber(Transaction t, int index) {
     checkArgument(index >= 0 && index < 2);

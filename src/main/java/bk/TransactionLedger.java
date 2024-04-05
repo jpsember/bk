@@ -97,19 +97,20 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       }
       break;
 
-    case KEY_DELETE_TRANSACTION:
+    case KeyEvent.DELETE_TRANSACTION:
       if (a != null) {
         mListener.deleteTransaction(a);
       }
       handled = true;
       break;
 
-    case ":a":
+    case KeyEvent.ADD:
       mListener.addTransaction(mAccountNumber);
       rebuild();
       handled = true;
       break;
-    case ":e":
+
+    case KeyEvent.EDIT:
       if (a != null) {
         mListener.editTransaction(mAccountNumber, a);
         rebuild();

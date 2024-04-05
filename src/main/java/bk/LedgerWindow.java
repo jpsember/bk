@@ -123,8 +123,8 @@ public class LedgerWindow extends JWindow implements FocusHandler {
       break;
     default:
       switch (k.toString()) {
-      case Util.KEY_VIEW_TRANSACTIONS:
-      case KEY_VIEW_ACCOUNTS:
+      case KeyEvent.VIEW_TRANSACTIONS:
+      case KeyEvent.VIEW_ACCOUNTS:
         switchToView(k);
         break;
       }
