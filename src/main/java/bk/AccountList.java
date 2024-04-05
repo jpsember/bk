@@ -13,6 +13,7 @@ import bk.gen.Datatype;
 public class AccountList extends LedgerWindow implements ChangeListener {
 
   public AccountList(AccountListListener listener) {
+    setHeaderType(AccountList.HEADER_COLUMN_NAMES_WITH_DASHES);
     changeManager().addListener(this);
     mListener = listener;
     addColumns();
@@ -24,11 +25,12 @@ public class AccountList extends LedgerWindow implements ChangeListener {
   private void addColumns() {
     spaceSeparators();
     if (MERGED) {
-      addColumn(
-          Column.newBuilder().name("Account").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NUMBER_AND_NAME).growPct(100));
+      addColumn(Column.newBuilder().name("Account").datatype(Datatype.TEXT)
+          .width(CHARS_ACCOUNT_NUMBER_AND_NAME).growPct(100));
     } else {
       addColumn(Column.newBuilder().name("#").datatype(Datatype.ACCOUNT_NUMBER));
-      addColumn(Column.newBuilder().name("Name").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NAME).growPct(100));
+      addColumn(
+          Column.newBuilder().name("Name").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NAME).growPct(100));
     }
     addColumn(Column.newBuilder().name("Balance").alignment(Alignment.RIGHT).datatype(Datatype.CURRENCY));
   }

@@ -36,11 +36,13 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   private void addColumns() {
     if (mColumnsAdded)
       return;
+    spaceSeparators();
     addColumn(Column.newBuilder().name("Date").datatype(Datatype.DATE).width(CHARS_DATE));
     addColumn(Column.newBuilder().name("Amount").alignment(Alignment.RIGHT).datatype(Datatype.CURRENCY)
         .width(CHARS_CURRENCY));
-    addColumn(Column.newBuilder().name("Dr").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NUMBER_AND_NAME));
-    addColumn(Column.newBuilder().name("Cr").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NUMBER_AND_NAME));
+    addColumn(Column.newBuilder().name("Debit").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NUMBER_AND_NAME));
+    addColumn(
+        Column.newBuilder().name("Credit").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NUMBER_AND_NAME));
     addColumn(
         Column.newBuilder().name("Description").datatype(Datatype.TEXT).width(CHARS_TRANSACTION_DESCRIPTION));
     mColumnsAdded = true;
@@ -78,13 +80,11 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     boolean handled = false;
     Transaction a = getCurrentRow();
 
-    todo("the 'rebuild' should be a more general call for all, either add, edit, or delete");
     switch (k.toString()) {
 
     case KeyEvent.ENTER:
       if (a != null) {
         mListener.editTransaction(mAccountNumber, a);
-        rebuild();
         handled = true;
       }
       break;
@@ -98,14 +98,12 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
     case KeyEvent.ADD:
       mListener.addTransaction(mAccountNumber);
-      rebuild();
       handled = true;
       break;
 
     case KeyEvent.EDIT:
       if (a != null) {
         mListener.editTransaction(mAccountNumber, a);
-        rebuild();
       }
       handled = true;
       break;

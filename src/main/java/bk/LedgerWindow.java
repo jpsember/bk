@@ -17,9 +17,7 @@ import js.geometry.MyMath;
 public class LedgerWindow extends JWindow implements FocusHandler {
 
   public LedgerWindow() {
-    setBorder(BORDER_THIN);
-    todo("!allow one or more columns to be expandable by percentages to use available space");
-    todo("Have option for horizontal line separating header from data");
+    setBorder(BORDER_THICK);
   }
 
   @Override
@@ -27,9 +25,15 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     return "LedgerWindow";
   }
 
-  public boolean includesHeaderFields() {
-    return true;
+  public void setHeaderType(int code) {
+    mHeaderType = code;
   }
+
+  public static final int HEADER_NONE = 0;
+  public static final int HEADER_COLUMN_NAMES = 1;
+  public static final int HEADER_COLUMN_NAMES_WITH_DASHES = 2;
+
+  private int mHeaderType = HEADER_COLUMN_NAMES_WITH_DASHES;
 
   @Override
   public void paint() {
@@ -50,52 +54,63 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     int ledgerRowNumAtTopOfWindow = 0;
     {
       int vis = b.height;
-      ledgerRowNumAtTopOfWindow = Math.max(includesHeaderFields() ? -1 : 0, (mCursorRow - vis / 2));
+      ledgerRowNumAtTopOfWindow = Math.max(HEADER_NONE - mHeaderType, (mCursorRow - vis / 2));
     }
 
     int rows = b.height;
     calculateColumnWidths(b.width);
     for (int windowRowNum = 0; windowRowNum < rows; windowRowNum++) {
-      int ledgerRowNum = windowRowNum + ledgerRowNumAtTopOfWindow;
+      int rowNum = windowRowNum + ledgerRowNumAtTopOfWindow;
       msb.setLength(0);
 
       int x = 0;
 
-      var hl = hasFocus() && ledgerRowNum == mCursorRow;
+      var hl = hasFocus() && rowNum == mCursorRow;
       r.pushStyle(hl ? STYLE_INVERSE : STYLE_NORMAL);
       if (hl)
         r.clearRow(b.y + windowRowNum, ' ');
-      if (includesHeaderFields() && ledgerRowNum == -1) {
-        // Render the headings
+
+      do {
+        if (rowNum < 0) {
+          if (mHeaderType == HEADER_NONE)
+            break;
+
+          var j = -rowNum;
+          if (mHeaderType == HEADER_COLUMN_NAMES)
+            j++;
+
+          if (j == 2) {
+            // Render the headings
+            mCurrentColumn = INIT_INDEX;
+            for (var col : mColumns) {
+              mCurrentColumn++;
+              var cw = mColumnWidths[mCurrentColumn];
+              plotString(col.name(), x, windowRowNum, col.alignment(), cw);
+              x += cw;
+            }
+          } else if (j == 1) {
+            // Render dashes
+            r.clearRow(b.y + windowRowNum, Symbols.SINGLE_LINE_HORIZONTAL);
+          }
+          break;
+        }
+
+        int entNum = rowNum;
+        if (entNum >= mEntries.size())
+          break;
+
+        var ent = mEntries.get(entNum);
+        // Render the fields
         mCurrentColumn = INIT_INDEX;
         for (var col : mColumns) {
           mCurrentColumn++;
+          var data = ent.fields.get(mCurrentColumn);
+          var text = data.toString();
           var cw = mColumnWidths[mCurrentColumn];
-          plotString(col.name(), x, windowRowNum, col.alignment(), cw);
+          plotString(text, x, windowRowNum, col.alignment(), cw);
           x += cw;
         }
-      } else {
-        int entNum = ledgerRowNum;
-        if (entNum >= mEntries.size()) {
-          if (includesHeaderFields()) {
-            // Plot a row of grey to indicate we're off the ledger
-            if (false)
-              r.clearRow(b.y + windowRowNum, '░');
-          }
-        } else {
-          var ent = mEntries.get(entNum);
-          // Render the fields
-          mCurrentColumn = INIT_INDEX;
-          for (var col : mColumns) {
-            mCurrentColumn++;
-            var data = ent.fields.get(mCurrentColumn);
-            var text = data.toString();
-            var cw = mColumnWidths[mCurrentColumn];
-            plotString(text, x, windowRowNum, col.alignment(), cw);
-            x += cw;
-          }
-        }
-      }
+      } while (false);
       r.pop();
     }
   }
