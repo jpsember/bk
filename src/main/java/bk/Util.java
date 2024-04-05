@@ -14,11 +14,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-import com.googlecode.lanterna.Symbols;
-
 import bk.gen.Account;
-import bk.gen.Column;
-import bk.gen.Datatype;
 import bk.gen.Transaction;
 import js.base.DateTimeTools;
 import js.data.DataUtil;
@@ -247,15 +243,6 @@ public final class Util {
 
   private static Random sRandom = new Random(1965);
 
-  public static final Column VERT_SEP = Column.newBuilder().datatype(Datatype.TEXT).name("").width(1).build();
-  public static final LedgerField VERT_SEP_FLD = new LedgerField() {
-    @Override
-    public String toString() {
-      return SIN;
-    }
-
-    private String SIN = Character.toString(Symbols.SINGLE_LINE_VERTICAL);
-  };
   public static final LedgerField EMPTY_FIELD = new TextField("");
   public static final Validator DEFAULT_VALIDATOR = new Validator() {
   };
@@ -528,10 +515,10 @@ public final class Util {
 
   private static ChangeManager sChangeManager;
 
-  public static final int CHARS_ACCOUNT_NAME = 16;
+  public static final int CHARS_ACCOUNT_NAME = 20;
   public static final int CHARS_DATE = 10;
-  public static final int CHARS_CURRENCY = 13;
+  public static final int CHARS_CURRENCY = 12;
   public static final int CHARS_TRANSACTION_DESCRIPTION = 30;
-  public static final int CHARS_ACCOUNT_NUMBER_AND_NAME = 18;
+  public static final int CHARS_ACCOUNT_NUMBER_AND_NAME = 20;
 
 }

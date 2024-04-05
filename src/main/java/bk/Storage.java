@@ -213,7 +213,7 @@ public class Storage extends BaseObject {
   private BackupManager bkup() {
     if (mBackups == null) {
       mBackups = new BackupManager(Files.S, Files.parent(file()));
-      mBackups.alertVerbose();
+      //mBackups.alertVerbose();
     }
     return mBackups;
   }

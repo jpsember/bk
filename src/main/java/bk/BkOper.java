@@ -70,33 +70,42 @@ public class BkOper extends AppOper
       sAccountsView = mAccounts;
       sTransactionsView = mAllTransactionsLedger;
 
-      // Create a root container that has a horizontal layout, with accounts on the left
-      mgr.horz().pushContainer();
+      // Construct root container
+      mgr.pushContainer();
+
+      // Add a small header
+      if (true) {
+        var h = new MessageWindow();
+        h.setMessageAt(MessageWindow.CENTER, "bk 1.0").setMessageAt(MessageWindow.RIGHT, "^x to quit");
+        //HeaderWindow();
+        mgr.chars(1).window(h);
+      }
 
       {
-        mgr.pct(30);
-        mgr.thickBorder();
-        mgr.window(mAccounts);
-      }
-      {
-        mgr.pct(70);
-        var c = new JContainer();
-        mgr.pushContainer(c);
-        focusManager().setTopLevelContainer(c);
+        // Create a container that has a horizontal layout, with accounts on the left
+        mgr.horz().pushContainer();
+
+        {
+          mgr.pct(30);
+          mgr.thickBorder();
+          mgr.window(mAccounts);
+        }
+        {
+          mgr.pct(70);
+          var c = new JContainer();
+          mgr.pushContainer(c);
+          focusManager().setTopLevelContainer(c);
+          mgr.popContainer();
+        }
+
         mgr.popContainer();
       }
-
       mgr.doneConstruction();
       mgr.mainLoop();
     } catch (Throwable t) {
       setError(mgr.closeIfError(t));
     }
   }
-
-  private BkConfig mConfig;
-  private AccountList mAccounts;
-  private TransactionLedger mAllTransactionsLedger;
-  private TransactionLedger mSpecificAccountLedger;
 
   // ------------------------------------------------------------------
   // AccountListListener
@@ -116,11 +125,11 @@ public class BkOper extends AppOper
 
   @Override
   public void viewAccount(Account account) {
-    mSpecificAccountLedger.prepare((t) -> t.credit() == account.number() || t.debit() == account.number(),
-        this);
+    var v = mSpecificAccountLedger;
+    v.prepare((t) -> t.credit() == account.number() || t.debit() == account.number(), this);
     todo("!remove filter, or make it internal based on account number");
-    mSpecificAccountLedger.accountNumber(account.number());
-    focusManager().pushAppend(mSpecificAccountLedger);
+    v.accountNumber(account.number());
+    focusManager().pushAppend(v);
   }
 
   //------------------------------------------------------------------
@@ -135,9 +144,10 @@ public class BkOper extends AppOper
     if (account == null)
       return;
     pr("editedAccount:", INDENT, account);
-    mAccounts.rebuild();
-    mAccounts.setCurrentRow(account);
-    mAccounts.repaint();
+    var v = mAccounts;
+    v.rebuild();
+    v.setCurrentRow(account);
+    v.repaint();
     focusManager().pop();
   }
 
@@ -172,9 +182,10 @@ public class BkOper extends AppOper
     form.remove();
     if (t == null)
       return;
-    mAllTransactionsLedger.rebuild();
-    mAllTransactionsLedger.setCurrentRow(t);
-    mAllTransactionsLedger.repaint();
+    var v = mAllTransactionsLedger;
+    v.rebuild();
+    v.setCurrentRow(t);
+    v.repaint();
     focusManager().pop();
   }
 
@@ -201,4 +212,10 @@ public class BkOper extends AppOper
       halt();
     }
   }
+
+  private BkConfig mConfig;
+  private AccountList mAccounts;
+  private TransactionLedger mAllTransactionsLedger;
+  private TransactionLedger mSpecificAccountLedger;
+
 }

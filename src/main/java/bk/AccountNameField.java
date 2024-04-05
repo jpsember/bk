@@ -14,7 +14,7 @@ public class AccountNameField implements LedgerField {
   @Override
   public String toString() {
     if (mNumber != 0)
-      return mNumber + ": " + mName;
+      return mNumber + " " + mName;
     return mName;
   }
 

@@ -91,6 +91,11 @@ public class WinMgr extends BaseObject {
     return this;
   }
 
+  public WinMgr name(String pendingName) {
+    mPendingName = pendingName;
+    return this;
+  }
+
   private <T> T pop(int type) {
     if (mStack.size() <= 1)
       badState("attempt to pop the outermost container");
@@ -131,6 +136,9 @@ public class WinMgr extends BaseObject {
   private void applyParam(JWindow w) {
     w.setSize(mSizeExpr);
     w.setBorder(mBorderType);
+    if (!nullOrEmpty(mPendingName))
+      w.setName(mPendingName);
+    pr("set size:", mSizeExpr, "and border", mBorderType, "for window", w.name());
     resetPendingWindowVars();
   }
 
@@ -138,6 +146,7 @@ public class WinMgr extends BaseObject {
     mHorzFlag = false;
     mSizeExpr = -100;
     mBorderType = BORDER_NONE;
+    mPendingName = null;
   }
 
   public JContainer topLevelContainer() {
@@ -149,6 +158,7 @@ public class WinMgr extends BaseObject {
   private boolean mHorzFlag;
   private int mBorderType;
   private int mSizeExpr; // 0: unknown > 1: number of chars < 1: -percentage
+  private String mPendingName;
 
   public void doneConstruction() {
     // Ensure that only the root container remains on the stack

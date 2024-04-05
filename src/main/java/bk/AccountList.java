@@ -19,11 +19,17 @@ public class AccountList extends LedgerWindow implements ChangeListener {
     rebuild();
   }
 
+  private static final boolean MERGED = true;
+
   private void addColumns() {
-    addColumn(Column.newBuilder().name("#").datatype(Datatype.ACCOUNT_NUMBER));
-    addColumn(VERT_SEP);
-    addColumn(Column.newBuilder().name("Name").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NAME));
-    addColumn(VERT_SEP);
+    spaceSeparators();
+    if (MERGED) {
+      addColumn(
+          Column.newBuilder().name("Account").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NUMBER_AND_NAME));
+    } else {
+      addColumn(Column.newBuilder().name("#").datatype(Datatype.ACCOUNT_NUMBER));
+      addColumn(Column.newBuilder().name("Name").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NAME));
+    }
     addColumn(Column.newBuilder().name("Balance").alignment(Alignment.RIGHT).datatype(Datatype.CURRENCY));
   }
 
@@ -37,13 +43,16 @@ public class AccountList extends LedgerWindow implements ChangeListener {
     sorted.sort(ACCOUNT_COMPARATOR);
 
     for (var t : sorted) {
-      List<LedgerField> v = arrayList();
-      v.add(new AccountNumberField(t.number()));
-      v.add(VERT_SEP_FLD);
-      v.add(new AccountNameField(t.name()));
-      v.add(VERT_SEP_FLD);
-      v.add(new CurrencyField(t.balance()));
-      addEntry(v, t);
+      openEntry();
+      if (MERGED) {
+        add(new AccountNameField(t.number(), storage().accountName(t.number())));
+      } else {
+        add(new AccountNumberField(t.number()));
+        add(new AccountNameField(t.name()));
+      }
+
+      add(new CurrencyField(t.balance()));
+      closeEntry(t);
     }
     setCurrentRow(currentAccount);
     repaint();
@@ -63,9 +72,6 @@ public class AccountList extends LedgerWindow implements ChangeListener {
       }
       break;
 
-    //    case Character: {
-    //      var sum = keyInfo(k);
-    //      switch (sum) {
     case ":a":
       mListener.addAccount();
       rebuild();
@@ -78,9 +84,6 @@ public class AccountList extends LedgerWindow implements ChangeListener {
       }
       handled = true;
       break;
-    //      }
-    //    }
-    //      break;
     }
     if (!handled)
       super.processKeyEvent(k);

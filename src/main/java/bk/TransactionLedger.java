@@ -37,14 +37,10 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     if (mColumnsAdded)
       return;
     addColumn(Column.newBuilder().name("Date").datatype(Datatype.DATE).width(CHARS_DATE));
-    addColumn(VERT_SEP);
     addColumn(Column.newBuilder().name("Amount").alignment(Alignment.RIGHT).datatype(Datatype.CURRENCY)
         .width(CHARS_CURRENCY));
-    addColumn(VERT_SEP);
     addColumn(Column.newBuilder().name("Dr").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NUMBER_AND_NAME));
-    addColumn(VERT_SEP);
     addColumn(Column.newBuilder().name("Cr").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NUMBER_AND_NAME));
-    addColumn(VERT_SEP);
     addColumn(
         Column.newBuilder().name("Description").datatype(Datatype.TEXT).width(CHARS_TRANSACTION_DESCRIPTION));
     mColumnsAdded = true;
@@ -65,17 +61,15 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     sorted.sort(TRANSACTION_COMPARATOR);
 
     for (var t : sorted) {
-      List<LedgerField> v = arrayList();
-      v.add(new DateField(t.date()));
-      v.add(VERT_SEP_FLD);
-      v.add(new CurrencyField(t.amount()));
-      v.add(VERT_SEP_FLD);
-      v.add(new AccountNameField(t.debit(), storage().accountName(t.debit())));
-      v.add(VERT_SEP_FLD);
-      v.add(new AccountNameField(t.credit(), storage().accountName(t.credit())));
-      v.add(VERT_SEP_FLD);
-      v.add(new TextField(t.description()));
-      addEntry(v, t);
+      todo("have builder instead of manipulating the list ourselves");
+      openEntry();
+      add(new DateField(t.date()));
+      add(new CurrencyField(t.amount()));
+      add(new AccountNameField(t.debit(), storage().accountName(t.debit())));
+      add(new AccountNameField(t.credit(), storage().accountName(t.credit())));
+      add(new TextField(t.description()));
+      closeEntry(t);
+
     }
     setCurrentRow(currentTrans);
     repaint();

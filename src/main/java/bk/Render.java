@@ -58,7 +58,9 @@ public final class Render {
   }
 
   private static final char[] sBorderChars = { //
-      Symbols.SINGLE_LINE_HORIZONTAL, Symbols.SINGLE_LINE_VERTICAL, Symbols.SINGLE_LINE_TOP_LEFT_CORNER,
+      Symbols.SINGLE_LINE_HORIZONTAL, Symbols.SINGLE_LINE_VERTICAL,
+     
+      Symbols.SINGLE_LINE_TOP_LEFT_CORNER,
       Symbols.SINGLE_LINE_BOTTOM_LEFT_CORNER, Symbols.SINGLE_LINE_TOP_RIGHT_CORNER,
       Symbols.SINGLE_LINE_BOTTOM_RIGHT_CORNER, //
 
