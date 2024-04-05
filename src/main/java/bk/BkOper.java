@@ -54,8 +54,10 @@ public class BkOper extends AppOper
     {
       var f = Files.ifEmpty(config().file(), new File("database.json"));
       f = Files.addExpectedExtension(f, Files.EXT_JSON);
-      if (!f.exists())
-        setError("Cannot locate database file:", f);
+      if (!f.exists()) {
+        if (!config().create())
+          setError("Cannot locate database file:", f);
+      }
       storage().read(f);
     }
 

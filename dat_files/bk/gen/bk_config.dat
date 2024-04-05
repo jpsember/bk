@@ -1,4 +1,8 @@
 fields {
+
+  // If database not found, create one?
+  bool create;
+
   // The location of the database
   File file;
 }

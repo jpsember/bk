@@ -7,6 +7,10 @@ import js.json.JSMap;
 
 public class BkConfig implements AbstractData {
 
+  public boolean create() {
+    return mCreate;
+  }
+
   public File file() {
     return mFile;
   }
@@ -16,7 +20,8 @@ public class BkConfig implements AbstractData {
     return new Builder(this);
   }
 
-  protected static final String _0 = "file";
+  protected static final String _0 = "create";
+  protected static final String _1 = "file";
 
   @Override
   public String toString() {
@@ -26,7 +31,8 @@ public class BkConfig implements AbstractData {
   @Override
   public JSMap toJson() {
     JSMap m = new JSMap();
-    m.putUnsafe(_0, mFile.toString());
+    m.putUnsafe(_0, mCreate);
+    m.putUnsafe(_1, mFile.toString());
     return m;
   }
 
@@ -41,9 +47,10 @@ public class BkConfig implements AbstractData {
   }
 
   private BkConfig(JSMap m) {
+    mCreate = m.opt(_0, false);
     {
       mFile = Files.DEFAULT;
-      String x = m.opt(_0, (String) null);
+      String x = m.opt(_1, (String) null);
       if (x != null) {
         mFile = new File(x);
       }
@@ -63,6 +70,8 @@ public class BkConfig implements AbstractData {
     BkConfig other = (BkConfig) object;
     if (other.hashCode() != hashCode())
       return false;
+    if (!(mCreate == other.mCreate))
+      return false;
     if (!(mFile.equals(other.mFile)))
       return false;
     return true;
@@ -73,18 +82,21 @@ public class BkConfig implements AbstractData {
     int r = m__hashcode;
     if (r == 0) {
       r = 1;
+      r = r * 37 + (mCreate ? 1 : 0);
       r = r * 37 + mFile.hashCode();
       m__hashcode = r;
     }
     return r;
   }
 
+  protected boolean mCreate;
   protected File mFile;
   protected int m__hashcode;
 
   public static final class Builder extends BkConfig {
 
     private Builder(BkConfig m) {
+      mCreate = m.mCreate;
       mFile = m.mFile;
     }
 
@@ -102,8 +114,14 @@ public class BkConfig implements AbstractData {
     @Override
     public BkConfig build() {
       BkConfig r = new BkConfig();
+      r.mCreate = mCreate;
       r.mFile = mFile;
       return r;
+    }
+
+    public Builder create(boolean x) {
+      mCreate = x;
+      return this;
     }
 
     public Builder file(File x) {
