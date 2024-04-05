@@ -8,6 +8,7 @@ import java.util.Stack;
 
 import js.base.BaseObject;
 import js.geometry.MyMath;
+import js.json.JSMap;
 
 /**
  * Manages keyboard focus, and handles a stack of windows that have the focus.
@@ -138,9 +139,11 @@ public class FocusManager extends BaseObject {
     log("push", window.name(), "method:", method);
 
     // If window is already in the stack somewhere, pop to it
+    log("...looking for window in stack");
     int popTo = -1;
     for (int i = mStack.size() - 1; i >= 0; i--) {
       var ent = mStack.get(i);
+      log("......stack element:", INDENT, ent);
       if (ent.oldFocusHandler == window) {
         log("...found window in stack at:", i);
         popTo = i;
@@ -163,11 +166,8 @@ public class FocusManager extends BaseObject {
     ent.oldTopLevelContainer = top;
     ent.windows.addAll(top.children());
 
-    // If window is already in the hierarchy, make sure its parent is the top level container
-    if (mgr.inView(window)) {
-      checkState(window.parent() == top, "window is not within top level container, instead it's within",
-          window.parent().name());
-    } else {
+    // If window is not already visible, add it, and modify stack accordingly
+    if (!mgr.inView(window)) {
       switch (method) {
       default:
         notSupported("push method");
@@ -224,11 +224,24 @@ public class FocusManager extends BaseObject {
     set(ent.oldFocusHandler);
   }
 
-  private static class StackEntry {
+  private static class StackEntry extends BaseObject {
     StackEntry(int method, FocusHandler handlerToSave) {
       this.windows = arrayList();
       this.oldFocusHandler = handlerToSave;
+    }
 
+    @Override
+    public JSMap toJson() {
+      var m = map();
+      if (oldFocusHandler != null)
+        m.put("focus_handler", oldFocusHandler.toString());
+      if (oldTopLevelContainer != null)
+        m.put("top_level_container", oldTopLevelContainer.name());
+      var lst = list();
+      for (var w : windows)
+        lst.add(w.name());
+      m.put("windows", lst);
+      return m;
     }
 
     FocusHandler oldFocusHandler;

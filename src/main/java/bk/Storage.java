@@ -36,22 +36,16 @@ public class Storage extends BaseObject {
     if (!mModified)
       return;
 
-    if (file().exists()) {
-      // Write to a temporary file; then, if successful,
-      // rename the old file (if it exists) to something, rename the temp file to 
-      // the target file, and delete the old (or place somewhere for safety)
-
-      todo("once happy with backup manager, avoid temporary stuff; just backup the file then overwrite");
-      var tmp = Files.createTempFile("_bk_", null);
-      Files.S.write(tmp, mDatabase);
-      bkup().makeBackup(file());
-      Files.S.deleteFile(file());
-      Files.S.moveFile(tmp, file());
-      Files.S.deleteFile(tmp);
-    } else {
-    //  if (true || !alert("disabling writing for now"))
-        Files.S.writeWithPrettyIf(file(), mDatabase, alert("!writing pretty"));
+    var f = file();
+    if (f.exists()) {
+      bkup().makeBackup(f);
     }
+
+    File tmp = new File(Files.parent(f), "_temporary_.json");
+    Files.S.write(tmp, mDatabase);
+    Files.S.deleteFile(f);
+    Files.S.moveFile(tmp, f);
+
     mModified = false;
   }
 
