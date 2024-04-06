@@ -89,8 +89,6 @@ public class FocusManager extends BaseObject {
   }
 
   private void auxFocusList(List<FocusHandler> list, JWindow window) {
-    if (window.hidden())
-      return;
     if (window instanceof FocusHandler) {
       list.add((FocusHandler) window);
     }

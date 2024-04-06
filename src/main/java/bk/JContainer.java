@@ -29,8 +29,6 @@ public class JContainer extends JWindow {
 
     var problem = false;
 
-    if (hidden()) return;
-    
     if (children().isEmpty())
       return;
 
@@ -43,7 +41,8 @@ public class JContainer extends JWindow {
     boolean swap = !mHorzFlag;
 
     var boundsWithinScreen = calcContentBounds();
-   if (db) pr("contentBounds:", boundsWithinScreen);
+    if (db)
+      pr("contentBounds:", boundsWithinScreen);
 
     // The size of the container (normalized so windows are stacked horizontally)
 
@@ -58,7 +57,6 @@ public class JContainer extends JWindow {
     double pctSum = 0;
     int charsSum = 0;
     for (var child : children()) {
-      if (child.hidden()) continue;
       var sizeExpr = child.getSizeExpr();
       if (sizeExpr > 0)
         charsSum += sizeExpr;
@@ -76,7 +74,6 @@ public class JContainer extends JWindow {
     int dynamicCharsAllotted = 0;
 
     for (JWindow c : children()) {
-      if (c.hidden()) continue;
       if (db)
         pr(VERT_SP, "layout next child");
       var sizeExpr = c.getSizeExpr();
@@ -118,6 +115,5 @@ public class JContainer extends JWindow {
   }
 
   boolean mHorzFlag;
-
 
 }
