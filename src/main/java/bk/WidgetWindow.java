@@ -40,6 +40,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
 
   public WidgetWindow helper(WidgetHelper helper) {
     mHelper = helper;
+    helper.setWidget(this);
     return this;
   }
 
@@ -64,6 +65,13 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   @Override
   public void paint() {
     var r = Render.SHARED_INSTANCE;
+
+    boolean hf = hasFocus();
+
+    if (mHelper != null && hf) {
+      mHelper.paint();
+    }
+
     var b = r.clipBounds();
     b = b.withInset(1, 0);
     var SEP = 1;
@@ -71,8 +79,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     var labelWidth = Math.min(b.width / 2, 16);
     var valueWidth = mWidth;
 
-    boolean hf = hasFocus();
-
+  
     if (isButton()) {
       r.pushStyle(hf ? STYLE_INVERSE : STYLE_NORMAL);
       r.drawString(b.x + labelWidth + SEP, b.y, labelWidth, mLabel);
@@ -134,6 +141,14 @@ public class WidgetWindow extends JWindow implements FocusHandler {
 
   public boolean isButton() {
     return mButtonListener != null;
+  }
+
+  public String getContentForHelper() {
+    var cont = truncate(mContent, mWidth);
+    var c = mCursorPos;
+    if (c >= 0)
+      cont = truncate(cont, c);
+    return cont;
   }
 
   @Override

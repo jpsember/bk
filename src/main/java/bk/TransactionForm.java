@@ -38,8 +38,8 @@ public class TransactionForm extends FormWindow {
       dt = epochSecondsToday();
     mDate = validator(DATE_VALIDATOR).value(dt).addField("Date");
     mAmount = validator(CURRENCY_VALIDATOR).value(b.amount()).addField("Amount");
-    mDr = validator(ACCOUNT_VALIDATOR).value(b.debit()).addField("Dr").helper(AccountIdHelper.DEFAULT_INSTANCE);
-    mCr = validator(ACCOUNT_VALIDATOR).value(b.credit()).addField("Cr").helper(AccountIdHelper.DEFAULT_INSTANCE);
+    mDr = validator(ACCOUNT_VALIDATOR).value(b.debit()).addField("Dr").helper(new AccountIdHelper());
+    mCr = validator(ACCOUNT_VALIDATOR).value(b.credit()).addField("Cr").helper(new AccountIdHelper());
     mDesc = validator(DESCRIPTION_VALIDATOR).value(b.description()).fieldWidth(80).addField("Description");
     addVertSpace(1);
     addButton("Ok", () -> okHandler());
@@ -93,7 +93,7 @@ public class TransactionForm extends FormWindow {
     } while (false);
 
     if (problem != null) {
-      pr("setMessage:",problem);
+      pr("setMessage:", problem);
       setMessage(problem);
       return;
     }

@@ -2,12 +2,53 @@ package bk;
 
 import bk.gen.HelperResult;
 import js.base.BaseObject;
+import js.geometry.IPoint;
+import js.geometry.IRect;
 import js.geometry.MyMath;
+import static bk.Util.*;
 
 public class WidgetHelper extends BaseObject {
 
   public WidgetHelper() {
     alertVerbose();
+  }
+
+  void setWidget(WidgetWindow widget) {
+    mWidget = widget;
+  }
+
+  public void paint() {
+    var b = determineBounds();
+    if (b == null)
+      return;
+
+    var r = Render.SHARED_INSTANCE;
+    var bSave = r.clipBounds();
+    {
+      // Save the current clip rect since we may be rendering outside of it
+
+      r.setClipBounds(b);
+      r.drawRect(b, BORDER_ROUNDED);
+    }
+    r.setClipBounds(bSave);
+
+  }
+
+  private IRect determineBounds() {
+
+    var w = mWidget;
+    var content = w.getContentForHelper();
+    if (content.isEmpty()) {
+      return null;
+    }
+    var r = Render.SHARED_INSTANCE;
+    var wb = r.clipBounds();
+    IPoint size = new IPoint(30, 6);
+    var locX = wb.x + 30;
+    var locY = wb.y - (size.y + 2);
+    if (locY < 0)
+      locY = wb.y + 2;
+    return new IRect(locX, locY, size.x, size.y);
   }
 
   public HelperResult processKeyEvent(KeyEvent k) {
@@ -38,6 +79,7 @@ public class WidgetHelper extends BaseObject {
     mPosition = MyMath.myMod(mPosition + direction, mSize);
   }
 
+  private WidgetWindow mWidget;
   private int mPosition;
   private int mSize = 5;
 }
