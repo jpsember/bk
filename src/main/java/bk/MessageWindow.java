@@ -8,10 +8,6 @@ public class MessageWindow extends JWindow {
 
   public static final int TOPLEFT = 0, TOP = 1, TOPRIGHT = 2, LEFT = 3, CENTER = 4, RIGHT = 5, BOTTOMLEFT = 6,
       BOTTOM = 7, BOTTOMRIGHT = 8;
-
-  //  public static final int LEFT = 0;
-  //  public static final int CENTER = 1;
-  //  public static final int RIGHT = 2;
   private static final int POS_TOTAL = 9;
 
   public MessageWindow setMessageAt(int position, Object... message) {

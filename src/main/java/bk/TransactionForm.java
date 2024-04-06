@@ -38,8 +38,10 @@ public class TransactionForm extends FormWindow {
       dt = epochSecondsToday();
     mDate = validator(DATE_VALIDATOR).value(dt).addField("Date");
     mAmount = validator(CURRENCY_VALIDATOR).value(b.amount()).addField("Amount");
-    mDr = validator(ACCOUNT_VALIDATOR).value(accountNumberWithNameString(b.debit(),false)).fieldWidth(CHARS_ACCOUNT_NUMBER_AND_NAME).addField("Dr").helper(new AccountIdHelper());
-    mCr = validator(ACCOUNT_VALIDATOR).value(accountNumberWithNameString(b.credit(),false)).fieldWidth(CHARS_ACCOUNT_NUMBER_AND_NAME).addField("Cr").helper(new AccountIdHelper());
+    mDr = validator(ACCOUNT_VALIDATOR).value(accountNumberWithNameString(b.debit(), false))
+        .fieldWidth(CHARS_ACCOUNT_NUMBER_AND_NAME).addField("Dr").helper(new AccountIdHelper());
+    mCr = validator(ACCOUNT_VALIDATOR).value(accountNumberWithNameString(b.credit(), false))
+        .fieldWidth(CHARS_ACCOUNT_NUMBER_AND_NAME).addField("Cr").helper(new AccountIdHelper());
     mDesc = validator(DESCRIPTION_VALIDATOR).value(b.description()).fieldWidth(80).addField("Description");
     addVertSpace(1);
     addButton("Ok", () -> okHandler());
@@ -66,7 +68,11 @@ public class TransactionForm extends FormWindow {
       if (!mDate.valid()) {
         focusManager().set(mDate);
       }
-      if (mDate.showAlert() || mAmount.showAlert() || mDr.showAlert() || mCr.showAlert() || mDesc.showAlert()) {
+      if (mDate.showAlert() //
+          || mAmount.showAlert() //
+          || mDr.showAlert() //
+          || mCr.showAlert() //
+          || mDesc.showAlert()) {
         break;
       }
       problem = null;
@@ -79,10 +85,8 @@ public class TransactionForm extends FormWindow {
       tr.description(mDesc.validResult());
 
       problem = validateTransaction(tr);
-      if (problem != null) {
-        pr("problem:", problem);
+      if (problem != null)
         break;
-      }
 
       problem = "Transaction must involve this account";
       if (mAccountNumber != 0) {
@@ -93,7 +97,6 @@ public class TransactionForm extends FormWindow {
     } while (false);
 
     if (problem != null) {
-      pr("setMessage:", problem);
       setMessage(problem);
       return;
     }

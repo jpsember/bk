@@ -206,7 +206,6 @@ public class FocusManager extends BaseObject {
   }
 
   public void pop() {
-    todo("intercept attempt to leave form?");
     log("pop; stack size:", mStack.size());
     if (mStack.isEmpty()) {
       badState("FocusHandler stack is empty");

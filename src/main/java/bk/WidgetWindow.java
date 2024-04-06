@@ -50,10 +50,16 @@ public class WidgetWindow extends JWindow implements FocusHandler {
 
   @Override
   public void loseFocus() {
+    updateValidationResult();
+  }
+
+  private void updateValidationResult() {
     mValidationResult = mValidator.validate(mContent);
-    mContent = mValidationResult.string();
-    if (mContent.isEmpty())
-      todo("!handle a failed validation");
+    var newContent = mValidationResult.string();
+    if (!newContent.equals(mContent)) {
+      repaint();
+      mContent = newContent;
+    }
   }
 
   @Override
@@ -113,7 +119,9 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   }
 
   public ValidationResult validationResult() {
-    return nullTo(mValidationResult, ValidationResult.NONE);
+    if (mValidationResult == null)
+      updateValidationResult();
+    return mValidationResult;
   }
 
   /**
@@ -152,8 +160,6 @@ public class WidgetWindow extends JWindow implements FocusHandler {
 
   @Override
   public void processKeyEvent(KeyEvent k) {
-    pr("WidgetWindow, process key event:", k);
-
     var fm = focusManager();
     switch (k.keyType()) {
     case Enter: {
@@ -221,8 +227,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     }
       break;
     default:
-      pr("did not handle the keypress:", k);
-      todo("have some sort of fallback");
+      //todo("have some sort of fallback");
       break;
     }
 

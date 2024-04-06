@@ -33,8 +33,8 @@ public class FormWindow extends JContainer {
   }
 
   public FormWindow setMessage(String message) {
-    mMessage.setMessageAt(MessageWindow.LEFT, message); //"bk 1.0").setMessageAt(MessageWindow.RIGHT, "^x to quit");
-     return this;
+    mMessage.setMessageAt(MessageWindow.LEFT, message);
+    return this;
   }
 
   public FormWindow addVertSpace(int count) {
