@@ -79,7 +79,6 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     var labelWidth = Math.min(b.width / 2, 16);
     var valueWidth = mWidth;
 
-  
     if (isButton()) {
       r.pushStyle(hf ? STYLE_INVERSE : STYLE_NORMAL);
       r.drawString(b.x + labelWidth + SEP, b.y, labelWidth, mLabel);
@@ -103,12 +102,17 @@ public class WidgetWindow extends JWindow implements FocusHandler {
           s = truncate(s, mWidth);
         }
 
-        if (hf)
+        if (hf) {
           winMgr().setCursorPosition(lx + curPos, ly);
+        }
       }
       r.pushStyle(style);
       r.drawString(lx, ly, valueWidth, s);
       r.pop();
+      if (hf) {
+        alert("experiment, overlaying some text");
+        r.drawString(lx, ly, valueWidth, "help?");
+      }
     }
 
   }
@@ -121,7 +125,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
    * If the field is invalid, make it the focus and return true; else, return
    * false
    */
-  public boolean alert() {
+  public boolean showAlert() {
     if (!valid()) {
       focusManager().set(this);
       return true;

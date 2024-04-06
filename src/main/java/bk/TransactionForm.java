@@ -66,7 +66,7 @@ public class TransactionForm extends FormWindow {
       if (!mDate.valid()) {
         focusManager().set(mDate);
       }
-      if (mDate.alert() || mAmount.alert() || mDr.alert() || mCr.alert() || mDesc.alert()) {
+      if (mDate.showAlert() || mAmount.showAlert() || mDr.showAlert() || mCr.showAlert() || mDesc.showAlert()) {
         break;
       }
       problem = null;
