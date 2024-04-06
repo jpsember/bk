@@ -22,6 +22,11 @@ public class KeyEvent {
       , ADD = ":a" //
       , EDIT = ":e" //
       , QUIT = "C:x" //
+          , ARROW_UP = ":ArrowUp" //
+           , ARROW_DOWN = ":ArrowDown" //
+               , ARROW_LEFT = ":ArrowLeft" //
+               , ARROW_RIGHT = ":ArrowRight" //
+          
   ;
 
   public KeyEvent(KeyStroke k) {

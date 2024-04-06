@@ -38,6 +38,11 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     return this;
   }
 
+  public WidgetWindow helper(WidgetHelper helper) {
+    mHelper = helper;
+    return this;
+  }
+
   public WidgetWindow focusRootWindow(JWindow rootWindow) {
     mFocusRootWindow = rootWindow;
     return this;
@@ -135,6 +140,22 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   public void processKeyEvent(KeyEvent k) {
     //pr("keyType:", k.getKeyType(), k);
 
+    if (mHelper != null) {
+      var r = mHelper.processKeyEvent(k);
+      if (r != null) {
+        if (!r.text().isEmpty()) {
+          mContent = r.text();
+          mContent = truncate(mContent, mWidth);
+          mCursorPos = MyMath.clamp(mCursorPos, -1, mWidth);
+          repaint();
+        }
+        if (r.selected()) {
+          pr("helper selected, hide it?");
+        }
+        return;
+      }
+
+    }
     switch (k.keyType()) {
     case Enter: {
       if (isButton())
@@ -230,5 +251,5 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   private JWindow mFocusRootWindow;
   private ButtonListener mButtonListener;
   private ValidationResult mValidationResult;
-
+  private WidgetHelper mHelper;
 }
