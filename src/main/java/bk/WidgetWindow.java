@@ -3,6 +3,7 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
+import bk.gen.HelperResult;
 import js.geometry.MyMath;
 
 public class WidgetWindow extends JWindow implements FocusHandler {
@@ -67,10 +68,10 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     var r = Render.SHARED_INSTANCE;
 
     boolean hf = hasFocus();
-
-    if (mHelper != null && hf) {
-      mHelper.paint();
-    }
+    //
+    //    if (mHelper != null && hf) {
+    //      mHelper.paint();
+    //    }
 
     var b = r.clipBounds();
     b = b.withInset(1, 0);
@@ -147,7 +148,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     return mButtonListener != null;
   }
 
-  public String getContentForHelper() {
+  private String getHintForHelper() {
     var cont = truncate(mContent, mWidth);
     var c = mCursorPos;
     if (c >= 0)
@@ -155,26 +156,34 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     return cont;
   }
 
+  
   @Override
   public void processKeyEvent(KeyEvent k) {
-    //pr("keyType:", k.getKeyType(), k);
+    pr("WidgetWindow, process key event:", k);
 
-    if (mHelper != null) {
-      var r = mHelper.processKeyEvent(k);
-      if (r != null) {
-        if (!r.text().isEmpty()) {
-          mContent = r.text();
-          mContent = truncate(mContent, mWidth);
-          mCursorPos = MyMath.clamp(mCursorPos, -1, mWidth);
-          repaint();
-        }
-        if (r.selected()) {
-          pr("helper selected, hide it?");
-        }
-        return;
+    if (hasFocus()) {
+      if (mHelper != null) {
+        var r = mHelper.processKeyEvent(getHintForHelper(), k);
+        mHelperResult = r;
+
+        // Change content to help result
+        mContent = r.text();
       }
-
     }
+    //      if (r != null) {
+    //        if (!r.text().isEmpty()) {
+    //          mContent = r.text();
+    //          mContent = truncate(mContent, mWidth);
+    //          mCursorPos = MyMath.clamp(mCursorPos, -1, mWidth);
+    //          repaint();
+    //        }
+    //        if (r.selected()) {
+    //          pr("helper selected, hide it?");
+    //        }
+    //        return;
+    //      }
+    //
+    //    }
     switch (k.keyType()) {
     case Enter: {
       if (isButton())
@@ -271,4 +280,5 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   private ButtonListener mButtonListener;
   private ValidationResult mValidationResult;
   private WidgetHelper mHelper;
+  private HelperResult mHelperResult;
 }
