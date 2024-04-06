@@ -2,64 +2,40 @@ package bk;
 
 import static js.base.Tools.*;
 
-import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import js.base.BaseObject;
 
 public abstract class WidgetHelper extends BaseObject {
 
-  public WidgetHelper() {
-    alertVerbose();
-  }
-
   /**
-   * Construct a list of user prefixes, and corresponding hints that should be
-   * shown for those prefixes
+   * Construct a hint for a prefix (which will be a nonempty lower case string)
    */
-  public abstract void constructHintResults(List<String> userPrefixList, List<String> hintList);
+  public abstract String constructHint(String prefix);
 
   public String getHint(String prefix) {
     String hint = "";
-    outer: do {
-      if (!prefix.isEmpty()) {
-        var tl = hintResults().tailMap(prefix);
-        if (tl.isEmpty())
-          break;
-        var x = tl.get(tl.firstKey());
-        if (x.length() < prefix.length())
-          break;
-        if (String.CASE_INSENSITIVE_ORDER.compare(prefix, x.substring(0, prefix.length())) != 0)
-          break;
-        hint = x;
-        break outer;
+    if (!prefix.isEmpty()) {
+      var prefixLower = prefix.toLowerCase();
+      hint = mHintResultsMap.get(prefix);
+      if (hint == null) {
+        hint = nullToEmpty(constructHint(prefixLower));
+        mHintResultsMap.put(prefix, hint);
       }
-    } while (false);
+    }
     return hint;
   }
 
-  private SortedMap<String, String> hintResults() {
-    if (mHintResultsMap == null) {
-      List<String> userPrefixList = arrayList();
-      List<String> hintList = arrayList();
-
-      constructHintResults(userPrefixList, hintList);
-      checkState(hintList.size() == userPrefixList.size(), "hint result arrays not same size");
-
-      SortedMap<String, String> mp = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-
-      int i = INIT_INDEX;
-      for (var pref : userPrefixList) {
-        i++;
-        var hint = hintList.get(i);
-        mp.put(pref, hint);
-      }
-      mHintResultsMap = mp;
-    }
-    return mHintResultsMap;
+  public static int compareLowerCase(String a, String b) {
+    return String.CASE_INSENSITIVE_ORDER.compare(a, b);
   }
 
-  private SortedMap<String, String> mHintResultsMap;
+  public static boolean hasPrefix(String string, String prefix) {
+    if (string.length() < prefix.length())
+      return false;
+    return compareLowerCase(string.substring(0, prefix.length()), prefix) == 0;
+  }
+
+  // A map of user prefix (in lower case) and the hint that should be shown for that prefix (which might be an empty string)
+  private Map<String, String> mHintResultsMap = hashMap();
 }
