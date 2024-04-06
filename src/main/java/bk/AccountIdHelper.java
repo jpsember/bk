@@ -12,7 +12,7 @@ public class AccountIdHelper extends WidgetHelper {
 
   @Override
   public String constructHint(String prefix) {
-    alertVerbose();
+    //alertVerbose();
     log("constructHint, prefix:", quote(prefix));
 
     List<AccEntry> candidates = arrayList();

@@ -513,6 +513,21 @@ public final class Util {
     return sChangeManager;
   }
 
+  public static String accountNumberWithNameString(int optAccountNumber, boolean emptyIfNotExist) {
+    var ac = account(optAccountNumber);
+    var effName = "???";
+    var effNumber = optAccountNumber;
+    if (ac == null) {
+      if (emptyIfNotExist)
+        return "";
+    } else {
+      effName = ac.name();
+      effNumber = ac.number();
+    }
+
+    return effNumber + " " + effName;
+  }
+
   private static ChangeManager sChangeManager;
 
   public static final int CHARS_ACCOUNT_NAME = 20;

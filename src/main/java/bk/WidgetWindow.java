@@ -159,8 +159,10 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     case Enter: {
       if (isButton())
         mButtonListener.buttonPressed();
-      else
+      else {
+        applyHint();
         fm.move(mFocusRootWindow, 1);
+      }
     }
       break;
 
@@ -170,9 +172,11 @@ public class WidgetWindow extends JWindow implements FocusHandler {
       break;
 
     case ArrowDown:
+      applyHint();
       fm.move(mFocusRootWindow, 1);
       break;
     case ArrowUp:
+      applyHint();
       fm.move(mFocusRootWindow, -1);
       break;
     case ArrowLeft:
@@ -245,6 +249,16 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     }
     mContent = mContent.substring(0, mCursorPos) + Character.toString(c) + mContent.substring(mCursorPos);
     mCursorPos++;
+  }
+
+  /**
+   * If a hint exists, replace user-typed content with it
+   */
+  private void applyHint() {
+    if (nonEmpty(mHint)) {
+      mContent = mHint;
+      mCursorPos = -1;
+    }
   }
 
   private static String truncate(String s, int maxWidth) {
