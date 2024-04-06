@@ -3,7 +3,6 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
-import bk.gen.HelperResult;
 import js.geometry.MyMath;
 
 public class WidgetWindow extends JWindow implements FocusHandler {
@@ -41,7 +40,6 @@ public class WidgetWindow extends JWindow implements FocusHandler {
 
   public WidgetWindow helper(WidgetHelper helper) {
     mHelper = helper;
-    helper.setWidget(this);
     return this;
   }
 
@@ -68,10 +66,6 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     var r = Render.SHARED_INSTANCE;
 
     boolean hf = hasFocus();
-    //
-    //    if (mHelper != null && hf) {
-    //      mHelper.paint();
-    //    }
 
     var b = r.clipBounds();
     b = b.withInset(1, 0);
@@ -91,7 +85,11 @@ public class WidgetWindow extends JWindow implements FocusHandler {
 
       var lx = b.x + labelWidth + SEP;
       var ly = b.y;
-      var s = truncate(mContent, mWidth);
+
+      var s = mContent; //truncate(mContent, mWidth);
+      if (mHint != null)
+        s = mHint;
+
       var style = STYLE_NORMAL;
       if (hf) {
         int curPos = mCursorPos;
@@ -110,10 +108,6 @@ public class WidgetWindow extends JWindow implements FocusHandler {
       r.pushStyle(style);
       r.drawString(lx, ly, valueWidth, s);
       r.pop();
-      if (hf) {
-        alert("experiment, overlaying some text");
-        r.drawString(lx, ly, valueWidth, "help?");
-      }
     }
 
   }
@@ -149,60 +143,37 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   }
 
   private String getHintForHelper() {
-    var cont = truncate(mContent, mWidth);
+    var cont = mContent;
     var c = mCursorPos;
     if (c >= 0)
       cont = truncate(cont, c);
     return cont;
   }
 
-  
   @Override
   public void processKeyEvent(KeyEvent k) {
     pr("WidgetWindow, process key event:", k);
 
-    if (hasFocus()) {
-      if (mHelper != null) {
-        var r = mHelper.processKeyEvent(getHintForHelper(), k);
-        mHelperResult = r;
-
-        // Change content to help result
-        mContent = r.text();
-      }
-    }
-    //      if (r != null) {
-    //        if (!r.text().isEmpty()) {
-    //          mContent = r.text();
-    //          mContent = truncate(mContent, mWidth);
-    //          mCursorPos = MyMath.clamp(mCursorPos, -1, mWidth);
-    //          repaint();
-    //        }
-    //        if (r.selected()) {
-    //          pr("helper selected, hide it?");
-    //        }
-    //        return;
-    //      }
-    //
-    //    }
+    var fm = focusManager();
     switch (k.keyType()) {
     case Enter: {
       if (isButton())
         mButtonListener.buttonPressed();
       else
-        focusManager().move(mFocusRootWindow, 1);
+        fm.move(mFocusRootWindow, 1);
     }
       break;
 
     case Tab:
       // Move to next button (e.g. Ok or Cancel)
-      focusManager().moveToNextButton(mFocusRootWindow);
+      fm.moveToNextButton(mFocusRootWindow);
       break;
 
     case ArrowDown:
-      focusManager().move(mFocusRootWindow, 1);
+      fm.move(mFocusRootWindow, 1);
       break;
     case ArrowUp:
-      focusManager().move(mFocusRootWindow, -1);
+      fm.move(mFocusRootWindow, -1);
       break;
     case ArrowLeft:
       if (mCursorPos == 0)
@@ -250,8 +221,20 @@ public class WidgetWindow extends JWindow implements FocusHandler {
       todo("have some sort of fallback");
       break;
     }
+
+    // If this is no longer the focused window, return immediately
+    if (fm.focus() != this)
+      return;
+
     mContent = truncate(mContent, mWidth);
     mCursorPos = MyMath.clamp(mCursorPos, -1, mWidth);
+
+    mHint = null;
+    if (mHelper != null) {
+      var prefix = getHintForHelper();
+      mHint = mHelper.getHint(prefix);
+    }
+
     repaint();
   }
 
@@ -280,5 +263,5 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   private ButtonListener mButtonListener;
   private ValidationResult mValidationResult;
   private WidgetHelper mHelper;
-  private HelperResult mHelperResult;
+  private String mHint;
 }

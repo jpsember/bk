@@ -1,7 +1,19 @@
 package bk;
 
+import static bk.Util.*;
+import static js.base.Tools.*;
+
+import java.util.List;
+
 public class AccountIdHelper extends WidgetHelper {
 
-  //public static final WidgetHelper DEFAULT_INSTANCE = new AccountIdHelper();
+  @Override
+  public void constructHintResults(List<String> userPrefixList, List<String> hintList) {
+    var a = storage().accounts();
+    for (var ac : a.values()) {
+ 
+      
+    }
+  }
 
 }
