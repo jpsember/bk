@@ -173,10 +173,9 @@ public class WidgetWindow extends JWindow implements FocusHandler {
       break;
 
     case Tab:
-      // Move to next button (e.g. Ok or Cancel)
-      fm.moveToNextButton(mFocusRootWindow);
+      applyHint();
+      fm.move(mFocusRootWindow, 1);
       break;
-
     case ArrowDown:
       applyHint();
       fm.move(mFocusRootWindow, 1);

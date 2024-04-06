@@ -43,20 +43,10 @@ public class TransactionForm extends FormWindow {
     mCr = validator(ACCOUNT_VALIDATOR).value(accountNumberWithNameString(b.credit(), false))
         .fieldWidth(CHARS_ACCOUNT_NUMBER_AND_NAME).addField("Cr").helper(new AccountIdHelper());
     mDesc = validator(DESCRIPTION_VALIDATOR).value(b.description()).fieldWidth(80).addField("Description");
-    addVertSpace(1);
     addButton("Ok", () -> okHandler());
     addButton("Cancel", () -> cancelHandler());
     addVertSpace(1);
     addMessageLine();
-  }
-
-  private void removeFormFromScreen() {
-    var m = winMgr();
-    var c = m.topLevelContainer();
-    c.removeChild(this);
-
-    c.setLayoutInvalid();
-    focusManager().set(mOldFocus);
   }
 
   private void okHandler() {
@@ -121,7 +111,7 @@ public class TransactionForm extends FormWindow {
   }
 
   private void cancelHandler() {
-    removeFormFromScreen();
+    mListener.editedTransaction(this, null);
   }
 
   private Listener mListener;

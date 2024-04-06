@@ -182,12 +182,12 @@ public class BkOper extends AppOper
   @Override
   public void editedTransaction(TransactionForm form, Transaction t) {
     form.remove();
-    if (t == null)
-      return;
-    var v = mAllTransactionsLedger;
-    v.rebuild();
-    v.setCurrentRow(t);
-    v.repaint();
+    if (t != null) {
+      var v = mAllTransactionsLedger;
+      v.rebuild();
+      v.setCurrentRow(t);
+      v.repaint();
+    }
     focusManager().pop();
   }
 
