@@ -30,6 +30,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
 
   public WidgetWindow value(Object value) {
     mContent = mValidator.encode(value);
+    mValidationResult = null;
     return this;
   }
 
@@ -67,6 +68,10 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     mCursorPos = -1;
   }
 
+  public boolean isEmpty() {
+    return nullOrEmpty(mContent);
+  }
+  
   @Override
   public void paint() {
     var r = Render.SHARED_INSTANCE;
@@ -92,7 +97,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
       var lx = b.x + labelWidth + SEP;
       var ly = b.y;
 
-      var s = mContent; //truncate(mContent, mWidth);
+      var s = mContent; 
       if (nonEmpty(mHint))
         s = mHint;
 

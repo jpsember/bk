@@ -23,12 +23,6 @@ public class TransactionForm extends FormWindow {
     mAccountNumber = forAccount;
 
     mOrig = b.build();
-    if (forAccount != 0) {
-      if (b.debit() == 0)
-        b.debit(forAccount);
-      if (b.credit() == 0)
-        b.credit(forAccount);
-    }
 
     mType = type;
     setSizeChars(12);
@@ -55,9 +49,20 @@ public class TransactionForm extends FormWindow {
     var tr = Transaction.newBuilder();
 
     do {
-      if (!mDate.valid()) {
-        focusManager().set(mDate);
+
+      if (mAccountNumber != 0) {
+        // If we are editing it for a particular account, and
+        // If exactly one of the debit or credit are empty, set them to that account
+        
+        // They can't BOTH be empty
+        if (!(mDr.isEmpty() && mCr.isEmpty())) {
+          if (mDr.isEmpty())
+            mDr.value(mAccountNumber).repaint();
+          if (mCr.isEmpty())
+            mCr.value(mAccountNumber).repaint();
+        }
       }
+
       if (mDate.showAlert() //
           || mAmount.showAlert() //
           || mDr.showAlert() //
@@ -116,7 +121,6 @@ public class TransactionForm extends FormWindow {
 
   private Listener mListener;
   private int mType;
-  private FocusHandler mOldFocus;
   private WidgetWindow mDate, mAmount, mDr, mCr, mDesc;
   private int mAccountNumber;
   private Transaction mOrig;

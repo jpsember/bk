@@ -514,6 +514,8 @@ public final class Util {
   }
 
   public static String accountNumberWithNameString(int optAccountNumber, boolean emptyIfNotExist) {
+    if (optAccountNumber == 0)
+      return "";
     var ac = account(optAccountNumber);
     var effName = "???";
     var effNumber = optAccountNumber;
