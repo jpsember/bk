@@ -26,10 +26,12 @@ public class AccountIdHelper extends WidgetHelper {
       }
     } catch (Throwable t) {
     }
-    int accMin = 0;
-    int accMax = 9999;
 
-    if (parsedAccountNumber != null && parsedAccountNumber > 0) {
+    // If prefix is a (positive) number, look for corresponding account numbers
+
+    if (parsedAccountNumber != null) {
+      int accMin = 0;
+      int accMax = 9999;
       accMin = parsedAccountNumber;
       checkState(accMin > 0);
       accMax = accMin + 1;
@@ -39,22 +41,36 @@ public class AccountIdHelper extends WidgetHelper {
       }
       log("parsed as account number:", parsedAccountNumber, "with bounds:", accMin, accMax);
 
-      for (var ac : accounts.values()) {
-        if (ac.number() >= accMin && ac.number() < accMax) {
-          var ent = accEntry(ac);
+      for (var account : accounts.values()) {
+        if (account.number() >= accMin && account.number() < accMax) {
+          var ent = accEntry(account);
           log("account has prefix, adding:", ent);
           candidates.add(ent);
         }
       }
-      //      
-      //      var numStr = Integer.toString(ac.number());
-      //      //log("considering account:", numStr);
-      //      if (hasPrefix(numStr, prefix)) {
-      //        var h = buildHint(ac);
-      //        log("account has prefix, adding:", h);
-      //        candidates.add(h);
-      //      }
+    } else {
+      // If any account name words match this prefix, or start with the prefix, make them candidates.
+      // Favor account names that contain the prefix as a single word.
+
+      List<AccEntry> prefCandidates = arrayList();
+
+      outer: for (var account : accounts.values()) {
+        var name = account.name();
+        var words = split(name, ' ');
+        for (var w : words) {
+          if (matchCaseInsens(w, prefix)) {
+            candidates.add(accEntry(account));
+            continue outer;
+          } else if (candidates.isEmpty() && hasPrefix(w, prefix)) {
+            prefCandidates.add(accEntry(account));
+            continue outer;
+          }
+        }
+      }
+      if (candidates.isEmpty())
+        candidates.addAll(prefCandidates);
     }
+
     log("candidate results:", INDENT, candidates);
     var result = "";
 

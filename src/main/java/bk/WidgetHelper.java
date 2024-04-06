@@ -30,10 +30,14 @@ public abstract class WidgetHelper extends BaseObject {
     return String.CASE_INSENSITIVE_ORDER.compare(a, b);
   }
 
+  public static boolean matchCaseInsens(String a, String b) {
+    return compareLowerCase(a, b) == 0;
+  }
+
   public static boolean hasPrefix(String string, String prefix) {
     if (string.length() < prefix.length())
       return false;
-    return compareLowerCase(string.substring(0, prefix.length()), prefix) == 0;
+    return matchCaseInsens(string.substring(0, prefix.length()), prefix);
   }
 
   // A map of user prefix (in lower case) and the hint that should be shown for that prefix (which might be an empty string)

@@ -87,7 +87,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
       var ly = b.y;
 
       var s = mContent; //truncate(mContent, mWidth);
-      if (mHint != null)
+      if (nonEmpty(mHint))
         s = mHint;
 
       var style = STYLE_NORMAL;
