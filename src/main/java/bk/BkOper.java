@@ -66,9 +66,7 @@ public class BkOper extends AppOper
     try {
       mgr.open();
       mAccounts = new AccountList(this);
-      mAllTransactionsLedger = new TransactionLedger();
-      mAllTransactionsLedger.prepare(null, this);
-      mSpecificAccountLedger = new TransactionLedger();
+      mAllTransactionsLedger = new TransactionLedger(0, this);
       sAccountsView = mAccounts;
       sTransactionsView = mAllTransactionsLedger;
 
@@ -127,10 +125,7 @@ public class BkOper extends AppOper
 
   @Override
   public void viewAccount(Account account) {
-    var v = mSpecificAccountLedger;
-    v.prepare((t) -> t.credit() == account.number() || t.debit() == account.number(), this);
-    todo("!remove filter, or make it internal based on account number");
-    v.accountNumber(account.number());
+    var v = new TransactionLedger(account.number(), this);
     focusManager().pushAppend(v);
   }
 
@@ -218,6 +213,6 @@ public class BkOper extends AppOper
   private BkConfig mConfig;
   private AccountList mAccounts;
   private TransactionLedger mAllTransactionsLedger;
-  private TransactionLedger mSpecificAccountLedger;
+  // private TransactionLedger mSpecificAccountLedger;
 
 }

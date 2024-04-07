@@ -68,6 +68,8 @@ public class Storage extends BaseObject {
   }
 
   public List<Transaction> transactionsForAccount(int accountNumber) {
+    checkArgument(accountNumber >= 1000 && accountNumber <= 5999, "unexpected account number:",
+        accountNumber);
     List<Transaction> out = arrayList();
     for (var tr : transactions().values()) {
       if (tr.debit() == accountNumber || tr.credit() == accountNumber)

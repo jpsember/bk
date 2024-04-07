@@ -18,20 +18,25 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
   public static final Filter ACCEPT_ALL = (t) -> true;
 
-  public TransactionLedger() {
+  public TransactionLedger(int accountNumberOrZero, TransactionListener listener) {
     changeManager().addListener(this);
-  }
-
-  public void prepare(Filter filter, TransactionListener listener) {
     addColumns();
-    mFilter = nullTo(filter, ACCEPT_ALL);
+    // mFilter = nullTo(filter, ACCEPT_ALL);
     mListener = listener;
+    mAccountNumber = accountNumberOrZero;
     rebuild();
   }
-
-  public void accountNumber(int anum) {
-    mAccountNumber = anum;
-  }
+  //
+  //  public void prepare(  TransactionListener listener) {
+  //    addColumns();
+  //    mFilter = nullTo(filter, ACCEPT_ALL);
+  //    mListener = listener;
+  //    rebuild();
+  //  }
+  //
+  //  public void accountNumber(int anum) {
+  //    mAccountNumber = anum;
+  //  }
 
   private void addColumns() {
     if (mColumnsAdded)
@@ -49,17 +54,14 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   }
 
   public void rebuild() {
-    checkState(prepared());
     var currentTrans = getCurrentRow();
     clearEntries();
 
-    var trans = storage().transactions();
     List<Transaction> sorted = arrayList();
-    for (var t : trans.values())
-      if (mFilter.accept(t)) {
-        sorted.add(t);
-        //    pr("adding transaction to be sorted:",INDENT,t);
-      }
+    if (mAccountNumber == 0)
+      sorted.addAll(storage().transactions().values());
+    else
+      sorted = storage().transactionsForAccount(mAccountNumber);
     sorted.sort(TRANSACTION_COMPARATOR);
 
     for (var t : sorted) {
@@ -114,17 +116,11 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
   @Override
   public void dataChanged(List<Integer> accountIds, List<Long> transactionIds) {
-    if (!prepared())
-      return;
     rebuild();
     todo("!verify that it attempts to restore cursor to more or less the same location");
   }
 
-  private boolean prepared() {
-    return mFilter != null;
-  }
-
-  private Filter mFilter;
+  //  private Filter mFilter;
   private TransactionListener mListener;
   private int mAccountNumber;
   private boolean mColumnsAdded;
