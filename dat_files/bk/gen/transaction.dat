@@ -5,4 +5,10 @@ fields {
   int debit;
   int credit;
   string description;
+
+  // transactions generated from this one via rules
+  *long children;
+
+  // If non-zero, this transaction was generated via a rule from this transaction
+  long parent;
 }

@@ -530,6 +530,10 @@ public final class Util {
     return effNumber + " " + effName;
   }
 
+  public static boolean isGenerated(Transaction t) {
+    return t.parent() != 0;
+  }
+
   private static ChangeManager sChangeManager;
 
   public static final int CHARS_ACCOUNT_NAME = 20;

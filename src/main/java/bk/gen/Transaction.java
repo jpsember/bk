@@ -1,6 +1,8 @@
 package bk.gen;
 
+import java.util.Arrays;
 import js.data.AbstractData;
+import js.data.DataUtil;
 import js.json.JSMap;
 
 public class Transaction implements AbstractData {
@@ -29,6 +31,14 @@ public class Transaction implements AbstractData {
     return mDescription;
   }
 
+  public long[] children() {
+    return mChildren;
+  }
+
+  public long parent() {
+    return mParent;
+  }
+
   @Override
   public Builder toBuilder() {
     return new Builder(this);
@@ -40,6 +50,8 @@ public class Transaction implements AbstractData {
   protected static final String _3 = "debit";
   protected static final String _4 = "credit";
   protected static final String _5 = "description";
+  protected static final String _6 = "children";
+  protected static final String _7 = "parent";
 
   @Override
   public String toString() {
@@ -55,6 +67,8 @@ public class Transaction implements AbstractData {
     m.putUnsafe(_3, mDebit);
     m.putUnsafe(_4, mCredit);
     m.putUnsafe(_5, mDescription);
+    m.putUnsafe(_6, DataUtil.encodeBase64Maybe(mChildren));
+    m.putUnsafe(_7, mParent);
     return m;
   }
 
@@ -75,6 +89,14 @@ public class Transaction implements AbstractData {
     mDebit = m.opt(_3, 0);
     mCredit = m.opt(_4, 0);
     mDescription = m.opt(_5, "");
+    {
+      mChildren = DataUtil.EMPTY_LONG_ARRAY;
+      Object x = m.optUnsafe(_6);
+      if (x != null) {
+        mChildren = DataUtil.parseLongsFromArrayOrBase64(x);
+      }
+    }
+    mParent = m.opt(_7, 0L);
   }
 
   public static Builder newBuilder() {
@@ -102,6 +124,10 @@ public class Transaction implements AbstractData {
       return false;
     if (!(mDescription.equals(other.mDescription)))
       return false;
+    if (!(Arrays.equals(mChildren, other.mChildren)))
+      return false;
+    if (!(mParent == other.mParent))
+      return false;
     return true;
   }
 
@@ -116,6 +142,8 @@ public class Transaction implements AbstractData {
       r = r * 37 + mDebit;
       r = r * 37 + mCredit;
       r = r * 37 + mDescription.hashCode();
+      r = r * 37 + Arrays.hashCode(mChildren);
+      r = r * 37 + (int)mParent;
       m__hashcode = r;
     }
     return r;
@@ -127,6 +155,8 @@ public class Transaction implements AbstractData {
   protected int mDebit;
   protected int mCredit;
   protected String mDescription;
+  protected long[] mChildren;
+  protected long mParent;
   protected int m__hashcode;
 
   public static final class Builder extends Transaction {
@@ -138,6 +168,8 @@ public class Transaction implements AbstractData {
       mDebit = m.mDebit;
       mCredit = m.mCredit;
       mDescription = m.mDescription;
+      mChildren = m.mChildren;
+      mParent = m.mParent;
     }
 
     @Override
@@ -160,6 +192,8 @@ public class Transaction implements AbstractData {
       r.mDebit = mDebit;
       r.mCredit = mCredit;
       r.mDescription = mDescription;
+      r.mChildren = mChildren;
+      r.mParent = mParent;
       return r;
     }
 
@@ -193,12 +227,23 @@ public class Transaction implements AbstractData {
       return this;
     }
 
+    public Builder children(long[] x) {
+      mChildren = (x == null) ? DataUtil.EMPTY_LONG_ARRAY : x;
+      return this;
+    }
+
+    public Builder parent(long x) {
+      mParent = x;
+      return this;
+    }
+
   }
 
   public static final Transaction DEFAULT_INSTANCE = new Transaction();
 
   private Transaction() {
     mDescription = "";
+    mChildren = DataUtil.EMPTY_LONG_ARRAY;
   }
 
 }
