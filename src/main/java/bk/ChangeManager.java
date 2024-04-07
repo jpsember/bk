@@ -5,6 +5,7 @@ import static js.base.Tools.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import bk.gen.Account;
 import bk.gen.Transaction;
@@ -65,6 +66,14 @@ public class ChangeManager extends BaseObject {
   public void dispatch() {
     mark("modify change manager to handle rules");
 
+    // We might make a recursive call to this method as a consequence of rules generating new transactions.
+    // So, process rules first.
+
+    if (!mAc.isEmpty()) {
+      Set<Integer> acctIds = hashSet();
+      acctIds.addAll(mAc.keySet());
+      RuleManager.SHARED_INSTANCE.applyRules(acctIds);
+    }
     if (mTr.isEmpty() && mAc.isEmpty())
       return;
 

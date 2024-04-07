@@ -55,7 +55,7 @@ public class Storage extends BaseObject {
     log("storage file:", INDENT, Files.infoMap(mFile));
   }
 
-  private File file() {
+  public File file() {
     return mFile;
   }
 
@@ -65,6 +65,15 @@ public class Storage extends BaseObject {
 
   public Map<Long, Transaction> transactions() {
     return mDatabase.transactions();
+  }
+
+  public List<Transaction> transactionsForAccount(int accountNumber) {
+    List<Transaction> out = arrayList();
+    for (var tr : transactions().values()) {
+      if (tr.debit() == accountNumber || tr.credit() == accountNumber)
+        out.add(tr);
+    }
+    return out;
   }
 
   public void verifyAccountBalances() {
