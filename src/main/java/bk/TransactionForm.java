@@ -53,7 +53,7 @@ public class TransactionForm extends FormWindow {
       if (mAccountNumber != 0) {
         // If we are editing it for a particular account, and
         // If exactly one of the debit or credit are empty, set them to that account
-        
+
         // They can't BOTH be empty
         if (!(mDr.isEmpty() && mCr.isEmpty())) {
           if (mDr.isEmpty())
@@ -98,10 +98,10 @@ public class TransactionForm extends FormWindow {
 
     Transaction edited = null;
 
-    if (mType == TYPE_ADD) {
+     if (mType == TYPE_ADD) {
       edited = tr.build();
       storage().addTransaction(edited);
-      changeManager().registerModifiedTransactions(edited).dispatch();
+      changeManager().registerModifiedTransactions(edited);
     } else {
       var orig = mOrig;
       tr.timestamp(orig.timestamp());
@@ -110,8 +110,9 @@ public class TransactionForm extends FormWindow {
       applyTransaction(edited);
       storage().deleteTransaction(orig.timestamp());
       storage().addTransaction(edited);
-      changeManager().registerModifiedTransactions(orig, edited).dispatch();
+      changeManager().registerModifiedTransactions(orig, edited);
     }
+    changeManager().dispatch();
     mListener.editedTransaction(this, edited);
   }
 

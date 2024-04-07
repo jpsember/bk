@@ -1,0 +1,6 @@
+fields {
+  * int accounts;
+  *string conditions;
+  *JSMap actions; // Make this a dat later
+}
+

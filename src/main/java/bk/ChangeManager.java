@@ -63,6 +63,8 @@ public class ChangeManager extends BaseObject {
   }
 
   public void dispatch() {
+    mark("modify change manager to handle rules");
+
     if (mTr.isEmpty() && mAc.isEmpty())
       return;
 

@@ -72,6 +72,7 @@ public class AccountForm extends FormWindow {
     if (mType == TYPE_ADD) {
       editedAccount = ac;
       storage().addAccount(ac);
+      changeManager().registerModifiedAccount(ac);
     } else {
       // modify original account to include the edits
       var orig = mOriginalAccount;
@@ -79,8 +80,10 @@ public class AccountForm extends FormWindow {
       mod.number(ac.number()).name(ac.name());
       // delete the original account
       storage().deleteAccount(orig.number());
+      changeManager().registerModifiedAccount(orig);
       editedAccount = mod.build();
       storage().addAccount(editedAccount);
+      changeManager().registerModifiedAccount(editedAccount);
     }
     mListener.editedAccount(this, editedAccount);
   }
