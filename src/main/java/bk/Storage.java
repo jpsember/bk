@@ -178,6 +178,12 @@ public class Storage extends BaseObject {
     accounts().put(account.number(), account);
     setModified();
   }
+  //
+  //  public void replaceAccountWithoutOtherChanges(Account account) {
+  //    var existing = accounts().put(account.number(), account.build());
+  //    checkState(existing != null, "account did not already exist:", INDENT, account);
+  //    setModified();
+  //  }
 
   public void deleteAccount(int number) {
     accounts().remove(number);
@@ -199,16 +205,32 @@ public class Storage extends BaseObject {
     setModified();
   }
 
+  public void replaceTransactionWithoutUpdatingAccountBalances(Transaction t) {
+    t = t.build();
+    transactions().put(t.timestamp(), t);
+  }
+
+  public void deleteTransaction(Transaction t) {
+    var t2 = transactions().remove(t.timestamp());
+    if (t2 == null) {
+      alert("deleteTransaction, not found; timestamp:", t.timestamp());
+      return;
+    }
+    deleteTransaction(t);
+    // Undo the effect of the transaction on account balances
+    adjustBalance(t.debit(), -t.amount());
+    adjustBalance(t.credit(), t.amount());
+
+    setModified();
+  }
+
   public void deleteTransaction(long timestamp) {
-    var t = transactions().remove(timestamp);
+    var t = transaction(timestamp);
     if (t == null) {
       alert("deleteTransaction, not found; timestamp:", timestamp);
-    } else {
-      // Undo the effect of the transaction on account balances
-      adjustBalance(t.debit(), -t.amount());
-      adjustBalance(t.credit(), t.amount());
+      return;
     }
-    setModified();
+    deleteTransaction(t);
   }
 
   private void adjustBalance(int accountNumber, long currencyAmount) {

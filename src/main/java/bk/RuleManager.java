@@ -15,6 +15,7 @@ import bk.gen.rules.Rule;
 import bk.gen.rules.Rules;
 import js.base.BaseObject;
 import js.data.DataUtil;
+import js.data.LongArray;
 import js.file.Files;
 import js.json.JSMap;
 import js.parsing.RegExp;
@@ -34,9 +35,16 @@ public class RuleManager extends BaseObject {
     log("applying rules, accounts:", accountIds);
 
     // Invalidate our account ledger cache
+
+    todo("have the cache store transaction ids only, in case we change the underlying transactions");
     mAccountLedgerCache.clear();
+
     // We don't need to clear the child transaction cache if we are careful to only generate
-    // fresh parent transactions
+    // fresh parent transactions... or is this true?
+    mChildTransactionListCache.clear();
+
+    // Delete *all* existing child transactions for all parents in the accounts we're generating rules for.
+    List<Account> parents = arrayList();
 
     for (var accountId : accountIds) {
       var account = storage().account(accountId);
@@ -44,14 +52,44 @@ public class RuleManager extends BaseObject {
         log("...account doesn't exist:", accountId);
         continue;
       }
-      mParentAccount = account;
-      for (var tr : getAccountTransactions(account.number())) {
-        if (isGenerated(tr))
-          continue;
+      parents.add(account);
+
+      var trList = getAccountTransactions(account.number());
+
+      List<Transaction> trimmedList = arrayList();
+      for (var tr : trList) {
+        if (isGenerated(tr)) {
+          storage().deleteTransaction(tr);
+          // Remove this transaction's id from its parent
+          removeChildFromParent(tr);
+        } else {
+          trimmedList.add(tr);
+        }
+      }
+      if (trimmedList.size() != trList.size())
+        mAccountLedgerCache.put(accountId, trimmedList);
+    }
+
+    for (var parent : parents) {
+      mParentAccount = parent;
+      for (var tr : getAccountTransactions(parent.number())) {
+        // We should *not* find any generated transactions in the cache, as we've
+        // already deleted them above; as long as we haven't invalidated the cache.
+        checkState(!isGenerated(tr));
         mParent = tr;
         mNewChildren.clear();
         applyRules();
-        
+
+        if (!mNewChildren.isEmpty()) {
+          // Add these children to the existing list of children
+
+          var b = mParent.toBuilder();
+          var bchild = LongArray.with(b.children()).toBuilder();
+          for (var ch : mNewChildren)
+            bchild.add(ch.timestamp());
+          b.children(bchild.array());
+          storage().replaceTransactionWithoutUpdatingAccountBalances(b);
+        }
       }
     }
   }
@@ -221,6 +259,25 @@ public class RuleManager extends BaseObject {
       mChildTransactionListCache.put(parent.timestamp(), lst);
     }
     return lst;
+  }
+
+  private void removeChildFromParent(Transaction child) {
+    checkArgument(child.parent() != 0, "not a child!");
+    var parent = storage().transaction(child.parent());
+    if (parent == null) {
+      alert("removeChildFromParent; parent not found for:", INDENT, child);
+      return;
+    }
+    var b = parent.toBuilder();
+    var ch = LongArray.with(b.children()).toBuilder();
+    int j = ch.indexOf(child.timestamp());
+    if (j < 0) {
+      alert("parent doesn't have reference to child:", parent, CR, child);
+      return;
+    }
+    ch.remove(j);
+    b.children(ch.array());
+    storage().replaceTransactionWithoutUpdatingAccountBalances(b);
   }
 
   private File mFile;
