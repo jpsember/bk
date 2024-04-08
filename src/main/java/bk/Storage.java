@@ -266,13 +266,28 @@ public class Storage extends BaseObject {
    * 
    * Return the possibly modified transaction.
    */
-  public Transaction addTransactionNEW(Transaction t) {
+  public Transaction addOrReplace(Transaction t) {
+    checkState(t.children().length == 0,
+        "attempt to add/replace transaction with one that already has children");
     t = t.build();
+
     var existing = transaction(t.timestamp());
-    if (existing != null)
-      badState("transaction already exists!", INDENT, existing);
+
+    boolean updtBal = existing == null || existing.debit() != t.debit() || existing.credit() != t.credit()
+        || existing.amount() != t.amount();
+
+    if (existing != null) {
+      if (updtBal)
+        applyTransactionToAccountBalances(existing, true);
+      // Delete any child transactions
+      for (var childId : existing.children()) {
+        deleteTransaction(childId);
+      }
+    }
+
     transactions().put(t.timestamp(), t);
     applyTransactionToAccountBalances(t, false);
+
     setModified();
     todo("apply rules to this transaction");
     return t;
