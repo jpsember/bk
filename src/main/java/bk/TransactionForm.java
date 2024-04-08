@@ -72,7 +72,7 @@ public class TransactionForm extends FormWindow {
       }
       problem = null;
 
-      tr.timestamp(System.currentTimeMillis());
+      tr.timestamp(storage().uniqueTimestamp());
       tr.date(mDate.validResult());
       tr.amount(mAmount.validResult());
       tr.debit(mDr.validResult());

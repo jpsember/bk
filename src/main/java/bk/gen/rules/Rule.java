@@ -78,7 +78,7 @@ public class Rule implements AbstractData {
         if (m2 != null && !m2.isEmpty()) {
           Set<Integer> mp = new HashSet<>();
           for (Object e : m2.wrappedList())
-            mp.add((Integer) e);
+            mp.add(((Number)e).intValue());
           mAccounts = mp;
         }
       }

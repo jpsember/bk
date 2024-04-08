@@ -4,7 +4,6 @@ import static bk.Util.*;
 import static js.base.Tools.*;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +17,6 @@ import js.data.DataUtil;
 import js.data.LongArray;
 import js.file.Files;
 import js.json.JSMap;
-import js.parsing.RegExp;
 
 public class RuleManager extends BaseObject {
 
@@ -39,10 +37,6 @@ public class RuleManager extends BaseObject {
     todo("have the cache store transaction ids only, in case we change the underlying transactions");
     mAccountLedgerCache.clear();
 
-    // We don't need to clear the child transaction cache if we are careful to only generate
-    // fresh parent transactions... or is this true?
-    mChildTransactionListCache.clear();
-
     // Delete *all* existing child transactions for all parents in the accounts we're generating rules for.
     List<Account> parents = arrayList();
 
@@ -55,15 +49,18 @@ public class RuleManager extends BaseObject {
       parents.add(account);
 
       var trList = getAccountTransactions(account.number());
+      log("examing account:", INDENT, account);
 
-      List<Transaction> trimmedList = arrayList();
+      List<Long> trimmedList = arrayList();
       for (var tr : trList) {
+        log("transaction:", INDENT, tr);
         if (isGenerated(tr)) {
+          log("found a generated transaction; deleting it:", INDENT, tr);
           storage().deleteTransaction(tr);
           // Remove this transaction's id from its parent
           removeChildFromParent(tr);
         } else {
-          trimmedList.add(tr);
+          trimmedList.add(id(tr));
         }
       }
       if (trimmedList.size() != trList.size())
@@ -81,6 +78,8 @@ public class RuleManager extends BaseObject {
         applyRules();
 
         if (!mNewChildren.isEmpty()) {
+          log("...we have new children for:", mParent.timestamp(), INDENT, mNewChildren);
+
           // Add these children to the existing list of children
 
           var b = mParent.toBuilder();
@@ -88,28 +87,25 @@ public class RuleManager extends BaseObject {
           for (var ch : mNewChildren)
             bchild.add(ch.timestamp());
           b.children(bchild.array());
+
+          log("replacing transaction:", INDENT, b);
           storage().replaceTransactionWithoutUpdatingAccountBalances(b);
+
+          // Add the children as well
+          for (var ch : mNewChildren) {
+            storage().addTransaction(ch);
+            changeManager().registerModifiedTransaction(ch);
+
+          }
         }
       }
     }
-  }
-
-  private static long[] copyOf(long[] source) {
-    if (source.length == 0)
-      return source;
-    todo("put this in DataUtil");
-    return Arrays.copyOf(source, source.length);
   }
 
   /**
    * Apply any rules to the current transaction
    */
   private void applyRules() {
-    // We need to keep a list of any *existing* generated 'child' transactions of this one,
-    // so that we 1) avoid re-generating an otherwise identical transaction, and 
-    //            2) delete any stale generated transaction
-    //
-
     for (var entry : rules().rules().entrySet()) {
       var rule = entry.getValue();
       if (!rule.accounts().contains(mParentAccount.number()))
@@ -140,33 +136,33 @@ public class RuleManager extends BaseObject {
   private void applyGenerateRule(JSMap actionMap) {
 
     var parent = mParent;
-    int debitAccountNum = determineAccountNumber(mParentAccount, actionMap, "debit", mParentAccount.number());
-    int creditAccountNum = determineAccountNumber(mParentAccount, actionMap, "credit",
-        mParentAccount.number());
+    int dr = determineAccountNumber(mParentAccount, actionMap, "debit", mParentAccount.number());
+    int cr = determineAccountNumber(mParentAccount, actionMap, "credit", mParentAccount.number());
 
-    if (debitAccountNum == creditAccountNum) {
-      alert("debit = credit account numbers =", debitAccountNum, "while applying rule, map:", INDENT,
-          actionMap);
+    if (dr == cr) {
+      alert("debit = credit account numbers =", dr, "while applying rule, map:", INDENT, actionMap);
       return;
     }
 
     var amount = determineTransactionAmount(parent, actionMap, "amount");
 
     // If there is already a generated transaction in the child list matching this one, do nothing
-    var existingTr = findChildTransaction(debitAccountNum, creditAccountNum, amount);
-    if (existingTr == null) {
-      log("...a child transaction already exists");
+    var existing = findChildTransaction(dr, cr, amount);
+    if (existing != null) {
+      log("...a child transaction already exists for dr:", dr, "cr:", cr, "amount:", amount, INDENT,
+          existing);
       return;
     }
 
     var tr = Transaction.newBuilder();
 
-    tr.timestamp(parent.timestamp());
+    tr.timestamp(storage().uniqueTimestamp());
     tr.date(parent.date());
     tr.amount(amount);
-    tr.debit(debitAccountNum);
-    tr.credit(creditAccountNum);
+    tr.debit(dr);
+    tr.credit(cr);
     tr.description("(generated) " + parent.description());
+    tr.parent(mParent.timestamp());
     mNewChildren.add(tr.build());
   }
 
@@ -206,7 +202,8 @@ public class RuleManager extends BaseObject {
     Long amountInCents = null;
     if (val instanceof String) {
       var s = (String) val;
-      if (RegExp.patternMatchesString("(\\d+[.]\\d*)%", s)) {
+      // fucking regexes are stupidly complicated, abandoning them
+      if (s.endsWith("%")) {
         double pct = Double.parseDouble(s.substring(0, s.length() - 1));
         amountInCents = Math.round(parentTransaction.amount() * (pct / 100));
       } else {
@@ -222,6 +219,8 @@ public class RuleManager extends BaseObject {
   private Rules rules() {
     if (mRules == null) {
       mRules = Files.parseAbstractDataOpt(Rules.DEFAULT_INSTANCE, file());
+      log("read rules:", INDENT, mRules);
+
     }
     return mRules;
   }
@@ -229,7 +228,9 @@ public class RuleManager extends BaseObject {
   private File file() {
     if (mFile == null) {
       var sf = storage().file();
-      mFile = new File(Files.removeExtension(sf) + "_rules.json");
+      mFile = new File(Files.removeExtension(sf) + ".rules.json");
+      if (verbose())
+        log("set file to:", INDENT, Files.infoMap(mFile));
     }
     return mFile;
   }
@@ -237,28 +238,33 @@ public class RuleManager extends BaseObject {
   private List<Transaction> getAccountTransactions(int accountNumber) {
     var lst = mAccountLedgerCache.get(accountNumber);
     if (lst == null) {
-      lst = storage().transactionsForAccount(accountNumber);
+      var trs = storage().transactionsForAccount(accountNumber);
+      lst = arrayList();
+      for (var x : trs)
+        lst.add(x.timestamp());
+      mAccountLedgerCache.put(accountNumber, lst);
+      return trs;
     }
-    return lst;
+    List<Transaction> trs = arrayList();
+    for (var id : lst) {
+      var t = storage().transaction(id);
+      checkNotNull(t);
+      trs.add(t);
+    }
+    return trs;
   }
 
   private List<Transaction> getChildTransactions(Transaction parent) {
     if (parent.children().length == 0)
       return DataUtil.emptyList();
-    var lst = mChildTransactionListCache.get(parent.timestamp());
-    if (lst == null) {
-      lst = arrayList();
-      for (var timestamp : parent.children()) {
-        var tr = storage().transaction(timestamp);
-        if (tr == null) {
-          alert("can't find child transaction", timestamp, "for parent:", INDENT, parent);
-          continue;
-        }
-        lst.add(tr);
-      }
-      mChildTransactionListCache.put(parent.timestamp(), lst);
+    List<Transaction> trs = arrayList();
+    for (var timestamp : parent.children()) {
+      var tr = storage().transactionWhichShouldExist(timestamp);
+      if (tr == null)
+        continue;
+      trs.add(tr);
     }
-    return lst;
+    return trs;
   }
 
   private void removeChildFromParent(Transaction child) {
@@ -282,8 +288,8 @@ public class RuleManager extends BaseObject {
 
   private File mFile;
   private Rules mRules;
-  private Map<Integer, List<Transaction>> mAccountLedgerCache = hashMap();
-  private Map<Long, List<Transaction>> mChildTransactionListCache = hashMap();
+  private Map<Integer, List<Long>> mAccountLedgerCache = hashMap();
+  //  private Map<Long, List<Long>> mChildTransactionListCache = hashMap();
   private Account mParentAccount;
   private Transaction mParent;
   private List<Transaction> mNewChildren = arrayList();

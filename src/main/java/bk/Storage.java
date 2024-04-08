@@ -159,8 +159,22 @@ public class Storage extends BaseObject {
     return mDatabase.accounts().get(accountNumber);
   }
 
+  public Account accountWhichShouldExist(int accountNumber) {
+    var x = account(accountNumber);
+    if (x == null)
+      alert("<2account was supposed to exist! Number:", accountNumber);
+    return x;
+  }
+
   public Transaction transaction(long timestamp) {
     return mDatabase.transactions().get(timestamp);
+  }
+
+  public Transaction transactionWhichShouldExist(long timestamp) {
+    var x = transaction(timestamp);
+    if (x == null)
+      alert("<2transaction was supposed to exist! Timestamp:", timestamp);
+    return x;
   }
 
   public String accountName(int accountNumber) {
@@ -233,6 +247,18 @@ public class Storage extends BaseObject {
     deleteTransaction(t);
   }
 
+  /**
+   * Probably returns a unique timestamp
+   */
+  public long uniqueTimestamp() {
+    var ts = System.currentTimeMillis();
+    ts = Math.max(ts, mUniqueTimestamp + 1);
+    mUniqueTimestamp = ts;
+    return ts;
+  }
+
+  private long mUniqueTimestamp;
+
   private void adjustBalance(int accountNumber, long currencyAmount) {
     var a = account(accountNumber);
     if (a == null) {
@@ -255,5 +281,10 @@ public class Storage extends BaseObject {
   private Database.Builder mDatabase;
   private File mFile;
   private boolean mModified;
+
+  public Object transactionMustExist(long timestamp) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
 }

@@ -3,6 +3,7 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
+import java.util.List;
 import java.util.Stack;
 
 import com.googlecode.lanterna.TerminalPosition;
@@ -179,7 +180,19 @@ public class WinMgr extends BaseObject {
   }
 
   public void mainLoop() {
+    boolean exp = true;
     while (isOpen()) {
+
+      if (exp) {
+        alert("doing rules experiment");
+
+        List<Integer> ids = arrayList();
+        ids.add(5100);
+        RuleManager.SHARED_INSTANCE.applyRules(ids);
+
+        exp = false;
+      }
+
       update();
       sleepMs(10);
       storage().flush();

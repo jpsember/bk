@@ -1,0 +1,12 @@
+{ "rules" : {
+
+"sample" : {
+  "accounts" : [5100],
+  "actions" : [{
+    "action" : "generate",
+    "debit" : 1020,
+    "amount" : "30%",
+  }],
+},
+
+ } }
