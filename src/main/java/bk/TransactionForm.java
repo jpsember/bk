@@ -100,7 +100,7 @@ public class TransactionForm extends FormWindow {
 
      if (mType == TYPE_ADD) {
       edited = tr.build();
-      storage().addTransaction(edited);
+      edited = storage().addTransactionNEW(edited);
       changeManager().registerModifiedTransactions(edited);
     } else {
       var orig = mOrig;
@@ -109,7 +109,7 @@ public class TransactionForm extends FormWindow {
       undoTransaction(orig);
       applyTransaction(edited);
       storage().deleteTransaction(orig.timestamp());
-      storage().addTransaction(edited);
+      edited = storage().addTransactionNEW(edited);
       changeManager().registerModifiedTransactions(orig, edited);
     }
     changeManager().dispatch();

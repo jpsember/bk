@@ -193,64 +193,6 @@ public class Storage extends BaseObject {
     return account.name();
   }
 
-  public void addAccount(Account account) {
-    account = account.build();
-    var existing = account(account.number());
-    if (existing != null)
-      badState("account already exists!", INDENT, existing);
-    accounts().put(account.number(), account);
-    setModified();
-  }
-
-  public void deleteAccount(int number) {
-    accounts().remove(number);
-    setModified();
-  }
-
-  public void addTransaction(Transaction t) {
-    t = t.build();
-    var existing = transaction(t.timestamp());
-    if (existing != null)
-      badState("transaction already exists!", INDENT, existing);
-    transactions().put(t.timestamp(), t);
-    // Apply transaction to account balances
-    {
-      // Undo the effect of the transaction on account balances
-      adjustBalance(t.debit(), t.amount());
-      adjustBalance(t.credit(), -t.amount());
-    }
-    setModified();
-  }
-
-  @Deprecated
-  public void replaceTransactionWithoutUpdatingAccountBalances(Transaction t) {
-    t = t.build();
-    transactions().put(t.timestamp(), t);
-  }
-
-  public void deleteTransaction(Transaction t) {
-    var t2 = transactions().remove(t.timestamp());
-    if (t2 == null) {
-      alert("deleteTransaction, not found; timestamp:", t.timestamp());
-      return;
-    }
-    deleteTransaction(t);
-    // Undo the effect of the transaction on account balances
-    adjustBalance(t.debit(), -t.amount());
-    adjustBalance(t.credit(), t.amount());
-
-    setModified();
-  }
-
-  public void deleteTransaction(long timestamp) {
-    var t = transaction(timestamp);
-    if (t == null) {
-      alert("deleteTransaction, not found; timestamp:", timestamp);
-      return;
-    }
-    deleteTransaction(t);
-  }
-
   /**
    * Probably returns a unique timestamp
    */
@@ -271,6 +213,7 @@ public class Storage extends BaseObject {
     }
     a = a.toBuilder().balance(a.balance() + currencyAmount).build();
     accounts().put(a.number(), a);
+    setModified();
   }
 
   private BackupManager bkup() {
@@ -285,5 +228,82 @@ public class Storage extends BaseObject {
   private Database.Builder mDatabase;
   private File mFile;
   private boolean mModified;
+
+  // ------------------------------------------------------------------
+  // Methods that modify the database
+  // ------------------------------------------------------------------
+
+  public void addAccount(Account account) {
+    account = account.build();
+    var existing = account(account.number());
+    if (existing != null)
+      badState("account already exists!", INDENT, existing);
+    accounts().put(account.number(), account);
+    setModified();
+  }
+
+  public static Account mustExist(Account account) {
+    if (account == null)
+      badState("account is null!");
+    return account;
+  }
+
+  public void deleteAccount(int number) {
+    mustExist(account(number));
+
+    // Delete all transactions
+    todo("we probably want a single 'undo' action, not one for each transaction deletion");
+    var tr = readTransactionsForAccount(number);
+    for (var t : tr)
+      deleteTransaction(t);
+
+    accounts().remove(number);
+    setModified();
+  }
+
+  /**
+   * We may need to modify the transaction as we add it, if rules apply.
+   * 
+   * Return the possibly modified transaction.
+   */
+  public Transaction addTransactionNEW(Transaction t) {
+    t = t.build();
+    var existing = transaction(t.timestamp());
+    if (existing != null)
+      badState("transaction already exists!", INDENT, existing);
+    transactions().put(t.timestamp(), t);
+    applyTransactionToAccountBalances(t, false);
+    setModified();
+    todo("apply rules to this transaction");
+    return t;
+  }
+
+  @Deprecated
+  public void replaceTransactionWithoutUpdatingAccountBalances(Transaction t) {
+    t = t.build();
+    transactions().put(t.timestamp(), t);
+  }
+
+  public void deleteTransaction(Transaction t) {
+    checkNotNull(t);
+    var t2 = transactions().remove(t.timestamp());
+    checkState(t2 != null, "transaction wasn't in map");
+    applyTransactionToAccountBalances(t2, true);
+    setModified();
+  }
+
+  public void deleteTransaction(long timestamp) {
+    var t = transaction(timestamp);
+    deleteTransaction(t);
+  }
+
+  private void applyTransactionToAccountBalances(Transaction t, boolean negate) {
+    checkNotNull(t);
+    var amt = t.amount();
+    if (negate)
+      amt = -amt;
+    adjustBalance(t.debit(), amt);
+    adjustBalance(t.credit(), -amt);
+  }
 
 }

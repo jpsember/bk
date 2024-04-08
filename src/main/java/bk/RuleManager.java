@@ -94,7 +94,7 @@ public class RuleManager extends BaseObject {
 
           // Add the children as well
           for (var ch : mNewChildren) {
-            storage().addTransaction(ch);
+           ch =  storage().addTransactionNEW(ch);
             changeManager().registerModifiedTransaction(ch);
 
           }
