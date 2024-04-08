@@ -26,6 +26,7 @@ public class RuleManager extends BaseObject {
     alertVerbose();
   }
 
+  @Deprecated
   public void applyRules(Collection<Integer> accountIds) {
     loadTools();
     if (accountIds.isEmpty())
@@ -238,7 +239,7 @@ public class RuleManager extends BaseObject {
   private List<Transaction> getAccountTransactions(int accountNumber) {
     var lst = mAccountLedgerCache.get(accountNumber);
     if (lst == null) {
-      var trs = storage().transactionsForAccount(accountNumber);
+      var trs = storage().readTransactionsForAccount(accountNumber);
       lst = arrayList();
       for (var x : trs)
         lst.add(x.timestamp());

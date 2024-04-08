@@ -39,9 +39,7 @@ public class AccountList extends LedgerWindow implements ChangeListener {
     var currentAccount = getCurrentRow();
 
     clearEntries();
-    var accts = storage().accounts();
-    List<Account> sorted = arrayList();
-    sorted.addAll(accts.values());
+    List<Account> sorted = storage().readAllAccounts();
     sorted.sort(ACCOUNT_COMPARATOR);
 
     for (var t : sorted) {

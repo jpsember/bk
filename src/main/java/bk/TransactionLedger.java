@@ -57,11 +57,8 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     var currentTrans = getCurrentRow();
     clearEntries();
 
-    List<Transaction> sorted = arrayList();
-    if (mAccountNumber == 0)
-      sorted.addAll(storage().transactions().values());
-    else
-      sorted = storage().transactionsForAccount(mAccountNumber);
+    List<Transaction> sorted = (mAccountNumber == 0) ? storage().readAllTransactions()
+        : storage().readTransactionsForAccount(mAccountNumber);
     sorted.sort(TRANSACTION_COMPARATOR);
 
     for (var t : sorted) {

@@ -4,6 +4,7 @@ import static bk.Util.*;
 import static js.base.Tools.*;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -59,15 +60,23 @@ public class Storage extends BaseObject {
     return mFile;
   }
 
-  public Map<Integer, Account> accounts() {
+  private Map<Integer, Account> accounts() {
     return mDatabase.accounts();
   }
 
-  public Map<Long, Transaction> transactions() {
+  private Map<Long, Transaction> transactions() {
     return mDatabase.transactions();
   }
 
-  public List<Transaction> transactionsForAccount(int accountNumber) {
+  public List<Account> readAllAccounts() {
+    return new ArrayList<>(mDatabase.accounts().values());
+  }
+
+  public List<Transaction> readAllTransactions() {
+    return new ArrayList<>(transactions().values());
+  }
+
+  public List<Transaction> readTransactionsForAccount(int accountNumber) {
     checkArgument(accountNumber >= 1000 && accountNumber <= 5999, "unexpected account number:",
         accountNumber);
     List<Transaction> out = arrayList();
@@ -192,12 +201,6 @@ public class Storage extends BaseObject {
     accounts().put(account.number(), account);
     setModified();
   }
-  //
-  //  public void replaceAccountWithoutOtherChanges(Account account) {
-  //    var existing = accounts().put(account.number(), account.build());
-  //    checkState(existing != null, "account did not already exist:", INDENT, account);
-  //    setModified();
-  //  }
 
   public void deleteAccount(int number) {
     accounts().remove(number);
@@ -219,6 +222,7 @@ public class Storage extends BaseObject {
     setModified();
   }
 
+  @Deprecated
   public void replaceTransactionWithoutUpdatingAccountBalances(Transaction t) {
     t = t.build();
     transactions().put(t.timestamp(), t);
@@ -281,10 +285,5 @@ public class Storage extends BaseObject {
   private Database.Builder mDatabase;
   private File mFile;
   private boolean mModified;
-
-  public Object transactionMustExist(long timestamp) {
-    // TODO Auto-generated method stub
-    return null;
-  }
 
 }

@@ -16,7 +16,7 @@ public class AccountIdHelper extends WidgetHelper {
     log("constructHint, prefix:", quote(prefix));
 
     List<AccEntry> candidates = arrayList();
-    var accounts = storage().accounts();
+    var accounts = storage().readAllAccounts();
 
     Integer parsedAccountNumber = null;
     try {
@@ -41,7 +41,7 @@ public class AccountIdHelper extends WidgetHelper {
       }
       log("parsed as account number:", parsedAccountNumber, "with bounds:", accMin, accMax);
 
-      for (var account : accounts.values()) {
+      for (var account : accounts) {
         if (account.number() >= accMin && account.number() < accMax) {
           var ent = accEntry(account);
           log("account has prefix, adding:", ent);
@@ -54,7 +54,7 @@ public class AccountIdHelper extends WidgetHelper {
 
       List<AccEntry> prefCandidates = arrayList();
 
-      outer: for (var account : accounts.values()) {
+      outer: for (var account : accounts) {
         var name = account.name();
         var words = split(name, ' ');
         for (var w : words) {
