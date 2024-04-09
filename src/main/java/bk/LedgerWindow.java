@@ -5,8 +5,11 @@ import static js.base.Tools.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.googlecode.lanterna.Symbols;
+import com.googlecode.lanterna.input.KeyType;
 
 import bk.gen.Alignment;
 import bk.gen.Column;
@@ -167,6 +170,8 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     Integer targetEntry = null;
     int pageSize = mLastRenderedClipBounds.height - 2; // Assume a boundary
 
+    boolean resetHint = true;
+
     switch (k.keyType()) {
     case ArrowUp:
       targetEntry = mCursorRow - 1;
@@ -192,17 +197,25 @@ public class LedgerWindow extends JWindow implements FocusHandler {
       case KeyEvent.VIEW_ACCOUNTS:
         switchToView(k);
         break;
-        default:
-        if (mHelper != null) {
-          mHelper.processKeyEvent(k );
-        }
+      default:
+        if (processHelper(k))
+          resetHint = false;
+        //        if (mHelper != null) {
+        //          resetHint = false;
+        //          mHelper.processKeyEvent(k, helperTriggers());
+        //        }
         break;
       }
       break;
     }
 
-    if (targetEntry != null)
-    {
+    //    if (mHelper != null) {
+    if (resetHint) {
+      mHintBuffer.setLength(0);
+    }
+    //    }
+
+    if (targetEntry != null) {
       int sz = mEntries.size();
       if (sz != 0) {
         int t = MyMath.clamp(targetEntry, 0, sz - 1);
@@ -320,7 +333,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     //pr("added entry #",mEntries.size(),"fields:",ent.fields);
     mEntries.add(ent);
     mLedgerFieldList = null;
-    mHintPrepared = false;
+    mTriggerStringMap = null;
     return this;
   }
 
@@ -409,8 +422,64 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     }
   };
 
-  public void setHelper(WidgetHelper h) {
-    mHelper = h;
+
+  private Set<String> helperTriggers() {
+    if (mTriggerStringMap == null) {
+      mTriggerStringMap = hashMap();
+      var m = mTriggerStringMap;
+      for (int pass = 0; pass < 2; pass++) {
+        int index = INIT_INDEX;
+        for (var entry : mEntries) {
+          index++;
+          for (var f : entry.fields) {
+            var s = f.toString().trim();
+            var words = split(s, ' ');
+            int maxLen = (pass == 0) ? 1 : words.size();
+            for (int j = 0; j < maxLen; j++) {
+              var prefix = words.get(j);
+              if (m.containsKey(prefix))
+                continue;
+              m.put(prefix, index);
+            }
+          }
+          index++;
+        }
+      }
+    }
+    return mTriggerStringMap.keySet();
+  }
+
+  private boolean processHelper(KeyEvent event) {
+    //    public KeyEvent processKeyEvent(KeyEvent event, Set<String> triggerStrings) {
+    //      todo("finish this; return null if handled");
+    if (event.keyType() == KeyType.Character && !event.hasCtrlOrAlt()) {
+      char ch = event.getCharacter();
+      mHintBuffer.append(ch);
+      pr("hint is now:", mHintBuffer);
+      todo("how do we reset the hint if it is full of non-matched chars?");
+
+      var hv = determineHelperValue(mHintBuffer.toString());
+      if (hv != null) {
+        pr("******** do something with help result:",hv);
+      }
+      return true;
+    }
+    return false;
+  }
+
+  public void resetHintCursor() {
+    mHintBuffer.setLength(0);
+  }
+
+  //    private Integer   determineHelperValue(String prefix) {
+  //      
+  //    }
+
+  private StringBuilder mHintBuffer = new StringBuilder();
+
+  private Integer determineHelperValue(String prefix) {
+    mark("finish this");
+    return null;
   }
 
   private List<Column> mColumns = arrayList();
@@ -420,6 +489,5 @@ public class LedgerWindow extends JWindow implements FocusHandler {
   private IRect mLastRenderedClipBounds;
   private int mPendingSep = 1;
   private Integer mSep;
-  private WidgetHelper mHelper;
-  private boolean mHintPrepared;
+  private Map<String, Integer> mTriggerStringMap;
 }

@@ -50,6 +50,7 @@ public class KeyEvent {
     mString = sb.toString();
   }
 
+ 
   @Override
   public String toString() {
     return mString;
@@ -66,6 +67,10 @@ public class KeyEvent {
     return mKeyStroke.getKeyType();
   }
 
+  public boolean hasCtrlOrAlt() {
+    return mKeyStroke.isAltDown() || mKeyStroke.isCtrlDown();
+  }
+  
   public Character getCharacter() {
     checkArgument(keyType() == KeyType.Character);
     return mKeyStroke.getCharacter();

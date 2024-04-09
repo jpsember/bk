@@ -16,6 +16,8 @@ public class AccountList extends LedgerWindow implements ChangeListener {
     setHeaderType(AccountList.HEADER_COLUMN_NAMES_WITH_DASHES);
     changeManager().addListener(this);
     mListener = listener;
+
+    //setHelper(new ConcreteWidgetHelper());
     addColumns();
     rebuild();
   }

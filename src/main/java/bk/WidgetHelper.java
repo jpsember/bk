@@ -3,6 +3,9 @@ package bk;
 import static js.base.Tools.*;
 
 import java.util.Map;
+import java.util.Set;
+
+import com.googlecode.lanterna.input.KeyType;
 
 import js.base.BaseObject;
 
@@ -26,11 +29,6 @@ public abstract class WidgetHelper extends BaseObject {
     return hint;
   }
 
-  public KeyEvent processKeyEvent(KeyEvent event) {
-    todo("finish this; return null if handled");
-    return event;
-  }
-
   public static int compareLowerCase(String a, String b) {
     return String.CASE_INSENSITIVE_ORDER.compare(a, b);
   }
@@ -47,4 +45,5 @@ public abstract class WidgetHelper extends BaseObject {
 
   // A map of user prefix (in lower case) and the hint that should be shown for that prefix (which might be an empty string)
   private Map<String, String> mHintResultsMap = hashMap();
+
 }
