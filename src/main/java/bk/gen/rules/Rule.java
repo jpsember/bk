@@ -1,8 +1,7 @@
 package bk.gen.rules;
 
-import java.util.HashSet;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import js.data.AbstractData;
 import js.data.DataUtil;
 import js.json.JSList;
@@ -10,7 +9,7 @@ import js.json.JSMap;
 
 public class Rule implements AbstractData {
 
-  public Set<Integer> accounts() {
+  public int[] accounts() {
     return mAccounts;
   }
 
@@ -39,12 +38,7 @@ public class Rule implements AbstractData {
   @Override
   public JSMap toJson() {
     JSMap m = new JSMap();
-    {
-      JSList j = new JSList();
-      for (Integer e : mAccounts)
-        j.add(e.toString());
-      m.put(_0, j);
-    }
+    m.putUnsafe(_0, DataUtil.encodeBase64Maybe(mAccounts));
     {
       JSList j = new JSList();
       for (String x : mConditions)
@@ -72,15 +66,10 @@ public class Rule implements AbstractData {
 
   private Rule(JSMap m) {
     {
-      mAccounts = DataUtil.emptySet();
-      {
-        JSList m2 = m.optJSList("accounts");
-        if (m2 != null && !m2.isEmpty()) {
-          Set<Integer> mp = new HashSet<>();
-          for (Object e : m2.wrappedList())
-            mp.add(((Number)e).intValue());
-          mAccounts = mp;
-        }
+      mAccounts = DataUtil.EMPTY_INT_ARRAY;
+      Object x = m.optUnsafe(_0);
+      if (x != null) {
+        mAccounts = DataUtil.parseIntsFromArrayOrBase64(x);
       }
     }
     mConditions = DataUtil.parseListOfObjects(m.optJSList(_1), false);
@@ -100,7 +89,7 @@ public class Rule implements AbstractData {
     Rule other = (Rule) object;
     if (other.hashCode() != hashCode())
       return false;
-    if (!(mAccounts.equals(other.mAccounts)))
+    if (!(Arrays.equals(mAccounts, other.mAccounts)))
       return false;
     if (!(mConditions.equals(other.mConditions)))
       return false;
@@ -114,7 +103,7 @@ public class Rule implements AbstractData {
     int r = m__hashcode;
     if (r == 0) {
       r = 1;
-      r = r * 37 + mAccounts.hashCode();
+      r = r * 37 + Arrays.hashCode(mAccounts);
       for (String x : mConditions)
         if (x != null)
           r = r * 37 + x.hashCode();
@@ -126,7 +115,7 @@ public class Rule implements AbstractData {
     return r;
   }
 
-  protected Set<Integer> mAccounts;
+  protected int[] mAccounts;
   protected List<String> mConditions;
   protected List<JSMap> mActions;
   protected int m__hashcode;
@@ -134,7 +123,7 @@ public class Rule implements AbstractData {
   public static final class Builder extends Rule {
 
     private Builder(Rule m) {
-      mAccounts = DataUtil.mutableCopyOf(m.mAccounts);
+      mAccounts = m.mAccounts;
       mConditions = DataUtil.mutableCopyOf(m.mConditions);
       mActions = DataUtil.mutableCopyOf(m.mActions);
     }
@@ -153,14 +142,14 @@ public class Rule implements AbstractData {
     @Override
     public Rule build() {
       Rule r = new Rule();
-      r.mAccounts = DataUtil.immutableCopyOf(mAccounts);
+      r.mAccounts = mAccounts;
       r.mConditions = DataUtil.immutableCopyOf(mConditions);
       r.mActions = DataUtil.immutableCopyOf(mActions);
       return r;
     }
 
-    public Builder accounts(Set<Integer> x) {
-      mAccounts = DataUtil.mutableCopyOf((x == null) ? DataUtil.emptySet() : x);
+    public Builder accounts(int[] x) {
+      mAccounts = (x == null) ? DataUtil.EMPTY_INT_ARRAY : x;
       return this;
     }
 
@@ -179,7 +168,7 @@ public class Rule implements AbstractData {
   public static final Rule DEFAULT_INSTANCE = new Rule();
 
   private Rule() {
-    mAccounts = DataUtil.emptySet();
+    mAccounts = DataUtil.EMPTY_INT_ARRAY;
     mConditions = DataUtil.emptyList();
     mActions = DataUtil.emptyList();
   }

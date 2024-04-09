@@ -289,14 +289,16 @@ public class Storage extends BaseObject {
     applyTransactionToAccountBalances(t, false);
 
     setModified();
-    todo("apply rules to this transaction");
+
+    RuleManager.SHARED_INSTANCE.applyRules(t);
+
     return t;
   }
 
-  @Deprecated
-  public void replaceTransactionWithoutUpdatingAccountBalances(Transaction t) {
+  void replaceTransactionWithoutUpdatingAccountBalances(Transaction t) {
     t = t.build();
     transactions().put(t.timestamp(), t);
+    setModified();
   }
 
   public void deleteTransaction(Transaction t) {

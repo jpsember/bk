@@ -64,17 +64,9 @@ public class ChangeManager extends BaseObject {
   }
 
   public void dispatch() {
-    mark("modify change manager to handle rules");
-
-    // We might make a recursive call to this method as a consequence of rules generating new transactions.
-    // So, process rules first.
-    
-    // The generated transactions won't themselves generate others, but that won't affect things...
-
     if (!mAc.isEmpty()) {
       Set<Integer> acctIds = hashSet();
       acctIds.addAll(mAc.keySet());
-      RuleManager.SHARED_INSTANCE.applyRules(acctIds);
     }
     if (mTr.isEmpty() && mAc.isEmpty())
       return;
