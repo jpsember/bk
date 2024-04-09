@@ -163,7 +163,7 @@ public class RuleManager extends BaseObject {
    */
   private Transaction findChildTransaction(int dr, int cr, long amount) {
     var parent = mParent;
-    var lst = getChildTransactions(parent);
+    var lst = storage().getChildTransactions(parent);
     for (var t : lst) {
       if (t.debit() == dr && t.credit() == cr && t.amount() == amount) {
         return t;
@@ -219,19 +219,6 @@ public class RuleManager extends BaseObject {
         log("set file to:", INDENT, Files.infoMap(mFile));
     }
     return mFile;
-  }
-
-  private List<Transaction> getChildTransactions(Transaction parent) {
-    if (parent.children().length == 0)
-      return DataUtil.emptyList();
-    List<Transaction> trs = arrayList();
-    for (var timestamp : parent.children()) {
-      var tr = storage().transactionWhichShouldExist(timestamp);
-      if (tr == null)
-        continue;
-      trs.add(tr);
-    }
-    return trs;
   }
 
   private File mFile;

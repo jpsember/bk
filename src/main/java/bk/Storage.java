@@ -12,6 +12,7 @@ import bk.gen.Account;
 import bk.gen.Database;
 import bk.gen.Transaction;
 import js.base.BaseObject;
+import js.data.DataUtil;
 import js.file.BackupManager;
 import js.file.Files;
 import js.json.JSMap;
@@ -303,10 +304,27 @@ public class Storage extends BaseObject {
 
   public void deleteTransaction(Transaction t) {
     checkNotNull(t);
+    if (!isGenerated(t)) {
+      for (var child : getChildTransactions(t))
+        deleteTransaction(child);
+    }
     var t2 = transactions().remove(t.timestamp());
     checkState(t2 != null, "transaction wasn't in map");
     applyTransactionToAccountBalances(t2, true);
     setModified();
+  }
+
+  public List<Transaction> getChildTransactions(Transaction parent) {
+    if (parent.children().length == 0)
+      return DataUtil.emptyList();
+    List<Transaction> trs = arrayList();
+    for (var timestamp : parent.children()) {
+      var tr = storage().transactionWhichShouldExist(timestamp);
+      if (tr == null)
+        continue;
+      trs.add(tr);
+    }
+    return trs;
   }
 
   public void deleteTransaction(long timestamp) {

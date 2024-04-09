@@ -106,8 +106,6 @@ public class TransactionForm extends FormWindow {
       var orig = mOrig;
       tr.timestamp(orig.timestamp());
       edited = tr;
-      undoTransaction(orig);
-      applyTransaction(edited);
       storage().deleteTransaction(orig.timestamp());
       edited = storage().addOrReplace(edited);
       changeManager().registerModifiedTransactions(orig, edited);

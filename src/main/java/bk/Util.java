@@ -469,14 +469,6 @@ public final class Util {
     ledger.rebuild();
   }
 
-  public static void applyTransaction(Transaction t) {
-
-  }
-
-  public static void undoTransaction(Transaction t) {
-
-  }
-
   public static JWindow sTransactionsView;
   public static JWindow sAccountsView;
 
