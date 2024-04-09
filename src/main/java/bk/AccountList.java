@@ -72,12 +72,12 @@ public class AccountList extends LedgerWindow implements ChangeListener {
       }
       break;
 
-    case ":a":
+    case "C:a":
       mListener.addAccount();
       rebuild();
       handled = true;
       break;
-    case ":e":
+    case "C:e":
       if (a != null) {
         mListener.editAccount(a);
         rebuild();
