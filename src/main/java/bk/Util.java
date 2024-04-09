@@ -448,9 +448,6 @@ public final class Util {
     case KeyEvent.VIEW_TRANSACTIONS:
       target = sTransactionsView;
       break;
-    case KeyEvent.VIEW_ACCOUNTS:
-      target = sAccountsView;
-      break;
     }
     if (target == null)
       return;

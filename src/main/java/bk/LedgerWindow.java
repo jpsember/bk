@@ -193,9 +193,9 @@ public class LedgerWindow extends JWindow implements FocusHandler {
       targetEntry = mEntries.size();
       break;
     default:
+      todo("view_transactions should only be available from account list? will simplify things.");
       switch (k.toString()) {
       case KeyEvent.VIEW_TRANSACTIONS:
-      case KeyEvent.VIEW_ACCOUNTS:
         switchToView(k);
         break;
       default:

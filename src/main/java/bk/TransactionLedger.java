@@ -100,12 +100,6 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       handled = true;
       break;
 
-    case KeyEvent.EDIT:
-      if (a != null) {
-        mListener.editTransaction(mAccountNumber, a);
-      }
-      handled = true;
-      break;
     }
     if (!handled)
       super.processKeyEvent(k);

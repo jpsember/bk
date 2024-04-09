@@ -16,17 +16,15 @@ public class KeyEvent {
   ENTER = ":Enter" //
       , ESCAPE = ":Escape" //
       , VIEW_TRANSACTIONS = "C:t" //
-      , VIEW_ACCOUNTS = "C:a" //
       , DELETE_TRANSACTION = "C:d" //
       , CONTROL_ENTER = "C:Enter" //
-      , ADD = ":a" //
-      , EDIT = ":e" //
+      , ADD = "C:a" //
       , QUIT = "C:x" //
-          , ARROW_UP = ":ArrowUp" //
-           , ARROW_DOWN = ":ArrowDown" //
-               , ARROW_LEFT = ":ArrowLeft" //
-               , ARROW_RIGHT = ":ArrowRight" //
-          
+      , ARROW_UP = ":ArrowUp" //
+      , ARROW_DOWN = ":ArrowDown" //
+      , ARROW_LEFT = ":ArrowLeft" //
+      , ARROW_RIGHT = ":ArrowRight" //
+
   ;
 
   public KeyEvent(KeyStroke k) {
@@ -49,7 +47,7 @@ public class KeyEvent {
     }
     mString = sb.toString();
   }
- 
+
   @Override
   public String toString() {
     return mString;
@@ -69,7 +67,7 @@ public class KeyEvent {
   public boolean hasCtrlOrAlt() {
     return mKeyStroke.isAltDown() || mKeyStroke.isCtrlDown();
   }
-  
+
   public Character getCharacter() {
     checkArgument(keyType() == KeyType.Character);
     return mKeyStroke.getCharacter();
