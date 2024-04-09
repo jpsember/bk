@@ -485,8 +485,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
   }
 
   private Integer determineHelperValue(String prefix) {
-    alertVerbose();
-
+    // alertVerbose();
     Integer bestResult = null;
     int bestWordPosition = 0;
 
