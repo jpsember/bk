@@ -6,7 +6,6 @@ import static js.base.Tools.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.googlecode.lanterna.Symbols;
 import com.googlecode.lanterna.input.KeyType;
@@ -209,22 +208,21 @@ public class LedgerWindow extends JWindow implements FocusHandler {
       break;
     }
 
-    //    if (mHelper != null) {
     if (resetHint) {
       mHintBuffer.setLength(0);
     }
-    //    }
 
     if (targetEntry != null) {
-      int sz = mEntries.size();
-      if (sz != 0) {
-        int t = MyMath.clamp(targetEntry, 0, sz - 1);
-        mCursorRow = t;
-        repaint();
-      }
-    } else if (false && alert("experiment with partial repaint")) {
-      pr("triggering partial repaint");
-      repaintPartial();
+      scrollToEntry(targetEntry);
+    }
+  }
+
+  private void scrollToEntry(int targetEntry) {
+    int sz = mEntries.size();
+    if (sz != 0) {
+      int t = MyMath.clamp(targetEntry, 0, sz - 1);
+      mCursorRow = t;
+      repaint();
     }
   }
 
@@ -422,9 +420,8 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     }
   };
 
-
-  private Set<String> helperTriggers() {
-    if (mTriggerStringMap == null) {
+  private Map<String, Integer> helperTriggers() {
+    if (mTriggerStringMap == null || alert("always rebuilding helper triggers")) {
       mTriggerStringMap = hashMap();
       var m = mTriggerStringMap;
       for (int pass = 0; pass < 2; pass++) {
@@ -432,7 +429,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
         for (var entry : mEntries) {
           index++;
           for (var f : entry.fields) {
-            var s = f.toString().trim();
+            var s = f.toString().trim().toLowerCase();
             var words = split(s, ' ');
             int maxLen = (pass == 0) ? 1 : words.size();
             for (int j = 0; j < maxLen; j++) {
@@ -442,11 +439,10 @@ public class LedgerWindow extends JWindow implements FocusHandler {
               m.put(prefix, index);
             }
           }
-          index++;
         }
       }
     }
-    return mTriggerStringMap.keySet();
+    return mTriggerStringMap;
   }
 
   private boolean processHelper(KeyEvent event) {
@@ -458,9 +454,9 @@ public class LedgerWindow extends JWindow implements FocusHandler {
       pr("hint is now:", mHintBuffer);
       todo("how do we reset the hint if it is full of non-matched chars?");
 
-      var hv = determineHelperValue(mHintBuffer.toString());
-      if (hv != null) {
-        pr("******** do something with help result:",hv);
+      var helperIndex = determineHelperValue(mHintBuffer.toString());
+      if (helperIndex != null) {
+        scrollToEntry(helperIndex);
       }
       return true;
     }
@@ -471,15 +467,32 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     mHintBuffer.setLength(0);
   }
 
-  //    private Integer   determineHelperValue(String prefix) {
-  //      
-  //    }
-
   private StringBuilder mHintBuffer = new StringBuilder();
 
   private Integer determineHelperValue(String prefix) {
-    mark("finish this");
-    return null;
+    var db = mark("verbose on");
+    Integer result = null;
+    if (prefix.length() != 0) {
+      prefix = prefix.toLowerCase();
+      var triggerMap = helperTriggers();
+      if (db)
+        pr("determineHelperValue for prefix:", quote(prefix), "triggers:", INDENT, triggerMap);
+      String shortestMatch = null;
+      for (var mapEntry : triggerMap.entrySet()) {
+        var key = mapEntry.getKey();
+        if (key.startsWith(prefix)) {
+          if (db)
+            pr("key starts with prefix:", key, "index:", mapEntry.getValue());
+          if (result == null || shortestMatch.length() > key.length()) {
+            shortestMatch = key;
+            result = mapEntry.getValue();
+          }
+        }
+      }
+    }
+    if (db)
+      pr("returning:", result);
+    return result;
   }
 
   private List<Column> mColumns = arrayList();

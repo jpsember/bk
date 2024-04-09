@@ -3,9 +3,6 @@ package bk;
 import static js.base.Tools.*;
 
 import java.util.Map;
-import java.util.Set;
-
-import com.googlecode.lanterna.input.KeyType;
 
 import js.base.BaseObject;
 

@@ -10,7 +10,6 @@ import bk.gen.Transaction;
 import bk.gen.rules.Rule;
 import bk.gen.rules.Rules;
 import js.base.BaseObject;
-import js.data.DataUtil;
 import js.data.LongArray;
 import js.file.Files;
 import js.json.JSMap;
@@ -21,8 +20,7 @@ public class RuleManager extends BaseObject {
 
   private RuleManager() {
     todo("!don't allow editing of generated transactions");
-    todo("!if editing parent, it isn't deleting old children?");
-    alertVerbose();
+   // alertVerbose();
   }
 
   public void deleteAllGeneratedTransactions() {

@@ -49,7 +49,6 @@ public class KeyEvent {
     }
     mString = sb.toString();
   }
-
  
   @Override
   public String toString() {
