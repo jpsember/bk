@@ -13,6 +13,8 @@ import com.googlecode.lanterna.input.KeyType;
 import bk.gen.Alignment;
 import bk.gen.Column;
 import bk.gen.Datatype;
+import js.base.DateTimeTools;
+import js.base.Pair;
 import js.geometry.IRect;
 import js.geometry.MyMath;
 
@@ -199,18 +201,13 @@ public class LedgerWindow extends JWindow implements FocusHandler {
       default:
         if (processHelper(k))
           resetHint = false;
-        //        if (mHelper != null) {
-        //          resetHint = false;
-        //          mHelper.processKeyEvent(k, helperTriggers());
-        //        }
         break;
       }
       break;
     }
 
-    if (resetHint) {
-      mHintBuffer.setLength(0);
-    }
+    if (resetHint)
+      resetHintCursor();
 
     if (targetEntry != null) {
       scrollToEntry(targetEntry);
@@ -304,6 +301,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
   }
 
   public LedgerWindow openEntry() {
+    discardHintState();
     checkState(mLedgerFieldList == null);
     mLedgerFieldList = arrayList();
     return this;
@@ -420,23 +418,23 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     }
   };
 
-  private Map<String, Integer> helperTriggers() {
+  private Map<String, Pair<Integer, Integer>> helperTriggers() {
     if (mTriggerStringMap == null || alert("always rebuilding helper triggers")) {
       mTriggerStringMap = hashMap();
       var m = mTriggerStringMap;
       for (int pass = 0; pass < 2; pass++) {
-        int index = INIT_INDEX;
+        int rowIndex = INIT_INDEX;
         for (var entry : mEntries) {
-          index++;
+          rowIndex++;
           for (var f : entry.fields) {
             var s = f.toString().trim().toLowerCase();
             var words = split(s, ' ');
             int maxLen = (pass == 0) ? 1 : words.size();
-            for (int j = 0; j < maxLen; j++) {
-              var prefix = words.get(j);
+            for (int wordIndex = 0; wordIndex < maxLen; wordIndex++) {
+              var prefix = words.get(wordIndex);
               if (m.containsKey(prefix))
                 continue;
-              m.put(prefix, index);
+              m.put(prefix, pair(rowIndex, wordIndex));
             }
           }
         }
@@ -445,14 +443,37 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     return mTriggerStringMap;
   }
 
+  private List<Column> mColumns = arrayList();
+  private List<Entry> mEntries = arrayList();
+  private StringBuilder msb = new StringBuilder();
+  private int mCursorRow;
+  private IRect mLastRenderedClipBounds;
+  private int mPendingSep = 1;
+  private Integer mSep;
+
+  // ------------------------------------------------------------------
+  // Hint
+  // ------------------------------------------------------------------
+
+  private void discardHintState() {
+    resetHintCursor();
+    mTriggerStringMap = null;
+  }
+
+  private void resetHintCursor() {
+    mHintBuffer.setLength(0);
+  }
+
   private boolean processHelper(KeyEvent event) {
-    //    public KeyEvent processKeyEvent(KeyEvent event, Set<String> triggerStrings) {
-    //      todo("finish this; return null if handled");
     if (event.keyType() == KeyType.Character && !event.hasCtrlOrAlt()) {
+      var ts = System.currentTimeMillis();
+      if (ts - mLastHintKeyTime > DateTimeTools.MILLISECONDS(750))
+        resetHintCursor();
+      mLastHintKeyTime = ts;
+
       char ch = event.getCharacter();
       mHintBuffer.append(ch);
-      pr("hint is now:", mHintBuffer);
-      todo("how do we reset the hint if it is full of non-matched chars?");
+      log("hint is now:", mHintBuffer);
 
       var helperIndex = determineHelperValue(mHintBuffer.toString());
       if (helperIndex != null) {
@@ -463,44 +484,41 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     return false;
   }
 
-  public void resetHintCursor() {
-    mHintBuffer.setLength(0);
-  }
-
-  private StringBuilder mHintBuffer = new StringBuilder();
-
   private Integer determineHelperValue(String prefix) {
-    var db = mark("verbose on");
-    Integer result = null;
+    alertVerbose();
+
+    Integer bestResult = null;
+    int bestWordPosition = 0;
+
     if (prefix.length() != 0) {
       prefix = prefix.toLowerCase();
       var triggerMap = helperTriggers();
-      if (db)
-        pr("determineHelperValue for prefix:", quote(prefix), "triggers:", INDENT, triggerMap);
+      log("determineHelperValue for prefix:", quote(prefix), "triggers:", INDENT, triggerMap);
       String shortestMatch = null;
       for (var mapEntry : triggerMap.entrySet()) {
         var key = mapEntry.getKey();
         if (key.startsWith(prefix)) {
-          if (db)
-            pr("key starts with prefix:", key, "index:", mapEntry.getValue());
-          if (result == null || shortestMatch.length() > key.length()) {
-            shortestMatch = key;
-            result = mapEntry.getValue();
+          var val = mapEntry.getValue();
+          if (bestResult != null) {
+            if (val.second > 0 && bestWordPosition == 0)
+              continue;
+            if (shortestMatch.length() <= key.length())
+              continue;
           }
+          shortestMatch = key;
+          bestResult = val.first;
+          bestWordPosition = val.second;
+          log("...new best match:", key, bestResult);
+
         }
       }
     }
-    if (db)
-      pr("returning:", result);
-    return result;
+    log("...result:", bestResult);
+    return bestResult;
   }
 
-  private List<Column> mColumns = arrayList();
-  private List<Entry> mEntries = arrayList();
-  private StringBuilder msb = new StringBuilder();
-  private int mCursorRow;
-  private IRect mLastRenderedClipBounds;
-  private int mPendingSep = 1;
-  private Integer mSep;
-  private Map<String, Integer> mTriggerStringMap;
+  private StringBuilder mHintBuffer = new StringBuilder();
+  private Map<String, Pair<Integer, Integer>> mTriggerStringMap;
+  private long mLastHintKeyTime;
+
 }
