@@ -192,12 +192,16 @@ public class LedgerWindow extends JWindow implements FocusHandler {
       case KeyEvent.VIEW_ACCOUNTS:
         switchToView(k);
         break;
+        default:
+        if (mHelper != null) {
+          mHelper.processKeyEvent(k );
+        }
+        break;
       }
       break;
     }
 
     if (targetEntry != null)
-
     {
       int sz = mEntries.size();
       if (sz != 0) {
@@ -316,6 +320,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     //pr("added entry #",mEntries.size(),"fields:",ent.fields);
     mEntries.add(ent);
     mLedgerFieldList = null;
+    mHintPrepared = false;
     return this;
   }
 
@@ -404,6 +409,10 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     }
   };
 
+  public void setHelper(WidgetHelper h) {
+    mHelper = h;
+  }
+
   private List<Column> mColumns = arrayList();
   private List<Entry> mEntries = arrayList();
   private StringBuilder msb = new StringBuilder();
@@ -411,4 +420,6 @@ public class LedgerWindow extends JWindow implements FocusHandler {
   private IRect mLastRenderedClipBounds;
   private int mPendingSep = 1;
   private Integer mSep;
+  private WidgetHelper mHelper;
+  private boolean mHintPrepared;
 }

@@ -26,6 +26,11 @@ public abstract class WidgetHelper extends BaseObject {
     return hint;
   }
 
+  public KeyEvent processKeyEvent(KeyEvent event) {
+    todo("finish this; return null if handled");
+    return event;
+  }
+
   public static int compareLowerCase(String a, String b) {
     return String.CASE_INSENSITIVE_ORDER.compare(a, b);
   }
