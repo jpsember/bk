@@ -225,7 +225,6 @@ public class Storage extends BaseObject {
 
   private long mUniqueTimestamp;
 
-
   private BackupManager bkup() {
     if (mBackups == null) {
       mBackups = new BackupManager(Files.S, Files.parent(file()));
@@ -259,7 +258,6 @@ public class Storage extends BaseObject {
     checkNotNull(acc);
 
     var u = UndoManager.SHARED_INSTANCE;
-
     // Delete all transactions
     todo("we probably want a single 'undo' action, not one for each transaction deletion");
     var tr = readTransactionsForAccount(number);
@@ -339,6 +337,16 @@ public class Storage extends BaseObject {
 
   public void deleteTransaction(long timestamp) {
     var t = transaction(timestamp);
+
+    if (t == null) {
+      pr(VERT_SP, "Can't find transaction with timestamp:", timestamp, "!!!");
+
+      pr("transactions are:");
+      for (var ent : transactions().entrySet())
+        pr("key:", ent.getKey(), "value:", INDENT, ent.getValue());
+      die("bye");
+    }
+
     deleteTransaction(t);
   }
 
@@ -362,5 +370,30 @@ public class Storage extends BaseObject {
     u.addAccount(a);
     setModified();
   }
+//
+//  public void deleteAccountUNDO(int number) {
+//    var acc = account(number);
+//    checkNotNull(acc);
+//    accounts().remove(number);
+//    setModified();
+//  }
+//
+//  public void deleteTransactionUNDO(long id) {
+//    var t2 = transactions().remove(id);
+//    checkState(t2 != null, "transaction wasn't in map");
+//    setModified();
+//  }
+//
+//  public void addUNDO(Account account) {
+//    var existing = accounts().put(account.number(), account);
+//    checkState(existing == null, "an account already existed with number:", account.number());
+//    setModified();
+//  }
+//
+//  public void addUNDO(Transaction transaction) {
+//    var existing = transactions().put(id(transaction), transaction);
+//    checkState(existing == null, "transaction already existed with id:", id(transaction));
+//    setModified();
+//  }
 
 }

@@ -3,6 +3,8 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
+import java.util.List;
+
 import bk.gen.Account;
 import bk.gen.Transaction;
 import bk.gen.UndoAction;
@@ -32,8 +34,10 @@ public class UndoManager extends BaseObject {
     assertState(STATE_EXECUTING);
     var act = mAction.build();
     mAction = null;
-    todo("do something with this undo action:", INDENT, act);
-    mUndoEvent = act;
+    removeAllButFirstN(mStack, mStackPointer);
+    mStack.add(act);
+    mStackPointer++;
+    log(VERT_SP, "added to undo stack:", INDENT, act);
   }
 
   private int assertState(int expected) {
@@ -79,28 +83,52 @@ public class UndoManager extends BaseObject {
     mAction.entries().add(UndoEntry.newBuilder().account(a).insert(false));
   }
 
-  public void deleteTransaction(Transaction t) {
-    if (!recording())
-      return;
-    mAction.entries().add(UndoEntry.newBuilder().transaction(t).insert(false));
-  }
-
   public void addTransaction(Transaction t) {
     if (!recording())
       return;
     mAction.entries().add(UndoEntry.newBuilder().transaction(t).insert(true));
   }
 
+  public void deleteTransaction(Transaction t) {
+    if (!recording())
+      return;
+    mAction.entries().add(UndoEntry.newBuilder().transaction(t).insert(false));
+  }
+
   public boolean performUndo() {
-    if (mUndoEvent == null) {
+    if (mStackPointer == 0) {
       log("can't undo anything");
       return false;
     }
+    mStackPointer--;
+    var evt = mStack.get(mStackPointer);
 
-    pr("not finished; undo:", mUndoEvent.description());
+    log(VERT_SP, "undoing:", INDENT, evt);
+    setState(STATE_UNDOING);
+    for (int j = evt.entries().size() - 1; j >= 0; j--) {
+      var ent = evt.entries().get(j);
+      undo(ent);
+    }
+    setState(STATE_DORMANT);
     return true;
   }
 
-  private UndoAction mUndoEvent;
+  private void undo(UndoEntry ent) {
+    log("undoing entry:", INDENT, ent);
+    var s = storage();
+    if (ent.insert()) {
+      if (ent.account() != null)
+        s.deleteAccountUNDO(ent.account().number());
+      else
+        s.deleteTransactionUNDO(id(ent.transaction()));
+    } else {
+      if (ent.account() != null)
+        s.addUNDO(ent.account());
+      else
+        s.addUNDO(ent.transaction());
+    }
+  }
 
+  private List<UndoAction> mStack = arrayList();
+  private int mStackPointer;
 }

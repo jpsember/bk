@@ -489,12 +489,6 @@ public final class Util {
     return a;
   }
 
-  //  public static Account ensureNotNull(Account a, int number) {
-  //    if (a == null)
-  //      badState("Account with number", number, "doesn't exist");
-  //    return a;
-  //  }
-
   public static ChangeManager changeManager() {
     if (sChangeManager == null)
       sChangeManager = new ChangeManager();

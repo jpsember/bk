@@ -96,19 +96,25 @@ public class TransactionForm extends FormWindow {
       return;
     }
 
+    var u = UndoManager.SHARED_INSTANCE;
+
     Transaction edited = null;
 
     if (mType == TYPE_ADD) {
+      u.begin("Add Transaction");
       edited = tr.build();
       edited = storage().addOrReplace(edited);
       changeManager().registerModifiedTransactions(edited);
+      u.end();
     } else {
+      u.begin("Edit Transaction");
       var orig = mOrig;
       tr.timestamp(orig.timestamp());
       edited = tr;
       storage().deleteTransaction(orig.timestamp());
       edited = storage().addOrReplace(edited);
       changeManager().registerModifiedTransactions(orig, edited);
+      u.end();
     }
     changeManager().dispatch();
     mListener.editedTransaction(this, edited);
