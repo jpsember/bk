@@ -13,7 +13,6 @@ import bk.gen.Datatype;
 public class AccountList extends LedgerWindow implements ChangeListener {
 
   public AccountList(AccountListListener listener) {
-    setHeaderType(AccountList.HEADER_COLUMN_NAMES_WITH_DASHES);
     changeManager().addListener(this);
     mListener = listener;
     addColumns();

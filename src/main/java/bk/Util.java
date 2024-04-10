@@ -490,11 +490,18 @@ public final class Util {
     return acc;
   }
 
-  public static Account ensureNotNull(Account a, int number) {
+  public static Account accountMustExist(int accountNumber) {
+    var a = account(accountNumber);
     if (a == null)
-      badState("Account with number", number, "doesn't exist");
+      badArg("account not found:", accountNumber);
     return a;
   }
+
+  //  public static Account ensureNotNull(Account a, int number) {
+  //    if (a == null)
+  //      badState("Account with number", number, "doesn't exist");
+  //    return a;
+  //  }
 
   public static ChangeManager changeManager() {
     if (sChangeManager == null)
@@ -521,6 +528,14 @@ public final class Util {
 
   public static boolean isGenerated(Transaction t) {
     return t.parent() != 0;
+  }
+
+  public static boolean hasBudget(Account a) {
+    return a.budget() != 0;
+  }
+
+  public static boolean hasBudget(int accountNumber) {
+    return hasBudget(accountMustExist(accountNumber));
   }
 
   private static ChangeManager sChangeManager;

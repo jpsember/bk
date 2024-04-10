@@ -17,6 +17,10 @@ public class Account implements AbstractData {
     return mBalance;
   }
 
+  public long budget() {
+    return mBudget;
+  }
+
   @Override
   public Builder toBuilder() {
     return new Builder(this);
@@ -25,6 +29,7 @@ public class Account implements AbstractData {
   protected static final String _0 = "number";
   protected static final String _1 = "name";
   protected static final String _2 = "balance";
+  protected static final String _3 = "budget";
 
   @Override
   public String toString() {
@@ -37,6 +42,7 @@ public class Account implements AbstractData {
     m.putUnsafe(_0, mNumber);
     m.putUnsafe(_1, mName);
     m.putUnsafe(_2, mBalance);
+    m.putUnsafe(_3, mBudget);
     return m;
   }
 
@@ -54,6 +60,7 @@ public class Account implements AbstractData {
     mNumber = m.opt(_0, 0);
     mName = m.opt(_1, "");
     mBalance = m.opt(_2, 0L);
+    mBudget = m.opt(_3, 0L);
   }
 
   public static Builder newBuilder() {
@@ -75,6 +82,8 @@ public class Account implements AbstractData {
       return false;
     if (!(mBalance == other.mBalance))
       return false;
+    if (!(mBudget == other.mBudget))
+      return false;
     return true;
   }
 
@@ -86,6 +95,7 @@ public class Account implements AbstractData {
       r = r * 37 + mNumber;
       r = r * 37 + mName.hashCode();
       r = r * 37 + (int)mBalance;
+      r = r * 37 + (int)mBudget;
       m__hashcode = r;
     }
     return r;
@@ -94,6 +104,7 @@ public class Account implements AbstractData {
   protected int mNumber;
   protected String mName;
   protected long mBalance;
+  protected long mBudget;
   protected int m__hashcode;
 
   public static final class Builder extends Account {
@@ -102,6 +113,7 @@ public class Account implements AbstractData {
       mNumber = m.mNumber;
       mName = m.mName;
       mBalance = m.mBalance;
+      mBudget = m.mBudget;
     }
 
     @Override
@@ -121,6 +133,7 @@ public class Account implements AbstractData {
       r.mNumber = mNumber;
       r.mName = mName;
       r.mBalance = mBalance;
+      r.mBudget = mBudget;
       return r;
     }
 
@@ -136,6 +149,11 @@ public class Account implements AbstractData {
 
     public Builder balance(long x) {
       mBalance = x;
+      return this;
+    }
+
+    public Builder budget(long x) {
+      mBudget = x;
       return this;
     }
 

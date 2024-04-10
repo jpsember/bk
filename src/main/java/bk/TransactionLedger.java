@@ -5,6 +5,7 @@ import static js.base.Tools.*;
 
 import java.util.List;
 
+import bk.gen.Account;
 import bk.gen.Alignment;
 import bk.gen.Column;
 import bk.gen.Datatype;
@@ -21,22 +22,12 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   public TransactionLedger(int accountNumberOrZero, TransactionListener listener) {
     changeManager().addListener(this);
     addColumns();
-    // mFilter = nullTo(filter, ACCEPT_ALL);
     mListener = listener;
     mAccountNumber = accountNumberOrZero;
+    if (accountNumberOrZero != 0)
+      mAccount = account(accountNumberOrZero);
     rebuild();
   }
-  //
-  //  public void prepare(  TransactionListener listener) {
-  //    addColumns();
-  //    mFilter = nullTo(filter, ACCEPT_ALL);
-  //    mListener = listener;
-  //    rebuild();
-  //  }
-  //
-  //  public void accountNumber(int anum) {
-  //    mAccountNumber = anum;
-  //  }
 
   private void addColumns() {
     if (mColumnsAdded)
@@ -111,9 +102,9 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     todo("!verify that it attempts to restore cursor to more or less the same location");
   }
 
-  //  private Filter mFilter;
   private TransactionListener mListener;
   private int mAccountNumber;
   private boolean mColumnsAdded;
+  private Account mAccount;
 
 }

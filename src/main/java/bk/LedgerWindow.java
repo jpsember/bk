@@ -29,89 +29,109 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     return "LedgerWindow";
   }
 
-  public void setHeaderType(int code) {
-    mHeaderType = code;
-  }
-
-  public static final int HEADER_NONE = 0;
-  public static final int HEADER_COLUMN_NAMES = 1;
-  public static final int HEADER_COLUMN_NAMES_WITH_DASHES = 2;
-
-  private int mHeaderType = HEADER_COLUMN_NAMES_WITH_DASHES;
-
   @Override
   public void paint() {
     prepareToRender();
     var r = Render.SHARED_INSTANCE;
-    var b = r.clipBounds();
-    mLastRenderedClipBounds = b;
+    var clip = r.clipBounds();
 
-    if (r.partial()) {
-      var rn = MyMath.random();
-      r.pushStyle(STYLE_INVERSE);
-      r.clearRow(b.y + rn.nextInt(20), (char) (rn.nextInt(26) + 'A'));
-      r.pop();
-      return;
-    }
+    int headerRowTotal = 2;
+    int headerScreenY = clip.y;
+    int bodyRowTotal = clip.height - headerRowTotal;
+    int bodyScreenY = headerScreenY + headerRowTotal;
+    mLastBodyRowTotal = bodyRowTotal;
 
-    // Determine the starting offset, to keep the cursor row near the center of the window
-    int ledgerRowNumAtTopOfWindow = 0;
+    calculateColumnWidths(clip.width);
+
+    
+    // Plot the header
     {
-      int vis = b.height;
-      ledgerRowNumAtTopOfWindow = Math.max(HEADER_NONE - mHeaderType, (mCursorRow - vis / 2));
-    }
 
-    int rows = b.height;
-    calculateColumnWidths(b.width);
-    for (int windowRowNum = 0; windowRowNum < rows; windowRowNum++) {
-      int rowNum = windowRowNum + ledgerRowNumAtTopOfWindow;
+      // Render the fields
+      // Render the headings
+      int y = headerScreenY;
+      int i = INIT_INDEX;
+      int x = clip.x;
+      for (var col : mColumns) {
+        i++;
+        var cw = mColumnWidths[i];
+        plotString(col.name(), x, y, col.alignment(), cw);
+        x += cw;
+      }
+      //
+      //      int x = clip.x;
+      //      mCurrentColumn = INIT_INDEX;
+      //      for (var col : mColumns) {
+      //        mCurrentColumn++;
+      //        var data = ent.fields.get(mCurrentColumn);
+      //        var text = data.toString();
+      //        var cw = mColumnWidths[mCurrentColumn];
+      //        //          pr("rowScreenY:",rowScreenY,"rowNum:",rowNum,"clip:",r.clipBounds());
+      //        //          halt();
+      //        plotString(text, x, rowScreenY, col.alignment(), cw);
+      //        x += cw;
+      //      }
+
+      for (int rn = 1; rn < headerRowTotal; rn++)
+        r.drawString(clip.x, headerScreenY + rn, 20, "Header row " + rn);
+    }
+    // Determine the starting offset, to keep the cursor row near the center of the window
+    int firstLedgerRowNum = Math.max(0, (mCursorRow - bodyRowTotal / 2));
+
+    for (int bodyRowIndex = 0; bodyRowIndex < bodyRowTotal; bodyRowIndex++) {
+      int rowScreenY = bodyRowIndex + bodyScreenY;
       msb.setLength(0);
 
-      int x = 0;
-
+      int rowNum = bodyRowIndex + firstLedgerRowNum;
       var hl = hasFocus() && rowNum == mCursorRow;
       r.pushStyle(hl ? STYLE_INVERSE : STYLE_NORMAL);
       if (hl)
-        r.clearRow(b.y + windowRowNum, ' ');
+        r.clearRow(rowScreenY, ' ');
+
+      if (rowNum < 0 || rowNum >= mEntries.size())
+        continue;
 
       do {
-        if (rowNum < 0) {
-          if (mHeaderType == HEADER_NONE)
-            break;
+        //        if (rowNum < 0) {
+        //          if (mHeaderType == HEADER_NONE)
+        //            break;
+        //
+        //          var j = -rowNum;
+        //          if (mHeaderType == HEADER_COLUMN_NAMES)
+        //            j++;
+        //
+        //          if (j == 2) {
+        //            // Render the headings
+        //            mCurrentColumn = INIT_INDEX;
+        //            for (var col : mColumns) {
+        //              mCurrentColumn++;
+        //              var cw = mColumnWidths[mCurrentColumn];
+        //              plotString(col.name(), x, windowRowNum, col.alignment(), cw);
+        //              x += cw;
+        //            }
+        //          } else if (j == 1) {
+        //            // Render dashes
+        //            r.clearRow(b.y + windowRowNum, Symbols.SINGLE_LINE_HORIZONTAL);
+        //          }
+        //          break;
+        //        }
 
-          var j = -rowNum;
-          if (mHeaderType == HEADER_COLUMN_NAMES)
-            j++;
+        //        int entNum = rowNum;
+        //        if (entNum >= mEntries.size())
+        //          break;
 
-          if (j == 2) {
-            // Render the headings
-            mCurrentColumn = INIT_INDEX;
-            for (var col : mColumns) {
-              mCurrentColumn++;
-              var cw = mColumnWidths[mCurrentColumn];
-              plotString(col.name(), x, windowRowNum, col.alignment(), cw);
-              x += cw;
-            }
-          } else if (j == 1) {
-            // Render dashes
-            r.clearRow(b.y + windowRowNum, Symbols.SINGLE_LINE_HORIZONTAL);
-          }
-          break;
-        }
-
-        int entNum = rowNum;
-        if (entNum >= mEntries.size())
-          break;
-
-        var ent = mEntries.get(entNum);
+        var ent = mEntries.get(rowNum);
         // Render the fields
+        int x = clip.x;
         mCurrentColumn = INIT_INDEX;
         for (var col : mColumns) {
           mCurrentColumn++;
           var data = ent.fields.get(mCurrentColumn);
           var text = data.toString();
           var cw = mColumnWidths[mCurrentColumn];
-          plotString(text, x, windowRowNum, col.alignment(), cw);
+          //          pr("rowScreenY:",rowScreenY,"rowNum:",rowNum,"clip:",r.clipBounds());
+          //          halt();
+          plotString(text, x, rowScreenY, col.alignment(), cw);
           x += cw;
         }
       } while (false);
@@ -163,13 +183,8 @@ public class LedgerWindow extends JWindow implements FocusHandler {
 
   @Override
   public void processKeyEvent(KeyEvent k) {
-    if (mLastRenderedClipBounds == null) {
-      alert("can't process KeyStroke; window has never been rendered");
-      return;
-    }
-
     Integer targetEntry = null;
-    int pageSize = mLastRenderedClipBounds.height - 2; // Assume a boundary
+    int pageSize = mLastBodyRowTotal;
 
     boolean resetHint = true;
 
@@ -227,7 +242,6 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     if (width < 0)
       width = text.length();
     var r = Render.SHARED_INSTANCE;
-    var b = r.clipBounds();
     var diff = width - text.length();
     if (diff > 0) {
       switch (alignment) {
@@ -241,7 +255,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
         break;
       }
     }
-    r.drawString(x + b.x, y + b.y, width, text);
+    r.drawString(x, y, width, text);
   }
 
   private void prepareToRender() {
@@ -447,7 +461,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
   private List<Entry> mEntries = arrayList();
   private StringBuilder msb = new StringBuilder();
   private int mCursorRow;
-  private IRect mLastRenderedClipBounds;
+  private int mLastBodyRowTotal = 10;
   private int mPendingSep = 1;
   private Integer mSep;
 

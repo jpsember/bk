@@ -2,4 +2,5 @@ fields {
   int number;
   string name;
   long balance;
+  long budget;
 }
