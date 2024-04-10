@@ -25,7 +25,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   }
 
   private boolean hasBudget() {
-    return mAccount != null && (mAccount.budget() != 0 || alert("always true"));
+    return mAccount != null && mAccount.budget() != 0;
   }
 
   @Override

@@ -135,12 +135,9 @@ public class BkOper extends AppOper
 
   @Override
   public void editedAccount(AccountForm form, Account account) {
-
     form.remove();
-
     if (account == null)
       return;
-    pr("editedAccount:", INDENT, account);
     var v = mAccounts;
     v.rebuild();
     v.setCurrentRow(account);

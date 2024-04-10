@@ -3,7 +3,10 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
+import java.util.List;
+
 import bk.gen.Account;
+import bk.gen.Transaction;
 
 public class AccountForm extends FormWindow {
 
@@ -59,7 +62,6 @@ public class AccountForm extends FormWindow {
         var existing = storage().account(ac.number());
         if (existing != null && ac.number() != mOriginalAccount.number())
           problem = "That account number is taken!";
-        todo("check for duplicate account names");
       }
         break;
       }
@@ -73,18 +75,40 @@ public class AccountForm extends FormWindow {
 
     if (mType == TYPE_ADD) {
       editedAccount = ac;
-      storage().addAccount(ac);
+      storage().addOrReplaceAccount(ac);
       changeManager().registerModifiedAccount(ac);
     } else {
-      // modify original account to include the edits
+      // modify a copy of the original account to include the edits
       var orig = mOriginalAccount;
       var mod = orig.build().toBuilder();
       mod.number(ac.number()).name(ac.name()).budget(ac.budget());
-      // delete the original account
-      storage().deleteAccount(orig.number());
+
+      if (orig.number() != mod.number()) {
+        // create modified versions of all transactions from this account
+        var origTrans = filterOutGenerated(storage().readTransactionsForAccount(orig.number()));
+        List<Transaction> modTrans = arrayList();
+        for (var t : origTrans) {
+          var b = t.toBuilder();
+          if (b.debit() == orig.number())
+            b.debit(mod.number());
+          if (b.credit() == orig.number())
+            b.credit(mod.number());
+          modTrans.add(b.build());
+        }
+        // Delete the original transactions
+        for (var t : origTrans)
+          storage().deleteTransaction(t);
+        // Add the modified transactions
+        for (var t : modTrans)
+          storage().addOrReplace(t);
+
+        // delete the original account
+        storage().deleteAccount(orig.number());
+      }
+
       changeManager().registerModifiedAccount(orig);
       editedAccount = mod.build();
-      storage().addAccount(editedAccount);
+      storage().addOrReplaceAccount(editedAccount);
       changeManager().registerModifiedAccount(editedAccount);
     }
     mListener.editedAccount(this, editedAccount);

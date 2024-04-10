@@ -9,6 +9,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
@@ -530,6 +531,18 @@ public final class Util {
     return effNumber + " " + effName;
   }
 
+  private static ChangeManager sChangeManager;
+
+  public static List<Transaction> filterOutGenerated(Collection<Transaction> trans) {
+    List<Transaction> out = arrayList();
+    for (var t : trans) {
+      if (isGenerated(t))
+        continue;
+      out.add(t);
+    }
+    return out;
+  }
+
   public static boolean isGenerated(Transaction t) {
     return t.parent() != 0;
   }
@@ -541,8 +554,6 @@ public final class Util {
   public static boolean hasBudget(int accountNumber) {
     return hasBudget(accountMustExist(accountNumber));
   }
-
-  private static ChangeManager sChangeManager;
 
   public static final int CHARS_ACCOUNT_NAME = 20;
   public static final int CHARS_DATE = 10;

@@ -234,11 +234,8 @@ public class Storage extends BaseObject {
   // Methods that modify the database
   // ------------------------------------------------------------------
 
-  public void addAccount(Account account) {
+  public void addOrReplaceAccount(Account account) {
     account = account.build();
-    var existing = account(account.number());
-    if (existing != null)
-      badState("account already exists!", INDENT, existing);
     accounts().put(account.number(), account);
     setModified();
   }

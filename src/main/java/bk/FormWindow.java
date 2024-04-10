@@ -10,7 +10,6 @@ public class FormWindow extends JContainer {
 
   public FormWindow() {
     todo("incorporate this into WinMgr");
-    loadUtil();
     setBorder(BORDER_ROUNDED);
   }
 
