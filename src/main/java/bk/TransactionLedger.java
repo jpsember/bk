@@ -14,7 +14,6 @@ import bk.gen.Transaction;
 public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
   public TransactionLedger(int accountNumberOrZero, TransactionListener listener) {
-    todo("for 'all' transactions, indicate this in the header somehow");
     changeManager().addListener(this);
     addColumns();
     mListener = listener;
@@ -34,7 +33,9 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     var r = Render.SHARED_INSTANCE;
     var clip = r.clipBounds();
     var a = mAccount;
-    if (a != null) {
+    if (a == null) {
+      plotString("All Transactions", clip.x, y, Alignment.CENTER, clip.width);
+    } else {
       var s = a.number() + " " + a.name();
       plotString(s, clip.x, y, Alignment.LEFT, CHARS_ACCOUNT_NUMBER_AND_NAME);
       if (hasBudget()) {
