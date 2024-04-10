@@ -527,7 +527,7 @@ public final class Util {
 
   public static final int CHARS_ACCOUNT_NAME = 20;
   public static final int CHARS_DATE = 10;
-  public static final int CHARS_CURRENCY = 12;
+  public static final int CHARS_CURRENCY = 16;
   public static final int CHARS_TRANSACTION_DESCRIPTION = 30;
   public static final int CHARS_ACCOUNT_NUMBER_AND_NAME = 20;
 

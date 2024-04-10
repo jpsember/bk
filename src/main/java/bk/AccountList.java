@@ -32,7 +32,7 @@ public class AccountList extends LedgerWindow implements ChangeListener {
       addColumn(
           Column.newBuilder().name("Name").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NAME).growPct(100));
     }
-    addColumn(Column.newBuilder().name("Balance").alignment(Alignment.RIGHT).datatype(Datatype.CURRENCY));
+    addColumn(Column.newBuilder().name("Balance").alignment(Alignment.RIGHT).width(CHARS_CURRENCY).datatype(Datatype.CURRENCY));
   }
 
   public void rebuild() {
