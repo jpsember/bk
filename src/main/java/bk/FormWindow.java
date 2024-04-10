@@ -9,7 +9,7 @@ import static js.base.Tools.*;
 public class FormWindow extends JContainer {
 
   public FormWindow() {
-    todo("incorporate this into WinMgr");
+    todo("?incorporate this into WinMgr");
     setBorder(BORDER_ROUNDED);
   }
 
