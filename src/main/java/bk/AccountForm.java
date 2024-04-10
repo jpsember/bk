@@ -27,6 +27,7 @@ public class AccountForm extends FormWindow {
     mNumber = validator(ACCOUNT_VALIDATOR).value(account.number()).addField("#");
     mName = validator(ACCOUNT_NAME_VALIDATOR).value(account.name()).fieldWidth(ACCOUNT_NAME_MAX_LENGTH)
         .addField("Name");
+    mBudget = validator(CURRENCY_VALIDATOR).value(account.budget()).addField("Budget");
     addVertSpace(1);
     addButton("Ok", () -> okHandler());
     addButton("Cancel", () -> cancelHandler());
@@ -37,9 +38,10 @@ public class AccountForm extends FormWindow {
   private void okHandler() {
     String problem = "One or more fields is invalid.";
     var ac = Account.newBuilder();
-    if (mNumber.valid() && mName.valid()) {
+    if (mNumber.valid() && mName.valid() && mBudget.valid()) {
       ac.number(mNumber.validResult());
       ac.name(mName.validResult());
+      ac.budget(mBudget.validResult());
       problem = validateAccount(ac);
     }
 
@@ -77,7 +79,7 @@ public class AccountForm extends FormWindow {
       // modify original account to include the edits
       var orig = mOriginalAccount;
       var mod = orig.build().toBuilder();
-      mod.number(ac.number()).name(ac.name());
+      mod.number(ac.number()).name(ac.name()).budget(ac.budget());
       // delete the original account
       storage().deleteAccount(orig.number());
       changeManager().registerModifiedAccount(orig);
@@ -93,7 +95,7 @@ public class AccountForm extends FormWindow {
   }
 
   private int mType;
-  private WidgetWindow mNumber, mName;
+  private WidgetWindow mNumber, mName, mBudget;
   private Account mOriginalAccount;
   private Listener mListener;
 

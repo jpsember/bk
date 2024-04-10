@@ -50,7 +50,6 @@ public class LedgerWindow extends JWindow implements FocusHandler {
   }
 
   public void plotHeader(int y, int headerHeight) {
-    pr("plotHeader, height:", headerHeight, mHeaderHeight, "y:", y);
     if (headerHeight >= 2) {
       plotColumnLabels(y + headerHeight - 2);
       plotHorzLine(y + headerHeight - 1);
