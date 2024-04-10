@@ -44,7 +44,7 @@ public class Storage extends BaseObject {
     }
 
     File tmp = new File(Files.parent(f), "_temporary_.json");
-    Files.S.write(tmp, mDatabase);
+    Files.S.writeWithPrettyIf(tmp, mDatabase, alert("!writing pretty"));
     Files.S.deleteFile(f);
     Files.S.moveFile(tmp, f);
 
@@ -151,15 +151,42 @@ public class Storage extends BaseObject {
           problem = "invalid date";
           break;
         }
+
+        if (t.parent() != 0 && transaction(t.parent()) == null) {
+          problem = "child has no parent";
+          break;
+        }
+
+        for (var childId : t.children()) {
+          if (transaction(childId) == null) {
+            pr("*** Child can't be found; removing all children:", INDENT, t);
+            t = t.toBuilder().children(null).build();
+            transactions().put(id(t), t);
+          }
+        }
       } while (false);
       if (problem != null) {
-        pr("*** Problem with transaction, moved to damaged section:", INDENT, t);
+        pr("*** Problem with transaction:", problem, "; moved to damaged section:", INDENT, t);
         moveList.add(t);
       }
     }
     for (var t : moveList) {
       mDatabase.damagedTransactions().put(id(t), t);
       mDatabase.transactions().remove(id(t));
+
+      // If there's a parent, remove its reference to this child
+      if (t.parent() != 0) {
+        var p = transactions().get(t.parent());
+        if (p != null) {
+          p = removeChild(p, id(t));
+          transactions().put(id(p), p);
+        }
+      } else {
+        // Remove any children
+        for (var id : t.children()) {
+          transactions().remove(id);
+        }
+      }
       setModified();
     }
     flush();
@@ -171,8 +198,10 @@ public class Storage extends BaseObject {
 
   public Account accountWhichShouldExist(int accountNumber) {
     var x = account(accountNumber);
-    if (x == null)
+    if (x == null) {
       alert("<2account was supposed to exist! Number:", accountNumber);
+      die("temporary");
+    }
     return x;
   }
 
@@ -182,8 +211,10 @@ public class Storage extends BaseObject {
 
   public Transaction transactionWhichShouldExist(long timestamp) {
     var x = transaction(timestamp);
-    if (x == null)
+    if (x == null) {
       alert("<2transaction was supposed to exist! Timestamp:", timestamp);
+      die("temporary");
+    }
     return x;
   }
 

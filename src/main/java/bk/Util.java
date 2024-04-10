@@ -19,6 +19,7 @@ import bk.gen.Account;
 import bk.gen.Transaction;
 import js.base.DateTimeTools;
 import js.data.DataUtil;
+import js.data.LongArray;
 import js.geometry.MyMath;
 import js.json.JSMap;
 
@@ -401,7 +402,6 @@ public final class Util {
   }
 
   public static String validateTransaction(Transaction t) {
-    todo("ensure accounts exist");
     if (t.debit() == t.credit())
       return "The account numbers cannot be the same!";
     for (int pass = 0; pass < 2; pass++) {
@@ -553,6 +553,35 @@ public final class Util {
 
   public static boolean hasBudget(int accountNumber) {
     return hasBudget(accountMustExist(accountNumber));
+  }
+
+  public static int indexOfChild(Transaction t, long childId) {
+    var a = LongArray.with(t.children());
+    return a.indexOf(childId);
+  }
+
+  public static boolean hasChild(Transaction t, long childId) {
+    return indexOfChild(t, childId) >= 0;
+  }
+
+  public static Transaction removeChild(Transaction t, long childId) {
+    var a = LongArray.with(t.children());
+    var i = a.indexOf(childId);
+    if (i < 0)
+      return t;
+    a = a.toBuilder().remove(i);
+    t = t.toBuilder().children(a.array()).build();
+    return t;
+  }
+
+  public static Transaction addChild(Transaction t, long childId) {
+    var a = LongArray.with(t.children());
+    int i = a.indexOf(childId);
+    if (i >= 0)
+      badState("transaction already has child", childId, ":", INDENT, t);
+    a = a.toBuilder().add(childId);
+    t = t.toBuilder().children(a.array()).build();
+    return t;
   }
 
   public static final int CHARS_ACCOUNT_NAME = 20;
