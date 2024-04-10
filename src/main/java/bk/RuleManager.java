@@ -20,7 +20,7 @@ public class RuleManager extends BaseObject {
 
   private RuleManager() {
     todo("!don't allow editing of generated transactions");
-   // alertVerbose();
+    // alertVerbose();
   }
 
   public void deleteAllGeneratedTransactions() {
@@ -92,7 +92,7 @@ public class RuleManager extends BaseObject {
       if (intWithinArray(rule.accounts(), mParent.debit())) {
         mTriggerAccountNumber = mParent.debit();
       } else if (intWithinArray(rule.accounts(), mParent.credit())) {
-        mTriggerAccountNumber = mParent.debit();
+        mTriggerAccountNumber = mParent.credit();
       } else
         continue;
       applyRule(rule);
@@ -133,6 +133,7 @@ public class RuleManager extends BaseObject {
     } else
       throw badState("expected transaction to reference trigger acct #:", mTriggerAccountNumber, parent);
 
+    checkState(cr != dr, "account numbers are the same:", cr);
     todo("!why are generated transactions appearing before their parents in the account ledger?");
 
     // If there is already a generated transaction in the child list matching this one, do nothing

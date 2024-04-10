@@ -128,8 +128,11 @@ public class Storage extends BaseObject {
 
   public void scanForProblems() {
 
-    List<Transaction> moveList = arrayList();
-    for (var t : transactions().values()) {
+    // Make a copy of the transactions so we can modify the original map
+    List<Transaction> copyOfTrans = arrayList();
+    copyOfTrans.addAll(transactions().values());
+
+    for (var t : copyOfTrans) {
       String problem = null;
       outer: do {
         for (int i = 0; i < 2; i++) {
@@ -166,30 +169,34 @@ public class Storage extends BaseObject {
         }
       } while (false);
       if (problem != null) {
-        pr("*** Problem with transaction:", problem, "; moved to damaged section:", INDENT, t);
-        moveList.add(t);
+        pr("*** Problem with transaction:", problem, "; deleting", INDENT, t);
+        deleteDamaged(t);
       }
     }
-    for (var t : moveList) {
-      mDatabase.damagedTransactions().put(id(t), t);
-      mDatabase.transactions().remove(id(t));
 
-      // If there's a parent, remove its reference to this child
-      if (t.parent() != 0) {
-        var p = transactions().get(t.parent());
-        if (p != null) {
-          p = removeChild(p, id(t));
-          transactions().put(id(p), p);
-        }
-      } else {
-        // Remove any children
-        for (var id : t.children()) {
-          transactions().remove(id);
-        }
-      }
-      setModified();
-    }
     flush();
+  }
+
+  private void deleteDamaged(Transaction t) {
+
+    setModified();
+
+    mDatabase.transactions().remove(id(t));
+
+    // If there's a parent, remove its reference to this child
+    if (t.parent() != 0) {
+      var p = transactions().get(t.parent());
+      if (p != null) {
+        p = removeChild(p, id(t));
+        transactions().put(id(p), p);
+      }
+    } else {
+      // Remove any children
+      for (var id : t.children()) {
+        transactions().remove(id);
+      }
+    }
+
   }
 
   public Account account(int accountNumber) {
