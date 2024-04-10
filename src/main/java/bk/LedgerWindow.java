@@ -29,6 +29,23 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     return "LedgerWindow";
   }
 
+  private void plotColumnLabels(int y) {
+    var r = Render.SHARED_INSTANCE;
+    int i = INIT_INDEX;
+    int x = r.clipBounds().x;
+    for (var col : mColumns) {
+      i++;
+      var cw = mColumnWidths[i];
+      plotString(col.name(), x, y, col.alignment(), cw);
+      x += cw;
+    }
+  }
+
+  private void plotHorzLine(int y) {
+    var r = Render.SHARED_INSTANCE;
+    r.clearRow(y, Symbols.SINGLE_LINE_HORIZONTAL);
+  }
+
   @Override
   public void paint() {
     prepareToRender();
@@ -43,37 +60,10 @@ public class LedgerWindow extends JWindow implements FocusHandler {
 
     calculateColumnWidths(clip.width);
 
-    
     // Plot the header
     {
-
-      // Render the fields
-      // Render the headings
-      int y = headerScreenY;
-      int i = INIT_INDEX;
-      int x = clip.x;
-      for (var col : mColumns) {
-        i++;
-        var cw = mColumnWidths[i];
-        plotString(col.name(), x, y, col.alignment(), cw);
-        x += cw;
-      }
-      //
-      //      int x = clip.x;
-      //      mCurrentColumn = INIT_INDEX;
-      //      for (var col : mColumns) {
-      //        mCurrentColumn++;
-      //        var data = ent.fields.get(mCurrentColumn);
-      //        var text = data.toString();
-      //        var cw = mColumnWidths[mCurrentColumn];
-      //        //          pr("rowScreenY:",rowScreenY,"rowNum:",rowNum,"clip:",r.clipBounds());
-      //        //          halt();
-      //        plotString(text, x, rowScreenY, col.alignment(), cw);
-      //        x += cw;
-      //      }
-
-      for (int rn = 1; rn < headerRowTotal; rn++)
-        r.drawString(clip.x, headerScreenY + rn, 20, "Header row " + rn);
+      plotColumnLabels(headerScreenY);
+      plotHorzLine(headerScreenY + 1);
     }
     // Determine the starting offset, to keep the cursor row near the center of the window
     int firstLedgerRowNum = Math.max(0, (mCursorRow - bodyRowTotal / 2));
@@ -91,50 +81,18 @@ public class LedgerWindow extends JWindow implements FocusHandler {
       if (rowNum < 0 || rowNum >= mEntries.size())
         continue;
 
-      do {
-        //        if (rowNum < 0) {
-        //          if (mHeaderType == HEADER_NONE)
-        //            break;
-        //
-        //          var j = -rowNum;
-        //          if (mHeaderType == HEADER_COLUMN_NAMES)
-        //            j++;
-        //
-        //          if (j == 2) {
-        //            // Render the headings
-        //            mCurrentColumn = INIT_INDEX;
-        //            for (var col : mColumns) {
-        //              mCurrentColumn++;
-        //              var cw = mColumnWidths[mCurrentColumn];
-        //              plotString(col.name(), x, windowRowNum, col.alignment(), cw);
-        //              x += cw;
-        //            }
-        //          } else if (j == 1) {
-        //            // Render dashes
-        //            r.clearRow(b.y + windowRowNum, Symbols.SINGLE_LINE_HORIZONTAL);
-        //          }
-        //          break;
-        //        }
-
-        //        int entNum = rowNum;
-        //        if (entNum >= mEntries.size())
-        //          break;
-
-        var ent = mEntries.get(rowNum);
-        // Render the fields
-        int x = clip.x;
-        mCurrentColumn = INIT_INDEX;
-        for (var col : mColumns) {
-          mCurrentColumn++;
-          var data = ent.fields.get(mCurrentColumn);
-          var text = data.toString();
-          var cw = mColumnWidths[mCurrentColumn];
-          //          pr("rowScreenY:",rowScreenY,"rowNum:",rowNum,"clip:",r.clipBounds());
-          //          halt();
-          plotString(text, x, rowScreenY, col.alignment(), cw);
-          x += cw;
-        }
-      } while (false);
+      // Render the fields
+      var ent = mEntries.get(rowNum);
+      int x = clip.x;
+      mCurrentColumn = INIT_INDEX;
+      for (var col : mColumns) {
+        mCurrentColumn++;
+        var data = ent.fields.get(mCurrentColumn);
+        var text = data.toString();
+        var cw = mColumnWidths[mCurrentColumn];
+        plotString(text, x, rowScreenY, col.alignment(), cw);
+        x += cw;
+      }
       r.pop();
     }
   }
