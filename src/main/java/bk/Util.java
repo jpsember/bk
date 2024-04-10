@@ -209,9 +209,7 @@ public final class Util {
 
   private static final long MAX_CURRENCY = 100_000_000_00L;
 
-  public static String formatCurrency(long cents) {
-    if (cents == 0)
-      return "";
+  public static String formatCurrencyEvenZero(long cents) {
     var absCents = Math.abs(cents);
     checkArgument(absCents < MAX_CURRENCY, "currency value out of range:", cents);
     var s = Long.toString(absCents);
@@ -235,6 +233,12 @@ public final class Util {
       sb.append(')');
     }
     return sb.toString();
+  }
+
+  public static String formatCurrency(long cents) {
+    if (cents == 0)
+      return "";
+    return formatCurrencyEvenZero(cents);
   }
 
   public static long generateDate() {

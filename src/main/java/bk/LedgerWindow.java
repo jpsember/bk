@@ -15,7 +15,6 @@ import bk.gen.Column;
 import bk.gen.Datatype;
 import js.base.DateTimeTools;
 import js.base.Pair;
-import js.geometry.IRect;
 import js.geometry.MyMath;
 
 public class LedgerWindow extends JWindow implements FocusHandler {
@@ -24,12 +23,16 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     setBorder(BORDER_THICK);
   }
 
+  public void setHeaderHeight(int height) {
+    mHeaderHeight = height;
+  }
+
   @Override
   protected String supplyName() {
     return "LedgerWindow";
   }
 
-  private void plotColumnLabels(int y) {
+  public void plotColumnLabels(int y) {
     var r = Render.SHARED_INSTANCE;
     int i = INIT_INDEX;
     int x = r.clipBounds().x;
@@ -41,9 +44,17 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     }
   }
 
-  private void plotHorzLine(int y) {
+  public void plotHorzLine(int y) {
     var r = Render.SHARED_INSTANCE;
     r.clearRow(y, Symbols.SINGLE_LINE_HORIZONTAL);
+  }
+
+  public void plotHeader(int y, int headerHeight) {
+    pr("plotHeader, height:", headerHeight, mHeaderHeight, "y:", y);
+    if (headerHeight >= 2) {
+      plotColumnLabels(y + headerHeight - 2);
+      plotHorzLine(y + headerHeight - 1);
+    }
   }
 
   @Override
@@ -52,7 +63,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     var r = Render.SHARED_INSTANCE;
     var clip = r.clipBounds();
 
-    int headerRowTotal = 2;
+    int headerRowTotal = mHeaderHeight;
     int headerScreenY = clip.y;
     int bodyRowTotal = clip.height - headerRowTotal;
     int bodyScreenY = headerScreenY + headerRowTotal;
@@ -60,11 +71,8 @@ public class LedgerWindow extends JWindow implements FocusHandler {
 
     calculateColumnWidths(clip.width);
 
-    // Plot the header
-    {
-      plotColumnLabels(headerScreenY);
-      plotHorzLine(headerScreenY + 1);
-    }
+    plotHeader(headerScreenY, mHeaderHeight);
+
     // Determine the starting offset, to keep the cursor row near the center of the window
     int firstLedgerRowNum = Math.max(0, (mCursorRow - bodyRowTotal / 2));
 
@@ -78,20 +86,20 @@ public class LedgerWindow extends JWindow implements FocusHandler {
       if (hl)
         r.clearRow(rowScreenY, ' ');
 
-      if (rowNum < 0 || rowNum >= mEntries.size())
-        continue;
+      if (!(rowNum < 0 || rowNum >= mEntries.size())) {
 
-      // Render the fields
-      var ent = mEntries.get(rowNum);
-      int x = clip.x;
-      mCurrentColumn = INIT_INDEX;
-      for (var col : mColumns) {
-        mCurrentColumn++;
-        var data = ent.fields.get(mCurrentColumn);
-        var text = data.toString();
-        var cw = mColumnWidths[mCurrentColumn];
-        plotString(text, x, rowScreenY, col.alignment(), cw);
-        x += cw;
+        // Render the fields
+        var ent = mEntries.get(rowNum);
+        int x = clip.x;
+        mCurrentColumn = INIT_INDEX;
+        for (var col : mColumns) {
+          mCurrentColumn++;
+          var data = ent.fields.get(mCurrentColumn);
+          var text = data.toString();
+          var cw = mColumnWidths[mCurrentColumn];
+          plotString(text, x, rowScreenY, col.alignment(), cw);
+          x += cw;
+        }
       }
       r.pop();
     }
@@ -196,7 +204,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     }
   }
 
-  private void plotString(String text, int x, int y, Alignment alignment, int width) {
+  protected void plotString(String text, int x, int y, Alignment alignment, int width) {
     if (width < 0)
       width = text.length();
     var r = Render.SHARED_INSTANCE;
@@ -291,14 +299,11 @@ public class LedgerWindow extends JWindow implements FocusHandler {
   public LedgerWindow closeEntry(Object auxData) {
     checkState(mLedgerFieldList != null);
     var fields = mLedgerFieldList;
-    //   addEntry(v, t);
-    //  public void addEntry(List<LedgerField> fields, Object auxData) {
     checkArgument(fields.size() == mColumns.size(), "expected", mColumns.size(), "entries, got",
         fields.size());
     var ent = new Entry();
     ent.auxData = auxData;
     ent.fields = new ArrayList<>(fields);
-    //pr("added entry #",mEntries.size(),"fields:",ent.fields);
     mEntries.add(ent);
     mLedgerFieldList = null;
     mTriggerStringMap = null;
@@ -491,5 +496,5 @@ public class LedgerWindow extends JWindow implements FocusHandler {
   private StringBuilder mHintBuffer = new StringBuilder();
   private Map<String, Pair<Integer, Integer>> mTriggerStringMap;
   private long mLastHintKeyTime;
-
+  private int mHeaderHeight = 2;
 }

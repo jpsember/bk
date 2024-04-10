@@ -13,12 +13,6 @@ import bk.gen.Transaction;
 
 public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
-  public interface Filter {
-    boolean accept(Transaction t);
-  }
-
-  public static final Filter ACCEPT_ALL = (t) -> true;
-
   public TransactionLedger(int accountNumberOrZero, TransactionListener listener) {
     changeManager().addListener(this);
     addColumns();
@@ -26,7 +20,43 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     mAccountNumber = accountNumberOrZero;
     if (accountNumberOrZero != 0)
       mAccount = account(accountNumberOrZero);
+    setHeaderHeight(hasBudget() ? 5 : 4);
     rebuild();
+  }
+
+  private boolean hasBudget() {
+    return mAccount != null && (mAccount.budget() != 0 || alert("always true"));
+  }
+
+  @Override
+  public void plotHeader(int y, int headerHeight) {
+    var r = Render.SHARED_INSTANCE;
+    var clip = r.clipBounds();
+    var a = mAccount;
+    if (a != null) {
+      var s = a.number() + " " + a.name();
+      plotString(s, clip.x, y, Alignment.LEFT, CHARS_ACCOUNT_NUMBER_AND_NAME);
+      if (hasBudget()) {
+        plotLabelledAmount("Budget", a.budget(), 1, y);
+        plotLabelledAmount("Spent", a.balance(), 0, y + 1);
+        plotLabelledAmount("Avail", a.budget() - a.balance(), 1, y + 1);
+      } else {
+        plotLabelledAmount("Balance", a.balance(), 1, y);
+      }
+    }
+    super.plotHeader(y, headerHeight);
+  }
+
+  private void plotLabelledAmount(String label, long amount, int slot, int y) {
+    var s = leftPad(label + ": ", 9) + leftPad(formatCurrencyEvenZero(amount), CHARS_CURRENCY);
+    var r = Render.SHARED_INSTANCE;
+    var clip = r.clipBounds();
+    var CHARS_SLOT = 34;
+    plotString(s, clip.endX() - (CHARS_SLOT * (2 - slot)), y, Alignment.RIGHT, CHARS_SLOT);
+  }
+
+  private String leftPad(String str, int minLength) {
+    return spaces(minLength - str.length()) + str;
   }
 
   private void addColumns() {
