@@ -88,7 +88,7 @@ public class Storage extends BaseObject {
     return out;
   }
 
-  public void verifyAccountBalances() {
+  private void verifyAccountBalances() {
     Map<Integer, Account.Builder> map = hashMap();
     for (var a : accounts().values()) {
       map.put(a.number(), a.toBuilder().balance(0));
@@ -126,7 +126,7 @@ public class Storage extends BaseObject {
     flush();
   }
 
-  public void scanForProblems() {
+  private void scanForProblems() {
 
     // Make a copy of the transactions so we can modify the original map
     List<Transaction> copyOfTrans = arrayList();
@@ -203,26 +203,8 @@ public class Storage extends BaseObject {
     return mDatabase.accounts().get(accountNumber);
   }
 
-  public Account accountWhichShouldExist(int accountNumber) {
-    var x = account(accountNumber);
-    if (x == null) {
-      alert("<2account was supposed to exist! Number:", accountNumber);
-      die("temporary");
-    }
-    return x;
-  }
-
   public Transaction transaction(long timestamp) {
     return mDatabase.transactions().get(timestamp);
-  }
-
-  public Transaction transactionWhichShouldExist(long timestamp) {
-    var x = transaction(timestamp);
-    if (x == null) {
-      alert("<2transaction was supposed to exist! Timestamp:", timestamp);
-      die("temporary");
-    }
-    return x;
   }
 
   public String accountName(int accountNumber) {
@@ -272,13 +254,13 @@ public class Storage extends BaseObject {
   // Methods that modify the database
   // ------------------------------------------------------------------
 
-  public void addOrReplaceAccount(Account account) {
+  public void addOrReplace(Account account) {
     account = account.build();
     accounts().put(account.number(), account);
     setModified();
   }
 
-  public static Account mustExist(Account account) {
+  private static Account mustExist(Account account) {
     if (account == null)
       badState("account is null!");
     return account;
@@ -354,7 +336,7 @@ public class Storage extends BaseObject {
       return DataUtil.emptyList();
     List<Transaction> trs = arrayList();
     for (var timestamp : parent.children()) {
-      var tr = storage().transactionWhichShouldExist(timestamp);
+      var tr = storage().transaction(timestamp);
       if (tr == null)
         continue;
       trs.add(tr);

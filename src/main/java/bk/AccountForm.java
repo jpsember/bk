@@ -75,7 +75,7 @@ public class AccountForm extends FormWindow {
 
     if (mType == TYPE_ADD) {
       editedAccount = ac;
-      storage().addOrReplaceAccount(ac);
+      storage().addOrReplace(ac);
       changeManager().registerModifiedAccount(ac);
     } else {
       // modify a copy of the original account to include the edits
@@ -108,7 +108,7 @@ public class AccountForm extends FormWindow {
 
       changeManager().registerModifiedAccount(orig);
       editedAccount = mod.build();
-      storage().addOrReplaceAccount(editedAccount);
+      storage().addOrReplace(editedAccount);
       changeManager().registerModifiedAccount(editedAccount);
     }
     mListener.editedAccount(this, editedAccount);
