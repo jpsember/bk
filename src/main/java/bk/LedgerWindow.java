@@ -175,6 +175,14 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     default:
       if (processHelper(k))
         resetHint = false;
+      else {
+        if (k.is(KeyEvent.UNDO)) {
+          var u = UndoManager.SHARED_INSTANCE;
+          if (u.performUndo()) {
+            todo("how do we refresh windows, return to appropriate location?");
+          }
+        }
+      }
       break;
     }
 

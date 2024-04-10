@@ -162,7 +162,7 @@ public class RuleManager extends BaseObject {
    */
   private Transaction findChildTransaction(int dr, int cr, long amount) {
     var parent = mParent;
-    var lst = storage().getChildTransactions(parent);
+    var lst = getChildTransactions(parent);
     for (var t : lst) {
       if (t.debit() == dr && t.credit() == cr && t.amount() == amount) {
         return t;

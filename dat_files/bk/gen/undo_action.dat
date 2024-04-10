@@ -1,0 +1,5 @@
+fields {
+  string description;
+  *UndoEntry entries;
+}
+

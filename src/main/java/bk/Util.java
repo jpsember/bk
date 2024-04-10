@@ -505,17 +505,16 @@ public final class Util {
     if (optAccountNumber == 0)
       return "";
     var ac = account(optAccountNumber);
-    var effName = "???";
-    var effNumber = optAccountNumber;
     if (ac == null) {
       if (emptyIfNotExist)
         return "";
-    } else {
-      effName = ac.name();
-      effNumber = ac.number();
+      return optAccountNumber + " ???";
     }
+    return accountNumberWithNameString(ac);
+  }
 
-    return effNumber + " " + effName;
+  public static String accountNumberWithNameString(Account ac) {
+    return ac.number() + " " + ac.name();
   }
 
   private static ChangeManager sChangeManager;
@@ -569,6 +568,19 @@ public final class Util {
     a = a.toBuilder().add(childId);
     t = t.toBuilder().children(a.array()).build();
     return t;
+  }
+
+  public static List<Transaction> getChildTransactions(Transaction parent) {
+    if (parent.children().length == 0)
+      return DataUtil.emptyList();
+    List<Transaction> trs = arrayList();
+    for (var timestamp : parent.children()) {
+      var tr = storage().transaction(timestamp);
+      if (tr == null)
+        continue;
+      trs.add(tr);
+    }
+    return trs;
   }
 
   public static final int CHARS_ACCOUNT_NAME = 20;

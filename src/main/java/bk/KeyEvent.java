@@ -13,7 +13,8 @@ import static js.base.Tools.*;
 public class KeyEvent {
 
   public static final String //
-  ENTER = ":Enter" //
+  UNDO = "C:u" // 
+  ,ENTER = ":Enter" //
       , ESCAPE = ":Escape" //
       , DELETE_TRANSACTION = "C:d" //
       , CONTROL_ENTER = "C:Enter" //

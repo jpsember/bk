@@ -12,7 +12,6 @@ import bk.gen.Account;
 import bk.gen.Database;
 import bk.gen.Transaction;
 import js.base.BaseObject;
-import js.data.DataUtil;
 import js.file.BackupManager;
 import js.file.Files;
 import js.json.JSMap;
@@ -30,7 +29,7 @@ public class Storage extends BaseObject {
     verifyAccountBalances();
   }
 
-  public void setModified() {
+  private void setModified() {
     mModified = true;
   }
 
@@ -226,16 +225,6 @@ public class Storage extends BaseObject {
 
   private long mUniqueTimestamp;
 
-  private void adjustBalance(int accountNumber, long currencyAmount) {
-    var a = account(accountNumber);
-    if (a == null) {
-      alert("adjustBalance, no such account number:", accountNumber);
-      return;
-    }
-    a = a.toBuilder().balance(a.balance() + currencyAmount).build();
-    accounts().put(a.number(), a);
-    setModified();
-  }
 
   private BackupManager bkup() {
     if (mBackups == null) {
@@ -255,26 +244,30 @@ public class Storage extends BaseObject {
   // ------------------------------------------------------------------
 
   public void addOrReplace(Account account) {
+    var u = UndoManager.SHARED_INSTANCE;
     account = account.build();
+    var existing = accounts().get(account.number());
+    if (existing != null)
+      u.deleteAccount(existing);
+    u.addAccount(account);
     accounts().put(account.number(), account);
     setModified();
   }
 
-  private static Account mustExist(Account account) {
-    if (account == null)
-      badState("account is null!");
-    return account;
-  }
-
   public void deleteAccount(int number) {
-    mustExist(account(number));
+    var acc = account(number);
+    checkNotNull(acc);
+
+    var u = UndoManager.SHARED_INSTANCE;
 
     // Delete all transactions
     todo("we probably want a single 'undo' action, not one for each transaction deletion");
     var tr = readTransactionsForAccount(number);
-    for (var t : tr)
+    for (var t : tr) {
+      u.deleteTransaction(t);
       deleteTransaction(t);
-
+    }
+    u.deleteAccount(acc);
     accounts().remove(number);
     setModified();
   }
@@ -285,6 +278,7 @@ public class Storage extends BaseObject {
    * Return the possibly modified transaction.
    */
   public Transaction addOrReplace(Transaction t) {
+    var u = UndoManager.SHARED_INSTANCE;
     checkState(t.children().length == 0,
         "attempt to add/replace transaction with one that already has children");
     t = t.build();
@@ -295,6 +289,7 @@ public class Storage extends BaseObject {
         || existing.amount() != t.amount();
 
     if (existing != null) {
+      u.deleteTransaction(existing);
       if (updtBal)
         applyTransactionToAccountBalances(existing, true);
       // Delete any child transactions
@@ -302,6 +297,8 @@ public class Storage extends BaseObject {
         deleteTransaction(childId);
       }
     }
+
+    u.addTransaction(t);
 
     transactions().put(t.timestamp(), t);
     applyTransactionToAccountBalances(t, false);
@@ -313,35 +310,31 @@ public class Storage extends BaseObject {
     return t;
   }
 
-  void replaceTransactionWithoutUpdatingAccountBalances(Transaction t) {
+  public void replaceTransactionWithoutUpdatingAccountBalances(Transaction t) {
+    var u = UndoManager.SHARED_INSTANCE;
     t = t.build();
+    var existing = transaction(t.timestamp());
+    if (existing != null) {
+      u.deleteTransaction(existing);
+    }
+    u.addTransaction(t);
     transactions().put(t.timestamp(), t);
     setModified();
   }
 
   public void deleteTransaction(Transaction t) {
     checkNotNull(t);
+    var u = UndoManager.SHARED_INSTANCE;
     if (!isGenerated(t)) {
-      for (var child : getChildTransactions(t))
+      for (var child : getChildTransactions(t)) {
         deleteTransaction(child);
+      }
     }
     var t2 = transactions().remove(t.timestamp());
     checkState(t2 != null, "transaction wasn't in map");
+    u.deleteTransaction(t2);
     applyTransactionToAccountBalances(t2, true);
     setModified();
-  }
-
-  public List<Transaction> getChildTransactions(Transaction parent) {
-    if (parent.children().length == 0)
-      return DataUtil.emptyList();
-    List<Transaction> trs = arrayList();
-    for (var timestamp : parent.children()) {
-      var tr = storage().transaction(timestamp);
-      if (tr == null)
-        continue;
-      trs.add(tr);
-    }
-    return trs;
   }
 
   public void deleteTransaction(long timestamp) {
@@ -356,6 +349,18 @@ public class Storage extends BaseObject {
       amt = -amt;
     adjustBalance(t.debit(), amt);
     adjustBalance(t.credit(), -amt);
+  }
+
+  private void adjustBalance(int accountNumber, long currencyAmount) {
+    var u = UndoManager.SHARED_INSTANCE;
+    var a = account(accountNumber);
+    checkNotNull(a, "adjustBalance, no such account:", accountNumber);
+    u.deleteAccount(a);
+
+    a = a.toBuilder().balance(a.balance() + currencyAmount).build();
+    accounts().put(a.number(), a);
+    u.addAccount(a);
+    setModified();
   }
 
 }

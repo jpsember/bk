@@ -75,7 +75,10 @@ public class AccountForm extends FormWindow {
 
     if (mType == TYPE_ADD) {
       editedAccount = ac;
+      var u = UndoManager.SHARED_INSTANCE;
+      u.begin("Add Account" , accountNumberWithNameString(ac ));
       storage().addOrReplace(ac);
+      u.end();
       changeManager().registerModifiedAccount(ac);
     } else {
       // modify a copy of the original account to include the edits
