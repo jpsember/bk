@@ -14,6 +14,7 @@ import bk.gen.Transaction;
 public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
   public TransactionLedger(int accountNumberOrZero, TransactionListener listener) {
+    todo("for 'all' transactions, indicate this in the header somehow");
     changeManager().addListener(this);
     addColumns();
     mListener = listener;

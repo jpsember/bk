@@ -65,7 +65,7 @@ public class BkOper extends AppOper
 
     try {
       mgr.open();
-      mAccounts = new AccountList(this);
+      mAccounts = new AccountList(this, this);
       mAllTransactionsLedger = new TransactionLedger(0, this);
       sAccountsView = mAccounts;
       sTransactionsView = mAllTransactionsLedger;

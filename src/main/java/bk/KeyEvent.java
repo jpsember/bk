@@ -15,7 +15,6 @@ public class KeyEvent {
   public static final String //
   ENTER = ":Enter" //
       , ESCAPE = ":Escape" //
-      , VIEW_TRANSACTIONS = "C:t" //
       , DELETE_TRANSACTION = "C:d" //
       , CONTROL_ENTER = "C:Enter" //
       , ADD = "C:a" //

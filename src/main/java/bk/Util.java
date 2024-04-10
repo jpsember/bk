@@ -447,19 +447,6 @@ public final class Util {
 
   };
 
-  public static void switchToView(KeyEvent k) {
-    JWindow target = null;
-    switch (k.toString()) {
-    case KeyEvent.VIEW_TRANSACTIONS:
-      target = sTransactionsView;
-      break;
-    }
-    if (target == null)
-      return;
-
-    focusManager().pushReplace(target);
-  }
-
   public static boolean quitCommand(KeyEvent k) {
     alert("!can't seem to use command keys reliably, so have user ctrl-c out of program");
     return false;

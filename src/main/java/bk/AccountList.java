@@ -12,9 +12,10 @@ import bk.gen.Datatype;
 
 public class AccountList extends LedgerWindow implements ChangeListener {
 
-  public AccountList(AccountListListener listener) {
+  public AccountList(AccountListListener listener, TransactionListener transListener) {
     changeManager().addListener(this);
     mListener = listener;
+    mTransListener = transListener;
     addColumns();
     rebuild();
   }
@@ -31,7 +32,8 @@ public class AccountList extends LedgerWindow implements ChangeListener {
       addColumn(
           Column.newBuilder().name("Name").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NAME).growPct(100));
     }
-    addColumn(Column.newBuilder().name("Balance").alignment(Alignment.RIGHT).width(CHARS_CURRENCY).datatype(Datatype.CURRENCY));
+    addColumn(Column.newBuilder().name("Balance").alignment(Alignment.RIGHT).width(CHARS_CURRENCY)
+        .datatype(Datatype.CURRENCY));
   }
 
   public void rebuild() {
@@ -71,6 +73,10 @@ public class AccountList extends LedgerWindow implements ChangeListener {
       }
       break;
 
+    case "C:t":
+      focusManager().pushAppend(new TransactionLedger(0, mTransListener));
+      break;
+
     case "C:a":
       mListener.addAccount();
       rebuild();
@@ -95,5 +101,6 @@ public class AccountList extends LedgerWindow implements ChangeListener {
   }
 
   private AccountListListener mListener;
+  private TransactionListener mTransListener;
 
 }
