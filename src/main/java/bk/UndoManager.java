@@ -19,7 +19,7 @@ public class UndoManager extends BaseObject {
   public static final UndoManager SHARED_INSTANCE = new UndoManager();
 
   private UndoManager() {
-    alertVerbose();
+    //alertVerbose();
   }
 
   public void begin(Object... description) {
