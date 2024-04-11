@@ -293,15 +293,26 @@ public class FocusManager extends BaseObject {
         break;
       var u = UndoManager.SHARED_INSTANCE;
       if (isUndo) {
-        if (u.performUndo()) {
-          todo("how do we refresh windows, return to appropriate location?");
-        }
+        u.performUndo();
       } else {
-        if (u.performRedo()) {
-        }
+        u.performRedo();
       }
     } while (false);
     return handled;
+  }
+
+  /**
+   * If the current focus is 'invalid', e.g. due to an undo or redo, pop its
+   * stack
+   */
+  public void validate() {
+    var f = focus();
+    if (f == null)
+      return;
+    if (!f.focusPossible()) {
+      pop();
+      validate();
+    }
   }
 
 }

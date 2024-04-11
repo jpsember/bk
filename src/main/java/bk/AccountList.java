@@ -47,7 +47,9 @@ public class AccountList extends LedgerWindow implements ChangeListener {
   }
 
   public void rebuild() {
+    mark("attempt to restore cursor to closest account number to one just deleted or modified");
     var currentAccount = getCurrentRow();
+    pr("currentAccount:", currentAccount);
 
     clearEntries();
     List<Account> sorted = storage().readAllAccounts();
@@ -66,6 +68,7 @@ public class AccountList extends LedgerWindow implements ChangeListener {
       closeEntry(t);
     }
     setCurrentRow(currentAccount);
+    pr("...updating current row to:", currentAccount);
     repaint();
   }
 
@@ -75,6 +78,10 @@ public class AccountList extends LedgerWindow implements ChangeListener {
     Account a = getCurrentRow();
 
     switch (k.toString()) {
+
+    case ":Q":
+      winMgr().quit();
+      break;
 
     case KeyEvent.ENTER:
       if (a != null) {
@@ -94,7 +101,6 @@ public class AccountList extends LedgerWindow implements ChangeListener {
       break;
 
     case KeyEvent.DELETE_ACCOUNT:
-      mark("change the shortcut to require a shift and something else");
       if (a != null) {
         mListener.deleteAccount(a);
         rebuild();

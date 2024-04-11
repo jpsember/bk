@@ -108,6 +108,7 @@ public class UndoManager extends BaseObject {
       undo(ent);
     }
     setState(DORMANT);
+    focusManager().validate();
     return true;
   }
 
@@ -125,6 +126,7 @@ public class UndoManager extends BaseObject {
       undo(ent);
     }
     setState(DORMANT);
+    focusManager().validate();
     return true;
   }
 
@@ -137,8 +139,13 @@ public class UndoManager extends BaseObject {
     if (ent.insert() ^ redo) {
       if (ent.account() != null)
         s.deleteAccount(ent.account().number());
-      else
-        s.deleteTransaction(ent.transaction());
+      else {
+        // This transaction may no longer exist in some cases;
+        // don't attempt to delete it unless it exists
+        var exists = s.transaction(id(ent.transaction()));
+        if (exists != null)
+          s.deleteTransaction(ent.transaction());
+      }
     } else {
       if (ent.account() != null)
         s.addOrReplace(ent.account());

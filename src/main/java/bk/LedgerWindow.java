@@ -325,6 +325,7 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
   }
 
   public <T> T getCurrentRow() {
+    mark("getCurrentRow, # entries:", mEntries.size(), "cursorRow:", mCursorRow);
     if (mCursorRow >= mEntries.size())
       return null;
     var ent = mEntries.get(mCursorRow);
