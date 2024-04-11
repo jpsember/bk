@@ -30,7 +30,7 @@ public class AccountForm extends FormWindow {
     mNumber = validator(ACCOUNT_VALIDATOR).value(account.number()).addField("#");
     mName = validator(ACCOUNT_NAME_VALIDATOR).value(account.name()).fieldWidth(ACCOUNT_NAME_MAX_LENGTH)
         .addField("Name");
-    mBudget = validator(CURRENCY_VALIDATOR).value(account.budget()).addField("Budget");
+    mBudget = validator(BUDGET_VALIDATOR).value(account.budget()).addField("Budget");
     addVertSpace(1);
     addButton("Ok", () -> okHandler());
     addButton("Cancel", () -> cancelHandler());
@@ -74,14 +74,14 @@ public class AccountForm extends FormWindow {
     Account editedAccount = null;
 
     var u = UndoManager.SHARED_INSTANCE;
-     if (mType == TYPE_ADD) {
+    if (mType == TYPE_ADD) {
       editedAccount = ac;
-      u.begin("Add Account" , accountNumberWithNameString(ac ));
+      u.begin("Add Account", accountNumberWithNameString(ac));
       storage().addOrReplace(ac);
       u.end();
       changeManager().registerModifiedAccount(ac);
     } else {
-      u.begin("Modify Account" , accountNumberWithNameString(ac ));
+      u.begin("Modify Account", accountNumberWithNameString(ac));
       // modify a copy of the original account to include the edits
       var orig = mOriginalAccount;
       var mod = orig.build().toBuilder();

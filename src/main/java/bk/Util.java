@@ -209,7 +209,7 @@ public final class Util {
     sYearsToday = s.substring(0, 4);
   }
 
-  private static final long MAX_CURRENCY = 100_000_000_00L;
+  public static final long MAX_CURRENCY = 100_000_000_00L;
 
   public static String formatCurrencyEvenZero(long cents) {
     var absCents = Math.abs(cents);
@@ -287,59 +287,8 @@ public final class Util {
     }
   };
 
-  public static final Validator CURRENCY_VALIDATOR = new Validator() {
-    @Override
-    public String encode(Object value) {
-      var out = "";
-      if (value != null) {
-        var i = (Long) value;
-        out = formatCurrency(i);
-      }
-      return out;
-    }
-
-    public ValidationResult validate(String value) {
-      final boolean db = false && alert("db is on");
-      if (db)
-        pr("validating currency:", value);
-      value = value.trim();
-      value = value.replace("$", "");
-      value = value.replace(",", "");
-      Long amount = null;
-      var result = ValidationResult.NONE;
-      try {
-        boolean neg = false;
-        if (value.startsWith("(") && value.endsWith(")")) {
-          neg = true;
-          value = value.substring(1, value.length() - 1);
-        } else if (value.startsWith("-")) {
-          neg = true;
-          value = value.substring(1);
-        }
-
-        if (!value.isEmpty()) {
-          int j = value.lastIndexOf('.');
-          if (j < 0) {
-            value = value + ".00";
-          }
-        }
-        if (db)
-          pr("parsing:", value);
-        var d = Double.parseDouble(value);
-        var toLong = Math.round(d * 100);
-        if (toLong >= MAX_CURRENCY)
-          throw badArg("failed to convert", value);
-        amount = toLong;
-        if (neg)
-          amount = -amount;
-        result = new ValidationResult(formatCurrency(amount), amount);
-      } catch (Throwable t) {
-        if (db)
-          pr("failed to validate:", quote(value), "got:", t);
-      }
-      return result;
-    };
-  };
+  public static final Validator CURRENCY_VALIDATOR = new CurrencyValidator();
+  public static final Validator BUDGET_VALIDATOR = new CurrencyValidator().withCanBeZero(true);
 
   public static final Validator ACCOUNT_VALIDATOR = new AccountValidator();
 
