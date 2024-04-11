@@ -87,10 +87,10 @@ public class AccountForm extends FormWindow {
       var mod = orig.build().toBuilder();
       mod.number(ac.number()).name(ac.name()).budget(ac.budget());
 
+      List<Transaction> modTrans = arrayList();
       if (orig.number() != mod.number()) {
         // create modified versions of all transactions from this account
         var origTrans = filterOutGenerated(storage().readTransactionsForAccount(orig.number()));
-        List<Transaction> modTrans = arrayList();
         for (var t : origTrans) {
           var b = t.toBuilder();
           if (b.debit() == orig.number())
@@ -99,12 +99,11 @@ public class AccountForm extends FormWindow {
             b.credit(mod.number());
           modTrans.add(b.build());
         }
+
         // Delete the original transactions
-        for (var t : origTrans)
+        for (var t : origTrans) {
           storage().deleteTransaction(t);
-        // Add the modified transactions
-        for (var t : modTrans)
-          storage().addOrReplace(t);
+        }
 
         // delete the original account
         storage().deleteAccount(orig.number());
@@ -114,6 +113,13 @@ public class AccountForm extends FormWindow {
       editedAccount = mod.build();
       storage().addOrReplace(editedAccount);
       changeManager().registerModifiedAccount(editedAccount);
+
+      // Add the modified transactions.  We've delayed doing this until now,
+      // when the modified account (with its possibly new account number) exists.
+      for (var t : modTrans) {
+        storage().addOrReplace(t);
+      }
+
       u.end();
     }
     mListener.editedAccount(this, editedAccount);
