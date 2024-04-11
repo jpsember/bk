@@ -2,6 +2,7 @@ package bk;
 
 import static bk.Util.*;
 import static js.base.Tools.*;
+import static bk.gen.UndoState.*;
 
 import java.util.List;
 
@@ -9,6 +10,7 @@ import bk.gen.Account;
 import bk.gen.Transaction;
 import bk.gen.UndoAction;
 import bk.gen.UndoEntry;
+import bk.gen.UndoState;
 import js.base.BaseObject;
 import js.base.BasePrinter;
 
@@ -23,13 +25,13 @@ public class UndoManager extends BaseObject {
   public void begin(Object... description) {
     var msg = BasePrinter.toString(description);
     log("begin:", msg);
-    assertState(STATE_DORMANT);
-    setState(STATE_EXECUTING);
+    assertState(DORMANT);
+    setState(RECORDING);
     mAction = UndoAction.newBuilder().description(msg);
   }
 
   public void end() {
-    assertState(STATE_EXECUTING);
+    assertState(RECORDING);
     var act = mAction.build();
     mAction = null;
     removeAllButFirstN(mStack, mStackPointer);
@@ -38,35 +40,31 @@ public class UndoManager extends BaseObject {
     log(VERT_SP, "added to undo stack:", INDENT, act);
   }
 
-  private int assertState(int expected) {
+  private UndoState assertState(UndoState expected) {
     if (mState != expected) {
-      badState("expected state", stateName(expected), "but found", stateName(mState));
+      badState("expected state", expected, "but found", mState);
     }
     return expected;
   }
 
-  private int setState(int s) {
+  private UndoState setState(UndoState s) {
     if (mState != s) {
-      log("state changing to:", stateName(s));
+      log("state changing to:", s);
       mState = s;
     }
     return s;
   }
 
-  private static String[] sStateNames = { "DORMANT", "EXECUTING", "UNDOING", };
-
-  private String stateName(int state) {
-    return sStateNames[state];
-  }
-
-  private static final int STATE_DORMANT = 0, STATE_EXECUTING = 1, STATE_UNDOING = 2, STATE_REDOING = 3, STATE_TOTAL = 4;
-
-  private int mState = STATE_DORMANT;
+  private UndoState mState = UndoState.DORMANT;
 
   private UndoAction.Builder mAction;
 
   public boolean recording() {
-    return mState == STATE_EXECUTING;
+    return stateIs(UndoState.RECORDING);
+  }
+
+  private boolean stateIs(UndoState s) {
+    return mState == s;
   }
 
   public void addAccount(Account a) {
@@ -102,23 +100,41 @@ public class UndoManager extends BaseObject {
     var evt = mStack.get(mStackPointer);
 
     log(VERT_SP, "undoing:", INDENT, evt);
-    setState(STATE_UNDOING);
+    setState(UNDOING);
     for (int j = evt.entries().size() - 1; j >= 0; j--) {
       var ent = evt.entries().get(j);
       undo(ent);
     }
-    setState(STATE_DORMANT);
+    setState(DORMANT);
+    return true;
+  }
+
+  public boolean performRedo() {
+    if (mStackPointer == mStack.size()) {
+      log("can't redo anything");
+      return false;
+    }
+    var evt = mStack.get(mStackPointer);
+    mStackPointer++;
+
+    log(VERT_SP, "redoing:", INDENT, evt);
+    setState(REDOING);
+    for (var ent : evt.entries()) {
+      undo(ent);
+    }
+    setState(DORMANT);
     return true;
   }
 
   private void undo(UndoEntry ent) {
-    log("undoing entry:", INDENT, ent);
+    boolean redo = mState == REDOING;
+    log(redo ? "redoing" : "undoing", "entry:", INDENT, ent);
     var s = storage();
-    if (ent.insert()) {
+    if (ent.insert() ^ redo) {
       if (ent.account() != null)
         s.deleteAccount(ent.account().number());
       else
-        s.deleteTransaction( ent.transaction() );
+        s.deleteTransaction(ent.transaction());
     } else {
       if (ent.account() != null)
         s.addOrReplace(ent.account());
@@ -131,6 +147,6 @@ public class UndoManager extends BaseObject {
   private int mStackPointer;
 
   public boolean live() {
-    return mState != STATE_UNDOING && mState != STATE_REDOING;
+    return !stateIs(UNDOING) && !stateIs(REDOING);
   }
 }

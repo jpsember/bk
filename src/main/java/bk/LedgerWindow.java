@@ -173,13 +173,17 @@ public class LedgerWindow extends JWindow implements FocusHandler {
       targetEntry = mEntries.size();
       break;
     default:
-      if (processHelper(k))
+      if (processHelper(k)) {
         resetHint = false;
+      }
       else {
+        var u = UndoManager.SHARED_INSTANCE;
         if (k.is(KeyEvent.UNDO)) {
-          var u = UndoManager.SHARED_INSTANCE;
           if (u.performUndo()) {
             todo("how do we refresh windows, return to appropriate location?");
+          }
+        } else if (k.is(KeyEvent.REDO)) {
+          if (u.performRedo()) {
           }
         }
       }
@@ -441,7 +445,7 @@ public class LedgerWindow extends JWindow implements FocusHandler {
   }
 
   private boolean processHelper(KeyEvent event) {
-    if (event.keyType() == KeyType.Character && !event.hasCtrlOrAlt()) {
+    if (event.keyType() == KeyType.Character && !event.hasCtrlOrAlt() && event.getCharacter() <= 127) {
       var ts = System.currentTimeMillis();
       if (ts - mLastHintKeyTime > DateTimeTools.MILLISECONDS(750))
         resetHintCursor();

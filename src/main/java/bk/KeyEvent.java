@@ -13,18 +13,21 @@ import static js.base.Tools.*;
 public class KeyEvent {
 
   public static final String //
-  UNDO = "C:u" // 
-      , ENTER = ":Enter" //
+  ENTER = ":Enter" //
       , ESCAPE = ":Escape" //
-      , DELETE_TRANSACTION = "C:d" //
+      , DELETE_TRANSACTION = ":∂" //
       , CONTROL_ENTER = "C:Enter" //
-      , ADD = "C:a" //
-      , QUIT = "C:x" //
+      , ADD = ":å" //
+      , OPTION_Z = ":Ω" //
+      , OPTION_SHIFT_Z = ":¸" //
+      , OPTION_Q = ":œ" //
       , ARROW_UP = ":ArrowUp" //
       , ARROW_DOWN = ":ArrowDown" //
       , ARROW_LEFT = ":ArrowLeft" //
       , ARROW_RIGHT = ":ArrowRight" //
-
+      , QUIT = OPTION_Q //
+      , UNDO = OPTION_Z // 
+      , REDO = OPTION_SHIFT_Z //
   ;
 
   public KeyEvent(KeyStroke k) {
