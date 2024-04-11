@@ -258,14 +258,17 @@ public class Storage extends BaseObject {
     checkNotNull(acc);
 
     var u = UndoManager.SHARED_INSTANCE;
-    // Delete all transactions
-    todo("we probably want a single 'undo' action, not one for each transaction deletion");
-    var tr = readTransactionsForAccount(number);
-    for (var t : tr) {
-      u.deleteTransaction(t);
-      deleteTransaction(t);
+
+    if (u.live()) {
+      // Delete all transactions
+      todo("we probably want a single 'undo' action, not one for each transaction deletion");
+      var tr = readTransactionsForAccount(number);
+      for (var t : tr) {
+        u.deleteTransaction(t);
+        deleteTransaction(t);
+      }
+      u.deleteAccount(acc);
     }
-    u.deleteAccount(acc);
     accounts().remove(number);
     setModified();
   }
@@ -283,16 +286,22 @@ public class Storage extends BaseObject {
 
     var existing = transaction(t.timestamp());
 
-    boolean updtBal = existing == null || existing.debit() != t.debit() || existing.credit() != t.credit()
-        || existing.amount() != t.amount();
-
     if (existing != null) {
       u.deleteTransaction(existing);
-      if (updtBal)
-        applyTransactionToAccountBalances(existing, true);
-      // Delete any child transactions
-      for (var childId : existing.children()) {
-        deleteTransaction(childId);
+      if (u.live()) {
+        // We don't want to do this if we're undoing, as it will add back those accounts
+        // with their proper balances anyways
+        {
+          todo("is this updtBal check necessary, given that we exit early if the adjustment is zero?");
+          boolean updtBal = existing == null || existing.debit() != t.debit()
+              || existing.credit() != t.credit() || existing.amount() != t.amount();
+          if (updtBal)
+            applyTransactionToAccountBalances(existing, true);
+        }
+        // Delete any child transactions
+        for (var childId : existing.children()) {
+          deleteTransaction(childId);
+        }
       }
     }
 
@@ -303,7 +312,9 @@ public class Storage extends BaseObject {
 
     setModified();
 
-    RuleManager.SHARED_INSTANCE.applyRules(t);
+    if (u.live()) {
+      RuleManager.SHARED_INSTANCE.applyRules(t);
+    }
 
     return t;
   }
@@ -323,15 +334,21 @@ public class Storage extends BaseObject {
   public void deleteTransaction(Transaction t) {
     checkNotNull(t);
     var u = UndoManager.SHARED_INSTANCE;
-    if (!isGenerated(t)) {
-      for (var child : getChildTransactions(t)) {
-        deleteTransaction(child);
+    if (u.live()) {
+      if (!isGenerated(t)) {
+        for (var child : getChildTransactions(t)) {
+          deleteTransaction(child);
+        }
       }
     }
     var t2 = transactions().remove(t.timestamp());
     checkState(t2 != null, "transaction wasn't in map");
     u.deleteTransaction(t2);
-    applyTransactionToAccountBalances(t2, true);
+    // We don't want to do this if we're undoing, as it will add back those accounts
+    // with their proper balances anyways
+    if (u.live()) {
+      applyTransactionToAccountBalances(t2, true);
+    }
     setModified();
   }
 
@@ -360,6 +377,8 @@ public class Storage extends BaseObject {
   }
 
   private void adjustBalance(int accountNumber, long currencyAmount) {
+    if (currencyAmount == 0)
+      return;
     var u = UndoManager.SHARED_INSTANCE;
     var a = account(accountNumber);
     checkNotNull(a, "adjustBalance, no such account:", accountNumber);
@@ -370,30 +389,30 @@ public class Storage extends BaseObject {
     u.addAccount(a);
     setModified();
   }
-//
-//  public void deleteAccountUNDO(int number) {
-//    var acc = account(number);
-//    checkNotNull(acc);
-//    accounts().remove(number);
-//    setModified();
-//  }
-//
-//  public void deleteTransactionUNDO(long id) {
-//    var t2 = transactions().remove(id);
-//    checkState(t2 != null, "transaction wasn't in map");
-//    setModified();
-//  }
-//
-//  public void addUNDO(Account account) {
-//    var existing = accounts().put(account.number(), account);
-//    checkState(existing == null, "an account already existed with number:", account.number());
-//    setModified();
-//  }
-//
-//  public void addUNDO(Transaction transaction) {
-//    var existing = transactions().put(id(transaction), transaction);
-//    checkState(existing == null, "transaction already existed with id:", id(transaction));
-//    setModified();
-//  }
+  //
+  //  public void deleteAccountUNDO(int number) {
+  //    var acc = account(number);
+  //    checkNotNull(acc);
+  //    accounts().remove(number);
+  //    setModified();
+  //  }
+  //
+  //  public void deleteTransactionUNDO(long id) {
+  //    var t2 = transactions().remove(id);
+  //    checkState(t2 != null, "transaction wasn't in map");
+  //    setModified();
+  //  }
+  //
+  //  public void addUNDO(Account account) {
+  //    var existing = accounts().put(account.number(), account);
+  //    checkState(existing == null, "an account already existed with number:", account.number());
+  //    setModified();
+  //  }
+  //
+  //  public void addUNDO(Transaction transaction) {
+  //    var existing = transactions().put(id(transaction), transaction);
+  //    checkState(existing == null, "transaction already existed with id:", id(transaction));
+  //    setModified();
+  //  }
 
 }

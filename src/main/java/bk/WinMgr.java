@@ -12,6 +12,7 @@ import com.googlecode.lanterna.screen.AbstractScreen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
+import com.googlecode.lanterna.terminal.ansi.UnixLikeTerminal.CtrlCBehaviour;
 
 import js.base.BaseObject;
 import js.base.Pair;
@@ -327,8 +328,10 @@ public class WinMgr extends BaseObject {
 
   public void open() {
     try {
-      DefaultTerminalFactory defaultTerminalFactory = new DefaultTerminalFactory();
-      mTerminal = defaultTerminalFactory.createTerminal();
+      var f = new DefaultTerminalFactory();
+      f.setUnixTerminalCtrlCBehaviour(CtrlCBehaviour.TRAP);
+      mTerminal = f.createTerminal();
+      mark("terminal type:", mTerminal.getClass(), INDENT, mTerminal);
       mScreen = new TerminalScreen(mTerminal);
       mScreen.startScreen();
       winMgr().hideCursor();

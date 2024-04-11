@@ -17,8 +17,6 @@ public class UndoManager extends BaseObject {
   public static final UndoManager SHARED_INSTANCE = new UndoManager();
 
   private UndoManager() {
-    loadTools();
-    loadUtil();
     alertVerbose();
   }
 
@@ -61,7 +59,7 @@ public class UndoManager extends BaseObject {
     return sStateNames[state];
   }
 
-  private static final int STATE_DORMANT = 0, STATE_EXECUTING = 1, STATE_UNDOING = 2, STATE_TOTAL = 3;
+  private static final int STATE_DORMANT = 0, STATE_EXECUTING = 1, STATE_UNDOING = 2, STATE_REDOING = 3, STATE_TOTAL = 4;
 
   private int mState = STATE_DORMANT;
 
@@ -118,17 +116,21 @@ public class UndoManager extends BaseObject {
     var s = storage();
     if (ent.insert()) {
       if (ent.account() != null)
-        s.deleteAccountUNDO(ent.account().number());
+        s.deleteAccount(ent.account().number());
       else
-        s.deleteTransactionUNDO(id(ent.transaction()));
+        s.deleteTransaction( ent.transaction() );
     } else {
       if (ent.account() != null)
-        s.addUNDO(ent.account());
+        s.addOrReplace(ent.account());
       else
-        s.addUNDO(ent.transaction());
+        s.addOrReplace(ent.transaction());
     }
   }
 
   private List<UndoAction> mStack = arrayList();
   private int mStackPointer;
+
+  public boolean live() {
+    return mState != STATE_UNDOING && mState != STATE_REDOING;
+  }
 }

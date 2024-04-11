@@ -14,7 +14,7 @@ public class KeyEvent {
 
   public static final String //
   UNDO = "C:u" // 
-  ,ENTER = ":Enter" //
+      , ENTER = ":Enter" //
       , ESCAPE = ":Escape" //
       , DELETE_TRANSACTION = "C:d" //
       , CONTROL_ENTER = "C:Enter" //
@@ -46,6 +46,7 @@ public class KeyEvent {
       break;
     }
     mString = sb.toString();
+    pr("*** KeyEvent:", mString);
   }
 
   @Override
