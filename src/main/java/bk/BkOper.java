@@ -175,8 +175,11 @@ public class BkOper extends AppOper
 
   @Override
   public void deleteTransaction(Transaction t) {
+    var u = UndoManager.SHARED_INSTANCE;
+    u.begin("Delete Transaction");
     storage().deleteTransaction(t.timestamp());
     changeManager().registerModifiedTransaction(t);
+    u.end();
   }
 
   //------------------------------------------------------------------
