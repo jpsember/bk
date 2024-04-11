@@ -27,6 +27,10 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     mHeaderHeight = height;
   }
 
+  public int chooseCurrentRow() {
+    return 0;
+  }
+
   @Override
   protected String supplyName() {
     return "LedgerWindow";
@@ -183,16 +187,7 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
       resetHintCursor();
 
     if (targetEntry != null) {
-      scrollToEntry(targetEntry);
-    }
-  }
-
-  private void scrollToEntry(int targetEntry) {
-    int sz = mEntries.size();
-    if (sz != 0) {
-      int t = MyMath.clamp(targetEntry, 0, sz - 1);
-      mCursorRow = t;
-      repaint();
+      setCurrentRowIndex(targetEntry);
     }
   }
 
@@ -325,11 +320,9 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
   }
 
   public <T> T getCurrentRow() {
-    mark("getCurrentRow, # entries:", mEntries.size(), "cursorRow:", mCursorRow);
     if (mCursorRow >= mEntries.size())
       return null;
-    var ent = mEntries.get(mCursorRow);
-    return (T) ent.auxData;
+    return entry(mCursorRow);
   }
 
   private int indexOfAuxData(Object auxData) {
@@ -342,24 +335,35 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     return -1;
   }
 
+  public int size() {
+    return mEntries.size();
+  }
+
+  public <T> T entry(int index) {
+    return (T) mEntries.get(index).auxData;
+  }
+
   public <T> void setCurrentRow(T auxData) {
-    boolean db = false && alert("verbosity");
-    if (db)
-      pr("setCurrentRow to:", INDENT, auxData);
-    int newCursor = 0;
+    int newCursor = -1;
     if (auxData != null) {
-      int pos = indexOfAuxData(auxData);
-      if (db)
-        pr("position was:", pos);
-      if (pos >= 0)
-        newCursor = pos;
+      newCursor = indexOfAuxData(auxData);
     }
+    if (newCursor < 0)
+      newCursor = chooseCurrentRow();
+    setCurrentRowIndex(newCursor);
+  }
+
+  public void setCurrentRowIndex(int newCursor) {
+    newCursor = clampCursor(newCursor);
     if (mCursorRow != newCursor) {
       mCursorRow = newCursor;
-      if (db)
-        pr("set cursor row to:", mCursorRow);
       repaint();
     }
+  }
+
+  private int clampCursor(int cursor) {
+    cursor = MyMath.clamp(cursor, 0, Math.max(0, mEntries.size() - 1));
+    return cursor;
   }
 
   private static class Entry {
@@ -447,7 +451,7 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
 
       var helperIndex = determineHelperValue(mHintBuffer.toString());
       if (helperIndex != null) {
-        scrollToEntry(helperIndex);
+        setCurrentRowIndex(helperIndex);
       }
       return true;
     }

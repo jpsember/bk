@@ -116,6 +116,22 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   }
 
   @Override
+  public int chooseCurrentRow() {
+    int bestMatch = 0;
+    if (mCurrentTrans != null) {
+      int x = size();
+      for (int i = 0; i < x; i++) {
+        Transaction t = entry(i);
+        if (t.date() >= mCurrentTrans.date()) {
+          bestMatch = i;
+          break;
+        }
+      }
+    }
+    return bestMatch;
+  }
+
+  @Override
   public void processKeyEvent(KeyEvent k) {
     boolean handled = false;
     Transaction a = getCurrentRow();
@@ -145,6 +161,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     }
     if (!handled)
       super.processKeyEvent(k);
+    mCurrentTrans = getCurrentRow();
   }
 
   @Override
@@ -157,4 +174,5 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   private TransactionListener mListener;
   private int mAccountNumber;
   private boolean mColumnsAdded;
+  private Transaction mCurrentTrans;
 }

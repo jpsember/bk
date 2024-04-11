@@ -46,10 +46,10 @@ public class AccountList extends LedgerWindow implements ChangeListener {
         .datatype(Datatype.CURRENCY));
   }
 
+  private Account mCurrentAccount;
+
   public void rebuild() {
-    mark("attempt to restore cursor to closest account number to one just deleted or modified");
-    var currentAccount = getCurrentRow();
-    pr("currentAccount:", currentAccount);
+    mCurrentAccount = getCurrentRow();
 
     clearEntries();
     List<Account> sorted = storage().readAllAccounts();
@@ -67,9 +67,24 @@ public class AccountList extends LedgerWindow implements ChangeListener {
       add(new CurrencyField(t.balance()));
       closeEntry(t);
     }
-    setCurrentRow(currentAccount);
-    pr("...updating current row to:", currentAccount);
+    setCurrentRow(mCurrentAccount);
     repaint();
+  }
+
+  @Override
+  public int chooseCurrentRow() {
+    int bestMatch = 0;
+    if (mCurrentAccount != null) {
+      int x = size();
+      for (int i = 0; i < x; i++) {
+        Account a = entry(i);
+        if (a.number() >= mCurrentAccount.number()) {
+          bestMatch = i;
+          break;
+        }
+      }
+    }
+    return bestMatch;
   }
 
   @Override
