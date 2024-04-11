@@ -19,7 +19,7 @@ public class UndoManager extends BaseObject {
   public static final UndoManager SHARED_INSTANCE = new UndoManager();
 
   private UndoManager() {
-    alertVerbose();
+    //alertVerbose();
   }
 
   public void begin(Object... description) {
@@ -108,7 +108,7 @@ public class UndoManager extends BaseObject {
       undo(ent);
     }
     setState(DORMANT);
-    changeManager().dispatch();
+   // changeManager().dispatch();
 
     return true;
   }
@@ -127,7 +127,7 @@ public class UndoManager extends BaseObject {
       undo(ent);
     }
     setState(DORMANT);
-    changeManager().dispatch();
+  //  changeManager().dispatch();
     return true;
   }
 

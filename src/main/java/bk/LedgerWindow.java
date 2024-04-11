@@ -58,6 +58,8 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
 
   @Override
   public void paint() {
+    mark("LedgerWindow paint() called:",this);
+    mark("perhaps the change listener is being called AFTER the repaint stuff?");
     prepareToRender();
     var r = Render.SHARED_INSTANCE;
     var clip = r.clipBounds();

@@ -105,7 +105,6 @@ public class Storage extends BaseObject {
         }
         dAccount.balance(dAccount.balance() + t.amount());
         cAccount.balance(cAccount.balance() - t.amount());
-        //pr("credit balance for:",cAccount.number(),"sub:",formatCurrency(t.amount()),"now:",formatCurrency(cAccount.balance()),"desc:",t.description());
       }
     }
 
@@ -289,10 +288,8 @@ public class Storage extends BaseObject {
     todo("put u.live() checks into the methods being called where possible");
     if (existing != null) {
       u.deleteTransaction(existing);
+      applyTransactionToAccountBalances(existing, true);
       if (u.live()) {
-        // We don't want to do this if we're undoing, as it will add back those accounts
-        // with their proper balances anyways
-        applyTransactionToAccountBalances(existing, true);
         // Delete any child transactions
         for (var childId : existing.children()) {
           deleteTransaction(childId);
@@ -303,8 +300,7 @@ public class Storage extends BaseObject {
     u.addTransaction(t);
 
     transactions().put(t.timestamp(), t);
-    if (u.live())
-      applyTransactionToAccountBalances(t, false);
+    applyTransactionToAccountBalances(t, false);
 
     setModified();
 
@@ -340,11 +336,7 @@ public class Storage extends BaseObject {
     var t2 = transactions().remove(t.timestamp());
     checkState(t2 != null, "transaction wasn't in map");
     u.deleteTransaction(t2);
-    // We don't want to do this if we're undoing, as it will add back those accounts
-    // with their proper balances anyways
-    if (u.live()) {
-      applyTransactionToAccountBalances(t2, true);
-    }
+    applyTransactionToAccountBalances(t2, true);
     setModified();
   }
 
@@ -363,9 +355,13 @@ public class Storage extends BaseObject {
     deleteTransaction(t);
   }
 
+  /**
+   * This has no effect if undo or redo is occurring
+   */
   private void applyTransactionToAccountBalances(Transaction t, boolean negate) {
     checkNotNull(t);
-    checkState(UndoManager.SHARED_INSTANCE.live());
+    if (!UndoManager.SHARED_INSTANCE.live())
+      return;
     var amt = t.amount();
     if (negate)
       amt = -amt;

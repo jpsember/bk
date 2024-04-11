@@ -116,7 +116,8 @@ public class TransactionForm extends FormWindow {
       changeManager().registerModifiedTransactions(orig, edited);
       u.end();
     }
-    changeManager().dispatch();
+    mark("dispatch should only be called by the window manager?");
+    //changeManager().dispatch();
     mListener.editedTransaction(this, edited);
   }
 

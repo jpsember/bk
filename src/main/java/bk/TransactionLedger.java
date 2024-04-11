@@ -40,6 +40,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
   @Override
   public void plotHeader(int y, int headerHeight) {
+    mark("plotHeader called for:", this, ST);
     var r = Render.SHARED_INSTANCE;
     var clip = r.clipBounds();
     var a = mAccount;
@@ -104,6 +105,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       closeEntry(t);
     }
     setCurrentRow(currentTrans);
+    mark("rebuild, repainting:", this);
     repaint();
   }
 
@@ -141,6 +143,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
   @Override
   public void dataChanged(List<Integer> accountIds, List<Long> transactionIds) {
+    mark("data changed in:", this, "; accountIds:", accountIds, "trans:", transactionIds, ST);
     rebuild();
     todo("!verify that it attempts to restore cursor to more or less the same location");
   }
