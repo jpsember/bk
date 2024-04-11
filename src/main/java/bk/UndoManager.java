@@ -108,8 +108,6 @@ public class UndoManager extends BaseObject {
       undo(ent);
     }
     setState(DORMANT);
-   // changeManager().dispatch();
-
     return true;
   }
 
@@ -127,7 +125,6 @@ public class UndoManager extends BaseObject {
       undo(ent);
     }
     setState(DORMANT);
-  //  changeManager().dispatch();
     return true;
   }
 

@@ -260,7 +260,6 @@ public class Storage extends BaseObject {
 
     if (u.live()) {
       // Delete all transactions
-      todo("we probably want a single 'undo' action, not one for each transaction deletion");
       var tr = readTransactionsForAccount(number);
       for (var t : tr) {
         u.deleteTransaction(t);
@@ -284,8 +283,6 @@ public class Storage extends BaseObject {
     t = t.build();
 
     var existing = transaction(t.timestamp());
-
-    todo("put u.live() checks into the methods being called where possible");
     if (existing != null) {
       u.deleteTransaction(existing);
       applyTransactionToAccountBalances(existing, true);

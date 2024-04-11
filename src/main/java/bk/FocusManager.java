@@ -300,17 +300,6 @@ public class FocusManager extends BaseObject {
         if (u.performRedo()) {
         }
       }
-      //    else {
-      //      var u = UndoManager.SHARED_INSTANCE;
-      //      if (k.is(KeyEvent.UNDO)) {
-      //        if (u.performUndo()) {
-      //          todo("how do we refresh windows, return to appropriate location?");
-      //        }
-      //      } else if (k.is(KeyEvent.REDO)) {
-      //        if (u.performRedo()) {
-      //        }
-      //      }
-      //    }
     } while (false);
     return handled;
   }

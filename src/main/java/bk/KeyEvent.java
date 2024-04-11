@@ -16,6 +16,7 @@ public class KeyEvent {
   ENTER = ":Enter" //
       , ESCAPE = ":Escape" //
       , DELETE_TRANSACTION = ":∂" //
+      , DELETE_ACCOUNT = ":∂" //
       , CONTROL_ENTER = "C:Enter" //
       , ADD = ":å" //
       , EDIT = ":µ" //  option-e does something strange

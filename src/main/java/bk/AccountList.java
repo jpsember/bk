@@ -92,7 +92,16 @@ public class AccountList extends LedgerWindow implements ChangeListener {
       rebuild();
       handled = true;
       break;
-      
+
+    case KeyEvent.DELETE_ACCOUNT:
+      mark("change the shortcut to require a shift and something else");
+      if (a != null) {
+        mListener.deleteAccount(a);
+        rebuild();
+      }
+      handled = true;
+      break;
+
     case KeyEvent.EDIT:
       if (a != null) {
         mListener.editAccount(a);

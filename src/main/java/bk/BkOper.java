@@ -124,6 +124,18 @@ public class BkOper extends AppOper
   }
 
   @Override
+  public void deleteAccount(Account account) {
+    var u = UndoManager.SHARED_INSTANCE;
+    u.begin("Add Account", accountNumberWithNameString(account));
+    storage().deleteAccount(account.number());
+    u.end();
+    changeManager().registerModifiedAccount(account);
+    var v = mAccounts;
+    v.rebuild();
+    v.repaint();
+  }
+
+  @Override
   public void viewAccount(Account account) {
     var v = new TransactionLedger(account.number(), this);
     focusManager().pushAppend(v);
