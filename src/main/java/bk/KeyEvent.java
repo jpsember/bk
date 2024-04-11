@@ -21,6 +21,7 @@ public class KeyEvent {
       , ADD = ":å" //
       , EDIT = ":µ" //  option-e does something strange
       , OPTION_Z = ":Ω" //
+      , PRINT = ":π" //
       , OPTION_SHIFT_Z = ":¸" //
       , OPTION_Q = ":œ" //
       , ARROW_UP = ":ArrowUp" //

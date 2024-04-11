@@ -89,9 +89,9 @@ public class AccountList extends LedgerWindow implements ChangeListener {
 
   @Override
   public void processKeyEvent(KeyEvent k) {
-    boolean handled = false;
     Account a = getCurrentRow();
 
+    mark("key:", k);
     switch (k.toString()) {
 
     case ":Q":
@@ -101,7 +101,6 @@ public class AccountList extends LedgerWindow implements ChangeListener {
     case KeyEvent.ENTER:
       if (a != null) {
         mListener.viewAccount(a);
-        handled = true;
       }
       break;
 
@@ -112,7 +111,6 @@ public class AccountList extends LedgerWindow implements ChangeListener {
     case KeyEvent.ADD:
       mListener.addAccount();
       rebuild();
-      handled = true;
       break;
 
     case KeyEvent.DELETE_ACCOUNT:
@@ -120,7 +118,6 @@ public class AccountList extends LedgerWindow implements ChangeListener {
         mListener.deleteAccount(a);
         rebuild();
       }
-      handled = true;
       break;
 
     case KeyEvent.EDIT:
@@ -128,11 +125,17 @@ public class AccountList extends LedgerWindow implements ChangeListener {
         mListener.editAccount(a);
         rebuild();
       }
-      handled = true;
+      break;
+
+    case KeyEvent.PRINT:
+      if (a != null) {
+        PrintManager.SHARED_INSTANCE.printLedger(a);
+      }
+      break;
+    default:
+      super.processKeyEvent(k);
       break;
     }
-    if (!handled)
-      super.processKeyEvent(k);
   }
 
   @Override
