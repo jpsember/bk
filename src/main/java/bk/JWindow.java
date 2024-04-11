@@ -82,15 +82,6 @@ public class JWindow extends BaseObject {
   }
 
   void setPaintValid(boolean valid) {
-    if (!valid) {
-      if (!paintValid())
-        return;
-      clearFlag(FLG_PAINTVALID);
-      // Mark all children as invalid recursively
-      for (var c : children())
-        c.setPaintValid(false);
-    }
-
     setFlag(FLG_PAINTVALID, valid);
   }
 

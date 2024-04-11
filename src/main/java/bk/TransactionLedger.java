@@ -17,9 +17,8 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     changeManager().addListener(this);
     addColumns();
     mListener = listener;
+    // Be careful not to store the actual Account reference, since it may change unexpectedly!
     mAccountNumber = accountNumberOrZero;
-    if (accountNumberOrZero != 0)
-      mAccount = account(accountNumberOrZero);
     setHeaderHeight(hasBudget() ? 5 : 4);
     rebuild();
   }
@@ -35,12 +34,20 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   }
 
   private boolean hasBudget() {
-    return mAccount != null && mAccount.budget() != 0;
+    return getAccount().budget() != 0;
+  }
+
+  private Account getAccount() {
+    if (mAccountNumber == 0)
+      return Account.DEFAULT_INSTANCE;
+    var a = storage().account(mAccountNumber);
+    checkState(a != null, "account number no longer exists:", mAccountNumber);
+    return a;
   }
 
   @Override
   public void plotHeader(int y, int headerHeight) {
-    mark("plotHeader called for:", this, ST);
+    var mAccount = getAccount();
     var r = Render.SHARED_INSTANCE;
     var clip = r.clipBounds();
     var a = mAccount;
@@ -105,7 +112,6 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       closeEntry(t);
     }
     setCurrentRow(currentTrans);
-    mark("rebuild, repainting:", this);
     repaint();
   }
 
@@ -143,7 +149,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
   @Override
   public void dataChanged(List<Integer> accountIds, List<Long> transactionIds) {
-    mark("data changed in:", this, "; accountIds:", accountIds, "trans:", transactionIds, ST);
+    // mark("data changed in:", this, "; accountIds:", accountIds, "trans:", transactionIds, ST);
     rebuild();
     todo("!verify that it attempts to restore cursor to more or less the same location");
   }
@@ -151,6 +157,4 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   private TransactionListener mListener;
   private int mAccountNumber;
   private boolean mColumnsAdded;
-  private Account mAccount;
-
 }

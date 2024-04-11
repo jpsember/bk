@@ -279,7 +279,7 @@ public class WinMgr extends BaseObject {
    * Recursively processes all child views in this manner as well.
    */
   private void updateView(JWindow w) {
-    final boolean db = true && mark("logging is on");
+    final boolean db = false; //&& mark("logging is on");
 
     if (db) {
       if (!w.layoutValid() || !w.paintValid())
@@ -303,12 +303,11 @@ public class WinMgr extends BaseObject {
       w.setPartialPaintValid(true);
       if (db)
         pr("...window", w.name(), "paint is invalid; rendering; bounds:", w.totalBounds());
+      // Mark all children invalid
+      for (var c : w.children())
+        c.setPaintValid(false);
       w.render(false);
       w.setPaintValid(true);
-      if (mark("verifying children are invalid too!")) {
-        auxVerifyChildrenInvalid(w);
-      }
-
     } else if (!w.partialPaintValid()) {
       if (db)
         pr("...window", w.name(), "partial paint is invalid");
@@ -318,14 +317,6 @@ public class WinMgr extends BaseObject {
 
     for (var c : w.children())
       updateView(c);
-  }
-
-  private void auxVerifyChildrenInvalid(JWindow w) {
-    if (w == null)
-      return;
-    checkState(!w.paintValid(), "expected window to have invalid paint:", w);
-    for (var c : w.children())
-      auxVerifyChildrenInvalid(c);
   }
 
   /**
