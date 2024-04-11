@@ -37,6 +37,9 @@ public class Storage extends BaseObject {
     if (!mModified)
       return;
 
+    if (mark("writing is DISABLED"))
+      return;
+
     var f = file();
     if (f.exists()) {
       bkup().makeBackup(f);
@@ -278,8 +281,10 @@ public class Storage extends BaseObject {
    */
   public Transaction addOrReplace(Transaction t) {
     var u = UndoManager.SHARED_INSTANCE;
-    checkState(t.children().length == 0,
-        "attempt to add/replace transaction with one that already has children");
+    if (u.live()) {
+      checkState(t.children().length == 0,
+          "attempt to add/replace transaction with one that already has children");
+    }
     t = t.build();
 
     var existing = transaction(t.timestamp());

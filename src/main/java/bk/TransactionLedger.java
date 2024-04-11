@@ -134,21 +134,22 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   @Override
   public void processKeyEvent(KeyEvent k) {
     boolean handled = false;
-    Transaction a = getCurrentRow();
+    Transaction t = getCurrentRow();
 
     switch (k.toString()) {
 
     case KeyEvent.EDIT:
     case KeyEvent.ENTER:
-      if (a != null) {
-        mListener.editTransaction(mAccountNumber, a);
-        handled = true;
+      if (t != null && !isGenerated(t)) {
+        mListener.editTransaction(mAccountNumber, t);
       }
+      handled = true;
       break;
 
     case KeyEvent.DELETE_TRANSACTION:
-      if (a != null) {
-        mListener.deleteTransaction(a);
+      if (t != null) {
+        if (!isGenerated(t))
+          mListener.deleteTransaction(t);
       }
       handled = true;
       break;
@@ -166,9 +167,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
   @Override
   public void dataChanged(List<Integer> accountIds, List<Long> transactionIds) {
-    // mark("data changed in:", this, "; accountIds:", accountIds, "trans:", transactionIds, ST);
     rebuild();
-    todo("!verify that it attempts to restore cursor to more or less the same location");
   }
 
   private TransactionListener mListener;
