@@ -19,7 +19,7 @@ public class UndoManager extends BaseObject {
   public static final UndoManager SHARED_INSTANCE = new UndoManager();
 
   private UndoManager() {
-    //alertVerbose();
+    alertVerbose();
   }
 
   public void begin(Object... description) {
@@ -31,7 +31,9 @@ public class UndoManager extends BaseObject {
   }
 
   public void end() {
+    log("end");
     assertState(RECORDING);
+    setState(DORMANT);
     var act = mAction.build();
     mAction = null;
     removeAllButFirstN(mStack, mStackPointer);

@@ -18,6 +18,7 @@ public class KeyEvent {
       , DELETE_TRANSACTION = ":∂" //
       , CONTROL_ENTER = "C:Enter" //
       , ADD = ":å" //
+      , EDIT = ":µ" //  option-e does something strange
       , OPTION_Z = ":Ω" //
       , OPTION_SHIFT_Z = ":¸" //
       , OPTION_Q = ":œ" //
@@ -49,7 +50,6 @@ public class KeyEvent {
       break;
     }
     mString = sb.toString();
-    pr("*** KeyEvent:", mString);
   }
 
   @Override

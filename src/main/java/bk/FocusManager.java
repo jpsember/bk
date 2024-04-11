@@ -265,4 +265,54 @@ public class FocusManager extends BaseObject {
   private boolean mNewTopLevelFlag;
   private JWindow mOurTopLevelContainer;
 
+  /**
+   * Returns true if an undo/redo key was pressed and handled
+   */
+  public boolean processUndoKeys(KeyEvent k) {
+    log("processUndoKeys:", k);
+    boolean handled = false;
+    do {
+      boolean isUndo = false;
+      handled = true;
+      switch (k.toString()) {
+      case KeyEvent.UNDO:
+        isUndo = true;
+        break;
+      case KeyEvent.REDO:
+        break;
+      default:
+        handled = false;
+      }
+      if (!handled)
+        break;
+
+      var f = focus();
+      if (f == null)
+        break;
+      if (!f.undoEnabled())
+        break;
+      var u = UndoManager.SHARED_INSTANCE;
+      if (isUndo) {
+        if (u.performUndo()) {
+          todo("how do we refresh windows, return to appropriate location?");
+        }
+      } else {
+        if (u.performRedo()) {
+        }
+      }
+      //    else {
+      //      var u = UndoManager.SHARED_INSTANCE;
+      //      if (k.is(KeyEvent.UNDO)) {
+      //        if (u.performUndo()) {
+      //          todo("how do we refresh windows, return to appropriate location?");
+      //        }
+      //      } else if (k.is(KeyEvent.REDO)) {
+      //        if (u.performRedo()) {
+      //        }
+      //      }
+      //    }
+    } while (false);
+    return handled;
+  }
+
 }

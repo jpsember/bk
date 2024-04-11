@@ -24,6 +24,16 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     rebuild();
   }
 
+  @Override
+  public boolean focusPossible() {
+    return mAccountNumber == 0 || account(mAccountNumber) != null;
+  }
+
+  @Override
+  public boolean undoEnabled() {
+    return true;
+  }
+
   private boolean hasBudget() {
     return mAccount != null && mAccount.budget() != 0;
   }
@@ -104,6 +114,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
     switch (k.toString()) {
 
+    case KeyEvent.EDIT:
     case KeyEvent.ENTER:
       if (a != null) {
         mListener.editTransaction(mAccountNumber, a);

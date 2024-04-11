@@ -6,8 +6,10 @@ import static js.base.Tools.*;
 import js.geometry.MyMath;
 
 public class WidgetWindow extends JWindow implements FocusHandler {
+  
   public static final int DEFAULT_WIDTH = 16;
 
+  
   public WidgetWindow width(int width) {
     mWidth = width;
     return this;
@@ -287,4 +289,15 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   private ValidationResult mValidationResult;
   private WidgetHelper mHelper;
   private String mHint;
+
+
+  @Override
+  public boolean focusPossible() {
+    return true;
+  }
+
+  @Override
+  public boolean undoEnabled() {
+    return false;
+  }
 }

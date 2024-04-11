@@ -73,14 +73,15 @@ public class AccountForm extends FormWindow {
 
     Account editedAccount = null;
 
-    if (mType == TYPE_ADD) {
+    var u = UndoManager.SHARED_INSTANCE;
+     if (mType == TYPE_ADD) {
       editedAccount = ac;
-      var u = UndoManager.SHARED_INSTANCE;
       u.begin("Add Account" , accountNumberWithNameString(ac ));
       storage().addOrReplace(ac);
       u.end();
       changeManager().registerModifiedAccount(ac);
     } else {
+      u.begin("Modify Account" , accountNumberWithNameString(ac ));
       // modify a copy of the original account to include the edits
       var orig = mOriginalAccount;
       var mod = orig.build().toBuilder();
@@ -113,6 +114,7 @@ public class AccountForm extends FormWindow {
       editedAccount = mod.build();
       storage().addOrReplace(editedAccount);
       changeManager().registerModifiedAccount(editedAccount);
+      u.end();
     }
     mListener.editedAccount(this, editedAccount);
   }

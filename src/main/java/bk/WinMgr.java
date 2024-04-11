@@ -215,8 +215,12 @@ public class WinMgr extends BaseObject {
             processed = true;
           }
           break;
+          default:
+            if (focusManager().processUndoKeys(key))
+              processed = true;
+            break;
         }
-
+        
         if (!processed)
           focusManager().focus().processKeyEvent(key);
       }

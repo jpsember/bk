@@ -17,7 +17,7 @@ import js.base.DateTimeTools;
 import js.base.Pair;
 import js.geometry.MyMath;
 
-public class LedgerWindow extends JWindow implements FocusHandler {
+public abstract class LedgerWindow extends JWindow implements FocusHandler {
 
   public LedgerWindow() {
     setBorder(BORDER_THICK);
@@ -175,17 +175,6 @@ public class LedgerWindow extends JWindow implements FocusHandler {
     default:
       if (processHelper(k)) {
         resetHint = false;
-      }
-      else {
-        var u = UndoManager.SHARED_INSTANCE;
-        if (k.is(KeyEvent.UNDO)) {
-          if (u.performUndo()) {
-            todo("how do we refresh windows, return to appropriate location?");
-          }
-        } else if (k.is(KeyEvent.REDO)) {
-          if (u.performRedo()) {
-          }
-        }
       }
       break;
     }

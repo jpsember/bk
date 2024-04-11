@@ -20,6 +20,16 @@ public class AccountList extends LedgerWindow implements ChangeListener {
     rebuild();
   }
 
+  @Override
+  public boolean focusPossible() {
+    return true;
+  }
+
+  @Override
+  public boolean undoEnabled() {
+    return true;
+  }
+
   private static final boolean MERGED = true;
 
   private void addColumns() {
@@ -77,12 +87,13 @@ public class AccountList extends LedgerWindow implements ChangeListener {
       focusManager().pushAppend(new TransactionLedger(0, mTransListener));
       break;
 
-    case "C:a":
+    case KeyEvent.ADD:
       mListener.addAccount();
       rebuild();
       handled = true;
       break;
-    case "C:e":
+      
+    case KeyEvent.EDIT:
       if (a != null) {
         mListener.editAccount(a);
         rebuild();
