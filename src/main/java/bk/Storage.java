@@ -37,8 +37,8 @@ public class Storage extends BaseObject {
     if (!mModified)
       return;
 
-    if (mark("writing is DISABLED"))
-      return;
+    //if (mark("writing is DISABLED"))
+    //  return;
 
     var f = file();
     if (f.exists()) {
