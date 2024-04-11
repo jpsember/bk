@@ -108,6 +108,8 @@ public class UndoManager extends BaseObject {
       undo(ent);
     }
     setState(DORMANT);
+    changeManager().dispatch();
+
     return true;
   }
 
@@ -125,6 +127,7 @@ public class UndoManager extends BaseObject {
       undo(ent);
     }
     setState(DORMANT);
+    changeManager().dispatch();
     return true;
   }
 
@@ -132,6 +135,8 @@ public class UndoManager extends BaseObject {
     boolean redo = mState == REDOING;
     log(redo ? "redoing" : "undoing", "entry:", INDENT, ent);
     var s = storage();
+    changeManager().registerModifiedAccount(ent.account());
+    changeManager().registerModifiedTransaction(ent.transaction());
     if (ent.insert() ^ redo) {
       if (ent.account() != null)
         s.deleteAccount(ent.account().number());

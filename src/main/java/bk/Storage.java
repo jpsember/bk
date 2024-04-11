@@ -308,7 +308,8 @@ public class Storage extends BaseObject {
     u.addTransaction(t);
 
     transactions().put(t.timestamp(), t);
-    applyTransactionToAccountBalances(t, false);
+    if (u.live())
+      applyTransactionToAccountBalances(t, false);
 
     setModified();
 
@@ -369,6 +370,7 @@ public class Storage extends BaseObject {
 
   private void applyTransactionToAccountBalances(Transaction t, boolean negate) {
     checkNotNull(t);
+    checkState( UndoManager.SHARED_INSTANCE.live());
     var amt = t.amount();
     if (negate)
       amt = -amt;
