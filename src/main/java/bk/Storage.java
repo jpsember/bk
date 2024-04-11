@@ -286,18 +286,13 @@ public class Storage extends BaseObject {
 
     var existing = transaction(t.timestamp());
 
+    todo("put u.live() checks into the methods being called where possible");
     if (existing != null) {
       u.deleteTransaction(existing);
       if (u.live()) {
         // We don't want to do this if we're undoing, as it will add back those accounts
         // with their proper balances anyways
-        {
-          todo("is this updtBal check necessary, given that we exit early if the adjustment is zero?");
-          boolean updtBal = existing == null || existing.debit() != t.debit()
-              || existing.credit() != t.credit() || existing.amount() != t.amount();
-          if (updtBal)
-            applyTransactionToAccountBalances(existing, true);
-        }
+        applyTransactionToAccountBalances(existing, true);
         // Delete any child transactions
         for (var childId : existing.children()) {
           deleteTransaction(childId);
@@ -370,7 +365,7 @@ public class Storage extends BaseObject {
 
   private void applyTransactionToAccountBalances(Transaction t, boolean negate) {
     checkNotNull(t);
-    checkState( UndoManager.SHARED_INSTANCE.live());
+    checkState(UndoManager.SHARED_INSTANCE.live());
     var amt = t.amount();
     if (negate)
       amt = -amt;
@@ -391,30 +386,5 @@ public class Storage extends BaseObject {
     u.addAccount(a);
     setModified();
   }
-  //
-  //  public void deleteAccountUNDO(int number) {
-  //    var acc = account(number);
-  //    checkNotNull(acc);
-  //    accounts().remove(number);
-  //    setModified();
-  //  }
-  //
-  //  public void deleteTransactionUNDO(long id) {
-  //    var t2 = transactions().remove(id);
-  //    checkState(t2 != null, "transaction wasn't in map");
-  //    setModified();
-  //  }
-  //
-  //  public void addUNDO(Account account) {
-  //    var existing = accounts().put(account.number(), account);
-  //    checkState(existing == null, "an account already existed with number:", account.number());
-  //    setModified();
-  //  }
-  //
-  //  public void addUNDO(Transaction transaction) {
-  //    var existing = transactions().put(id(transaction), transaction);
-  //    checkState(existing == null, "transaction already existed with id:", id(transaction));
-  //    setModified();
-  //  }
 
 }
