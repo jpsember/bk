@@ -431,6 +431,15 @@ public final class Util {
     return acc;
   }
 
+  public static Account otherAccount(Transaction t, int accountNumber) {
+    Account out = null;
+    if (t.debit() == accountNumber)
+      out = account(t.credit());
+    else if (t.credit() == accountNumber)
+      out = account(t.debit());
+    return out;
+  }
+
   public static Account accountMustExist(int accountNumber) {
     var a = account(accountNumber);
     if (a == null)

@@ -47,14 +47,13 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
   @Override
   public void plotHeader(int y, int headerHeight) {
-    var mAccount = getAccount();
+    var a = getAccount();
     var r = Render.SHARED_INSTANCE;
     var clip = r.clipBounds();
-    var a = mAccount;
     if (a == null) {
       plotString("All Transactions", clip.x, y, Alignment.CENTER, clip.width);
     } else {
-      var s = a.number() + " " + a.name();
+      var s = accountNumberWithNameString(a);
       plotString(s, clip.x, y, Alignment.LEFT, CHARS_ACCOUNT_NUMBER_AND_NAME);
       if (hasBudget()) {
         plotLabelledAmount("Budget", a.budget(), 1, y);

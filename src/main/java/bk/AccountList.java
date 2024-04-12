@@ -91,7 +91,6 @@ public class AccountList extends LedgerWindow implements ChangeListener {
   public void processKeyEvent(KeyEvent k) {
     Account a = getCurrentRow();
 
-    mark("key:", k);
     switch (k.toString()) {
 
     case ":Q":

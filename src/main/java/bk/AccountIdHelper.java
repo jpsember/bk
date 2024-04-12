@@ -95,7 +95,7 @@ public class AccountIdHelper extends WidgetHelper {
     @Override
     public String toString() {
       if (mIdWithName == null)
-        mIdWithName = account.number() + " " + account.name();
+        mIdWithName = accountNumberWithNameString(account);
       return mIdWithName;
     }
 
