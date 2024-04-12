@@ -18,8 +18,8 @@ public class KeyEvent {
       , DELETE_TRANSACTION = ":∂" //
       , DELETE_ACCOUNT = ":Î" //
       , CONTROL_ENTER = "C:Enter" //
-      , ADD = ":å" //
-      , EDIT = ":µ" //  option-e does something strange
+      , ADD = ":A" //
+      , EDIT = ":E" //   
       , OPTION_Z = ":Ω" //
       , PRINT = ":π" //
       , OPTION_SHIFT_Z = ":¸" //
