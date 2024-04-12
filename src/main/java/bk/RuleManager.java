@@ -126,12 +126,11 @@ public class RuleManager extends BaseObject {
 
     int dr, cr;
     dr = cr = otherAccountNum;
-    if (parent.debit() == mTriggerAccountNumber) {
+    int accInd = debitOrCreditIndex(parent, mTriggerAccountNumber);
+    if (accInd == 0)
       cr = mTriggerAccountNumber;
-    } else if (parent.credit() == mTriggerAccountNumber) {
+    else
       dr = mTriggerAccountNumber;
-    } else
-      throw badState("expected transaction to reference trigger acct #:", mTriggerAccountNumber, parent);
 
     checkState(cr != dr, "account numbers are the same:", cr);
     todo("!why are generated transactions appearing before their parents in the account ledger?");

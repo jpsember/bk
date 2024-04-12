@@ -104,7 +104,7 @@ public class AccountList extends LedgerWindow implements ChangeListener {
       }
       break;
 
-    case "C:t":
+    case ":T":
       focusManager().pushAppend(new TransactionLedger(0, mTransListener));
       break;
 

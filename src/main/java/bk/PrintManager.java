@@ -55,8 +55,14 @@ public class PrintManager extends BaseObject {
     long currBal = 0;
     for (var t : ts) {
       var other = otherAccount(t, a.number()).number();
-
-      currBal += t.amount();
+      var signedAmount = signedAmount(t, a.number());
+      currBal += signedAmount;
+      
+    /*  pr("trans:",INDENT,t);
+      pr("other account #:",other);
+      pr("signedAmt:",signedAmount);
+      pr("bal:",currBal); */
+      
       beginLine();
       col(formatDate(t.date()));
       var curStr = formatCurrency(t.amount());

@@ -436,6 +436,18 @@ public final class Util {
     return acc;
   }
 
+  /**
+   * Return 0 if transaction has an account number in its debit slot, 1 if in
+   * its credit slot. Throws exception if neither.
+   */
+  public static int debitOrCreditIndex(Transaction t, int relativeToAccount) {
+    if (t.debit() == relativeToAccount)
+      return 0;
+    if (t.credit() == relativeToAccount)
+      return 1;
+    throw badArg("expected transaction to involve account #", relativeToAccount, INDENT, t);
+  }
+
   public static Account otherAccount(Transaction t, int accountNumber) {
     Account out = null;
     if (t.debit() == accountNumber)
@@ -443,6 +455,16 @@ public final class Util {
     else if (t.credit() == accountNumber)
       out = account(t.debit());
     return out;
+  }
+
+  public static long signedAmount(Transaction t, int relativeToAccountNumber) {
+    int sign = 1;
+    if (t.debit() != relativeToAccountNumber) {
+      if (t.credit() != relativeToAccountNumber)
+        badArg("transaction does not involve account", relativeToAccountNumber, ":", INDENT, t);
+      sign = -1;
+    }
+    return t.amount() * sign;
   }
 
   public static Account accountMustExist(int accountNumber) {
@@ -550,7 +572,6 @@ public final class Util {
     }
     return s;
   }
-
 
   public static String extractLine(String text, int maxLineLength) {
     int j = maxLineLength;
