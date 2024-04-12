@@ -27,7 +27,6 @@ public class PrintManager extends BaseObject {
   }
 
   public void auxPrintLedger(Account a, boolean expanded) {
-    alertVerbose();
     init();
     mExpanded = expanded;
 
@@ -46,6 +45,8 @@ public class PrintManager extends BaseObject {
     right().setMaxLength(CHARS_CURRENCY).addCol("balance");
     if (mExpanded)
       setMaxLength(CHARS_TRANSACTION_DESCRIPTION).stretchPct(100).addCol("description");
+    else
+      setMaxLength(4).shrinkPct(100).stretchPct(0).addCol("footnote");
 
     var date = formatDate(epochSecondsToday());
     setTitle(a.number(), a.name(), date);
@@ -73,6 +74,11 @@ public class PrintManager extends BaseObject {
       col(formatCurrency(currBal));
       if (mExpanded)
         col(t.description());
+      else {
+        var note = t.description();
+        note = addFootnoteIfNonEmpty(note);
+        col(note);
+      }
       endLine();
     }
 
@@ -94,7 +100,18 @@ public class PrintManager extends BaseObject {
     dashes(mLineLength);
     cr();
 
+    renderFootnotes();
+
     saveToDrive();
+  }
+
+  private String addFootnoteIfNonEmpty(String note) {
+    if (note.isEmpty())
+      return note;
+    if (false)
+      note = randomText(150, false);
+    mFootnotes.add(note);
+    return Integer.toString(mFootnotes.size());
   }
 
   public PrintManager setTitle(Object... msg) {
@@ -120,7 +137,7 @@ public class PrintManager extends BaseObject {
   private PrintManager cr() {
     var str = mBuffer.toString();
     mBuffer.setLength(0);
-    str = trimToWidth(str, mMaxLineLength);
+    str = trimToWidth(str, mLineLength);
     mPageBuffer.append(str);
     log(">>> ", str);
     mPageBuffer.append('\n');
@@ -261,9 +278,6 @@ public class PrintManager extends BaseObject {
     int slack = Math.max(0, mTargetLineLength - widthSum);
     int cropAmount = Math.max(0, widthSum - mMaxLineLength);
 
-    log("maxLineLength:", mMaxLineLength, "widthSum:", widthSum, "targetLineLength:", mTargetLineLength,
-        "slack:", slack, "crop:", cropAmount);
-
     if (slack > 0) {
       float[] f = new float[mPrintCols.size()];
       float stretchTot = 0;
@@ -316,7 +330,6 @@ public class PrintManager extends BaseObject {
       }
       widthSum -= cropAmount - remain;
     }
-
     mLineLength = widthSum;
   }
 
@@ -325,6 +338,31 @@ public class PrintManager extends BaseObject {
     mPageBuffer = new StringBuilder();
     mPrintCols = arrayList();
     mCurrentPrintCol = null;
+    mFootnotes = arrayList();
+  }
+
+  private void renderFootnotes() {
+    pr("maxLineLength:", mMaxLineLength);
+    pr("target:", mTargetLineLength);
+    pr("line length:", mLineLength);
+
+    int i = INIT_INDEX;
+    for (var n : mFootnotes) {
+      i++;
+
+      var sb = mBuffer;
+      sb.setLength(0);
+      sb.append(1 + i);
+      sb.append(". ");
+      while (!n.isEmpty()) {
+        var line = extractLine(n, mLineLength - sb.length());
+        n = n.substring(line.length()).trim();
+        sb.append(line);
+        cr();
+        sb.append("    ");
+      }
+
+    }
   }
 
   private StringBuilder mBuffer;
@@ -338,4 +376,5 @@ public class PrintManager extends BaseObject {
   private int mColNumber;
   private int mLineLength;
   private boolean mExpanded;
+  private List<String> mFootnotes;
 }

@@ -551,6 +551,23 @@ public final class Util {
     return s;
   }
 
+
+  public static String extractLine(String text, int maxLineLength) {
+    int j = maxLineLength;
+    while (true) {
+      if (j >= text.length()) {
+        j = text.length();
+        break;
+      }
+      if (text.charAt(j) <= ' ')
+        break;
+      if (j <= (maxLineLength * 2) / 3)
+        break;
+      j--;
+    }
+    return text.substring(0, j);
+  }
+
   public static final int CHARS_ACCOUNT_NAME = 25;
   public static final int CHARS_DATE = 10;
   public static final int CHARS_CURRENCY = 16;
