@@ -379,6 +379,12 @@ public final class Util {
 
   public static final Comparator<Transaction> TRANSACTION_COMPARATOR = (t1, t2) -> {
     int sep = Long.compare(t1.date(), t2.date());
+    if (sep == 0) {
+      int c1 = t1.parent() != 0 ? 1 : 0;
+      int c2 = t2.parent() != 0 ? 1 : 0;
+      sep = Integer.compare(c1, c2);
+    }
+
     if (sep == 0)
       sep = Integer.compare(t1.debit(), t2.debit());
     if (sep == 0)
