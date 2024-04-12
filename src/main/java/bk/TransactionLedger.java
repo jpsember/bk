@@ -104,7 +104,17 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     for (var t : sorted) {
       openEntry();
       add(new DateField(t.date()));
-      add(new CurrencyField(t.amount()));
+
+      var amt = t.amount();
+      // Adjust sign based on which of debit or credit matches the current account 
+      if (mAccountNumber != 0) {
+        if (t.credit() == mAccountNumber)
+          amt = -amt;
+      } else {
+        todo("what do we do here for the general ledger?");
+      }
+
+      add(new CurrencyField(amt));
       add(new AccountNameField(t.debit(), storage().accountName(t.debit())));
       add(new AccountNameField(t.credit(), storage().accountName(t.credit())));
       add(new TextField(t.description()));
