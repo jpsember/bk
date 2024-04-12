@@ -27,6 +27,7 @@ public class PrintManager extends BaseObject {
   }
 
   public void auxPrintLedger(Account a, boolean expanded) {
+    //    alertVerbose();
     init();
     mExpanded = expanded;
 
@@ -38,13 +39,13 @@ public class PrintManager extends BaseObject {
     right().setMaxLength(CHARS_CURRENCY).addCol("debit amt");
     right().setMaxLength(CHARS_CURRENCY).addCol("credit amt");
     if (mExpanded) {
-      setMaxLength(CHARS_ACCOUNT_NUMBER_AND_NAME).stretchPct(30).addCol("other name");
+      setMaxLength(CHARS_ACCOUNT_NUMBER_AND_NAME).stretchPct(30).shrinkPct(20).addCol("other name");
     } else {
-      setMaxLength(CHARS_ACCOUNT_NAME).stretchPct(30).addCol("other name");
+      setMaxLength(CHARS_ACCOUNT_NAME).stretchPct(30).shrinkPct(25).addCol("other name");
     }
     right().setMaxLength(CHARS_CURRENCY).addCol("balance");
     if (mExpanded)
-      setMaxLength(CHARS_TRANSACTION_DESCRIPTION).stretchPct(100).addCol("description");
+      setMaxLength(CHARS_TRANSACTION_DESCRIPTION).stretchPct(100).shrinkPct(50).addCol("description");
     else
       setMaxLength(4).shrinkPct(100).stretchPct(0).addCol("footnote");
 
@@ -156,8 +157,9 @@ public class PrintManager extends BaseObject {
       toDirectory(Files.getDesktopDirectory());
     var f = new File(mDir, filename);
     log("saving to:", f);
-    Files.S.writeString(f, mPageBuffer.toString());
-    log("|:|\n" + mPageBuffer.toString());
+    var content = mPageBuffer.toString();
+    Files.S.writeString(f, content);
+    pr("\n" + content);
     return this;
   }
 
@@ -223,6 +225,8 @@ public class PrintManager extends BaseObject {
     return this;
   }
 
+  private static final String COL_SEP_STRING = " | ";
+
   private PrintManager renderColumns() {
     int numRows = mPrintCols.get(0).mText.size();
     var sb = mBuffer;
@@ -233,7 +237,7 @@ public class PrintManager extends BaseObject {
         j++;
         String str = pc.mText.get(lineNumber);
         if (j != 0)
-          sb.append(" | ");
+          sb.append(COL_SEP_STRING);
         str = trimToWidth(str, pc.mLengthRequired);
         str = justify(str, pc.mLengthRequired, pc.mAlignment);
         sb.append(str);
@@ -267,7 +271,7 @@ public class PrintManager extends BaseObject {
       for (var c : mPrintCols) {
         i++;
         if (i != 0)
-          widthSum += 3; // " | "
+          widthSum += COL_SEP_STRING.length();
         widthSum += c.requiredLength();
       }
     }
@@ -275,60 +279,48 @@ public class PrintManager extends BaseObject {
     if (mTargetLineLength == 0)
       mTargetLineLength = Math.min(widthSum, mMaxLineLength);
 
-    int slack = Math.max(0, mTargetLineLength - widthSum);
-    int cropAmount = Math.max(0, widthSum - mMaxLineLength);
+    int maxExpandChars = Math.max(0, mTargetLineLength - widthSum);
+    int maxCropChars = Math.max(0, widthSum - mMaxLineLength);
 
-    if (slack > 0) {
+    int remain = maxExpandChars;
+    boolean expanding;
+    if (maxCropChars > 0) {
+      remain = maxCropChars;
+      expanding = false;
+    } else
+      expanding = true;
+
+    var sign = expanding ? 1 : -1;
+
+    if (remain > 0) {
+      var origRemain = remain;
       float[] f = new float[mPrintCols.size()];
-      float stretchTot = 0;
+      float changeTotal = 0;
       {
         int i = INIT_INDEX;
         for (var v : mPrintCols) {
           i++;
-          var x = v.mStretchPct * 100f;
+          var x = (expanding ? v.mStretchPct : v.mShrinkPct) * 100f;
           f[i] = x;
-          stretchTot += x;
+          changeTotal += x;
         }
       }
-      int remain = slack;
+      log("change factors:", f);
       {
         int i = INIT_INDEX;
         for (var v : mPrintCols) {
           i++;
           var x = f[i];
-          int ourChars = Math.round((x / stretchTot) * slack);
+          int ourChars = Math.round((x / changeTotal) * origRemain);
           ourChars = Math.min(ourChars, remain);
-          v.adjustWidth(ourChars);
-          remain -= ourChars;
+          if (ourChars != 0) {
+            log("adjusting field", v.name(), "by", ourChars * sign);
+            v.adjustWidth(ourChars * sign);
+            remain -= ourChars;
+          }
         }
       }
-      widthSum += slack - remain;
-    } else if (cropAmount > 0) {
-      todo("this can be merged with above with a little work");
-      float[] f = new float[mPrintCols.size()];
-      float shrinkTot = 0;
-      {
-        int i = INIT_INDEX;
-        for (var v : mPrintCols) {
-          i++;
-          var x = v.mShrinkPct * 100f;
-          f[i] = x;
-          shrinkTot += x;
-        }
-      }
-      int remain = slack;
-      {
-        int i = INIT_INDEX;
-        for (var v : mPrintCols) {
-          i++;
-          var x = f[i];
-          int ourChars = Math.round((x / shrinkTot) * slack);
-          ourChars = Math.min(ourChars, remain);
-          v.adjustWidth(-ourChars);
-          remain -= ourChars;
-        }
-      }
-      widthSum -= cropAmount - remain;
+      widthSum += (origRemain - remain) * sign;
     }
     mLineLength = widthSum;
   }
@@ -342,26 +334,20 @@ public class PrintManager extends BaseObject {
   }
 
   private void renderFootnotes() {
-    pr("maxLineLength:", mMaxLineLength);
-    pr("target:", mTargetLineLength);
-    pr("line length:", mLineLength);
-
     int i = INIT_INDEX;
-    for (var n : mFootnotes) {
+    for (var footNote : mFootnotes) {
       i++;
-
       var sb = mBuffer;
       sb.setLength(0);
       sb.append(1 + i);
       sb.append(". ");
-      while (!n.isEmpty()) {
-        var line = extractLine(n, mLineLength - sb.length());
-        n = n.substring(line.length()).trim();
-        sb.append(line);
+      while (!footNote.isEmpty()) {
+        var prefix = extractLine(footNote, mLineLength - sb.length());
+        footNote = footNote.substring(prefix.length()).trim();
+        sb.append(prefix);
         cr();
         sb.append("    ");
       }
-
     }
   }
 
