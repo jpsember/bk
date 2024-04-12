@@ -352,12 +352,17 @@ public final class Util {
   public static String validateTransaction(Transaction t) {
     if (t.debit() == t.credit())
       return "The account numbers cannot be the same!";
+    return null;
+  }
+
+  public static void createMissingAccounts(Transaction t) {
     for (int pass = 0; pass < 2; pass++) {
       int n = pass == 0 ? t.debit() : t.credit();
-      if (account(n) == null)
-        return "No such account: " + n;
+      if (account(n) == null) {
+        var a = Account.newBuilder().number(n).name("*** New #" + n + " ***");
+        storage().addOrReplace(a);
+      }
     }
-    return null;
   }
 
   public static String validateAccount(Account a) {

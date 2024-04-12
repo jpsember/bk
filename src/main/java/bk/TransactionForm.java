@@ -83,11 +83,9 @@ public class TransactionForm extends FormWindow {
       if (problem != null)
         break;
 
-      problem = "Transaction must involve this account";
-      if (mAccountNumber != 0) {
-        if ((Integer) mDr.validResult() != mAccountNumber && (Integer) mCr.validResult() != mAccountNumber)
-          break;
-      }
+      // If user specified accounts that don't exist, create them
+      createMissingAccounts(tr);
+
       problem = null;
     } while (false);
 
