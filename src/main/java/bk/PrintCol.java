@@ -21,10 +21,6 @@ public class PrintCol extends BaseObject {
       mLengthRequired = r;
   }
 
-  public void setSeparator(String sep) {
-    mSeparator = sep;
-  }
-
   public void setMinLength(int minLength) {
     mMinLength = minLength;
   }
@@ -51,7 +47,6 @@ public class PrintCol extends BaseObject {
 
   public List<String> mText = arrayList();
   private int mMaxTextLength;
-  private String mSeparator = " | ";
   private int mMinLength = 0;
   private int mMaxLength = -1;
   public int mLengthRequired;

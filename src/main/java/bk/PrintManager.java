@@ -19,7 +19,8 @@ public class PrintManager extends BaseObject {
   public static final PrintManager SHARED_INSTANCE = new PrintManager();
 
   public void printLedger(Account a) {
-    alertVerbose();
+    //    alertVerbose();
+    init();
 
     var ts = storage().readTransactionsForAccount(a.number());
     ts.sort(TRANSACTION_COMPARATOR);
@@ -31,53 +32,10 @@ public class PrintManager extends BaseObject {
     setMaxLength(CHARS_ACCOUNT_NUMBER_AND_NAME).stretchPct(30).addCol("other name");
     right().setMaxLength(CHARS_CURRENCY).addCol("balance");
     setMaxLength(CHARS_TRANSACTION_DESCRIPTION).stretchPct(100).addCol("description");
-    //
-    //    int maxCurrency = 0;
-    //    int maxDesc = 0;
-    //    {
-    //      long currBal = 0;
-    //      for (var t : ts) {
-    //        currBal += t.amount();
-    //        maxCurrency = Math.max(maxCurrency, formatCurrency(currBal).length());
-    //        maxCurrency = Math.max(maxCurrency, formatCurrency(t.amount()).length());
-    //        maxDesc = Math.max(maxDesc, t.description().length());
-    //      }
-    //    }
 
     var date = formatDate(epochSecondsToday());
     setTitle(a.number(), a.name(), date);
-    resetPendingVars();
 
-    a(a.number());
-    a(":");
-    a(a.name());
-    rightJustify(mMaxLineLength - mBuffer.length() - 1);
-    a(date);
-    cr();
-    dashes(mMaxLineLength);
-    cr();
-
-    //    int minDesc = Math.min(maxDesc, CHARS_TRANSACTION_DESCRIPTION);
-    //
-    //    int charsCurrency = Math.max(maxCurrency, 8);
-    //    int extra = (CHARS_CURRENCY - charsCurrency) * 3 - 5;
-    //    if (minDesc == 0)
-    //      extra += 3;
-    //    extra += (CHARS_TRANSACTION_DESCRIPTION - minDesc);
-    //
-    //    int charsDesc = 0;
-    //    int ex1 = Math.max(10, extra);
-    //    int charsAccountNumName = CHARS_ACCOUNT_NUMBER_AND_NAME + ex1;
-    //    extra -= ex1;
-    //    if (minDesc != 0) {
-    //      charsDesc = minDesc;
-    //      int extra2 = Math.min(maxDesc - charsDesc, extra);
-    //      charsDesc += extra2;
-    //      extra -= extra2;
-    //    }
-
-    //    long currBal = 0;
-    mColumnSeps = true;
     long currBal = 0;
     for (var t : ts) {
       var other = otherAccount(t, a.number()).number();
@@ -97,54 +55,26 @@ public class PrintManager extends BaseObject {
       col(t.description());
       endLine();
     }
+
+    determineColumnWidths();
+
+    {
+      var s = mBuffer;
+      s.append(a.number());
+      s.append(" : ");
+      s.append(a.name());
+      s.append(justify(date, mLineLength - s.length(), Alignment.RIGHT));
+      cr();
+      dashes(mLineLength);
+      cr();
+    }
+
     renderColumns();
 
-    mColumnSeps = false;
-    dashes(mMaxLineLength);
+    dashes(mLineLength);
     cr();
+
     saveToDrive();
-  }
-
-  private PrintManager left(int width) {
-    mPendingWidth = width;
-    mPendingAlignment = Alignment.LEFT;
-    return this;
-  }
-
-  private PrintManager rightJustify(int width) {
-    mPendingWidth = width;
-    mPendingAlignment = Alignment.RIGHT;
-    return this;
-  }
-
-  private PrintManager a(Object value) {
-    var s = value.toString();
-
-    int maxWidth = s.length();
-    if (mPendingWidth >= 0)
-      maxWidth = mPendingWidth;
-    s = trimToWidth(s, maxWidth);
-
-    int nsp = 0;
-    switch (mPendingAlignment) {
-    case CENTER:
-      nsp = (maxWidth - s.length()) / 2;
-      break;
-    case RIGHT:
-      nsp = maxWidth - s.length();
-      break;
-    default:
-      break;
-    }
-    if (mBuffer.length() != 0)
-      mBuffer.append(mColumnSeps ? " | " : " ");
-    mBuffer.append(spaces(nsp));
-    mBuffer.append(s);
-    mBuffer.append(spaces(maxWidth - s.length() - nsp));
-
-    resetPendingVars();
-
-    return this;
   }
 
   public PrintManager setTitle(Object... msg) {
@@ -186,11 +116,6 @@ public class PrintManager extends BaseObject {
     return this;
   }
 
-  private void resetPendingVars() {
-    mPendingAlignment = Alignment.LEFT;
-    mPendingWidth = -1;
-  }
-
   private PrintManager dashes(int count) {
     for (int i = 0; i < count; i++)
       mBuffer.append(Symbols.SINGLE_LINE_HORIZONTAL);
@@ -204,7 +129,7 @@ public class PrintManager extends BaseObject {
     var f = new File(mDir, filename);
     log("saving to:", f);
     Files.S.writeString(f, mPageBuffer.toString());
-    log(mPageBuffer.toString());
+    log("|:|\n" + mPageBuffer.toString());
     return this;
   }
 
@@ -218,42 +143,37 @@ public class PrintManager extends BaseObject {
     return this;
   }
 
-  public PrintManager pageTargetWidth(int numChars) {
-    mTargetLineLength = numChars;
-    return this;
-  }
-
   private PrintManager setMaxLength(int maxLength) {
-    apc().setMaxLength(maxLength);
+    printCol().setMaxLength(maxLength);
     return this;
   }
 
   private PrintManager right() {
-    apc().setAlignment(Alignment.RIGHT);
+    printCol().setAlignment(Alignment.RIGHT);
     return this;
   }
 
-  private PrintManager stretchPct(int pct) {
-    apc().mStretchPct = pct;
+  public PrintManager stretchPct(int pct) {
+    printCol().mStretchPct = pct;
     return this;
   }
 
-  private PrintManager shrinkPct(int pct) {
-    apc().mShrinkPct = pct;
+  public PrintManager shrinkPct(int pct) {
+    printCol().mShrinkPct = pct;
     return this;
   }
 
-  private PrintCol apc() {
-    if (mpc == null)
-      mpc = new PrintCol();
-    return mpc;
+  private PrintCol printCol() {
+    if (mCurrentPrintCol == null)
+      mCurrentPrintCol = new PrintCol();
+    return mCurrentPrintCol;
   }
 
   private PrintManager addCol(String debugName) {
-    checkState(mpc != null, "no PrintCol to add for", debugName);
-    mpc.setName(debugName);
-    mPrintCols.add(mpc);
-    mpc = null;
+    checkState(mCurrentPrintCol != null, "no PrintCol to add for", debugName);
+    mCurrentPrintCol.setName(debugName);
+    mPrintCols.add(mCurrentPrintCol);
+    mCurrentPrintCol = null;
     return this;
   }
 
@@ -269,19 +189,15 @@ public class PrintManager extends BaseObject {
 
   private PrintManager col(Object data) {
     checkState(mColNumber < mPrintCols.size(), "ran out of columns");
-    var x = mPrintCols.get(mColNumber);
-    x.add(data);
+    var printCol = mPrintCols.get(mColNumber);
+    printCol.add(data);
     mColNumber++;
     return this;
   }
 
   private PrintManager renderColumns() {
-    determineColumnWidths();
-
     int numRows = mPrintCols.get(0).mText.size();
-
     var sb = mBuffer;
-
     for (int lineNumber = 0; lineNumber < numRows; lineNumber++) {
       sb.setLength(0);
       int j = INIT_INDEX;
@@ -327,11 +243,15 @@ public class PrintManager extends BaseObject {
         widthSum += c.requiredLength();
       }
     }
+
     if (mTargetLineLength == 0)
       mTargetLineLength = Math.min(widthSum, mMaxLineLength);
 
     int slack = Math.max(0, mTargetLineLength - widthSum);
     int cropAmount = Math.max(0, widthSum - mMaxLineLength);
+
+    log("maxLineLength:", mMaxLineLength, "widthSum:", widthSum, "targetLineLength:", mTargetLineLength,
+        "slack:", slack, "crop:", cropAmount);
 
     if (slack > 0) {
       float[] f = new float[mPrintCols.size()];
@@ -385,21 +305,25 @@ public class PrintManager extends BaseObject {
       }
       widthSum -= cropAmount - remain;
     }
+
     mLineLength = widthSum;
   }
 
-  private StringBuilder mBuffer = new StringBuilder();
-  private StringBuilder mPageBuffer = new StringBuilder();
-  private int mMaxLineLength = 128;
+  private void init() {
+    mBuffer = new StringBuilder();
+    mPageBuffer = new StringBuilder();
+    mPrintCols = arrayList();
+    mCurrentPrintCol = null;
+  }
+
+  private StringBuilder mBuffer;
+  private StringBuilder mPageBuffer;
+  private int mMaxLineLength = 110;
   private int mTargetLineLength;
-  private int mPendingWidth;
-  private Alignment mPendingAlignment;
-  private boolean mColumnSeps;
   private String mTitle = "untitled";
   private File mDir;
-
-  private List<PrintCol> mPrintCols = arrayList();
-  private PrintCol mpc;
+  private List<PrintCol> mPrintCols;
+  private PrintCol mCurrentPrintCol;
   private int mColNumber;
   private int mLineLength;
 }
