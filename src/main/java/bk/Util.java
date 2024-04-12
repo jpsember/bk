@@ -17,6 +17,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import bk.gen.Account;
 import bk.gen.Transaction;
+import js.base.BasePrinter;
 import js.base.DateTimeTools;
 import js.data.DataUtil;
 import js.data.LongArray;
@@ -360,6 +361,8 @@ public final class Util {
       int n = pass == 0 ? t.debit() : t.credit();
       if (account(n) == null) {
         var a = Account.newBuilder().number(n).name("*** New #" + n + " ***");
+        setMessageDuration(30);
+        setFooterMessage("Created account:", a.name());
         storage().addOrReplace(a);
       }
     }
@@ -592,6 +595,33 @@ public final class Util {
       j--;
     }
     return text.substring(0, j);
+  }
+
+  public static MessageWindow sHeader, sFooter;
+  private static long sPendingDuration;
+  private static long sMessageExpTime;
+
+  public static void setMessageDuration(long seconds) {
+    sPendingDuration = seconds * 1000;
+  }
+
+  public static void setFooterMessage(Object... msg) {
+    var s = BasePrinter.toString(msg);
+    sMessageExpTime = 0;
+    if (sPendingDuration > 0)
+      sMessageExpTime = System.currentTimeMillis() + sPendingDuration;
+    sPendingDuration = 0;
+    if (sFooter != null) {
+      sFooter.setMessageAt(MessageWindow.LEFT, s);
+    } else {
+      pr(s);
+    }
+  }
+
+  public static void updateFooterMessage() {
+    if (sMessageExpTime != 0 && System.currentTimeMillis() >= sMessageExpTime) {
+      setFooterMessage();
+    }
   }
 
   public static final int CHARS_ACCOUNT_NAME = 25;

@@ -50,7 +50,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     var a = getAccount();
     var r = Render.SHARED_INSTANCE;
     var clip = r.clipBounds();
-    if (a == null) {
+    if (a.number() == 0) {
       plotString("All Transactions", clip.x, y, Alignment.CENTER, clip.width);
     } else {
       var s = accountNumberWithNameString(a);

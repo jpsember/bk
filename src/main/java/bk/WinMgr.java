@@ -181,7 +181,8 @@ public class WinMgr extends BaseObject {
   public void mainLoop() {
     while (isOpen()) {
       update();
-      sleepMs(10);
+      sleepMs(30);
+      updateFooterMessage();
       storage().flush();
       if (quitRequested())
         close();

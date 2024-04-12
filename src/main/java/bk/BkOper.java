@@ -73,10 +73,10 @@ public class BkOper extends AppOper
       mgr.pushContainer();
 
       // Add a small header
-      if (true) {
+      {
         var h = new MessageWindow();
-        h.setMessageAt(MessageWindow.CENTER, "bk 1.0").setMessageAt(MessageWindow.RIGHT, "^x to quit");
-        //HeaderWindow();
+        Util.sHeader = h;
+        h.setMessageAt(MessageWindow.CENTER, "bk 1.0").setMessageAt(MessageWindow.RIGHT, "option-x to quit");
         mgr.chars(1).window(h);
       }
 
@@ -99,6 +99,14 @@ public class BkOper extends AppOper
 
         mgr.popContainer();
       }
+
+      // Add a small footer
+      {
+        var h = new MessageWindow();
+        Util.sFooter = h;
+        mgr.chars(1).window(h);
+      }
+
       mgr.doneConstruction();
       mgr.mainLoop();
     } catch (Throwable t) {

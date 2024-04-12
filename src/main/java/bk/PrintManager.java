@@ -57,7 +57,7 @@ public class PrintManager extends BaseObject {
       var other = otherAccount(t, a.number()).number();
       var signedAmount = signedAmount(t, a.number());
       currBal += signedAmount;
-      
+
       beginLine();
       col(formatDate(t.date()));
       var curStr = formatCurrency(t.amount());
@@ -161,6 +161,8 @@ public class PrintManager extends BaseObject {
     var content = mPageBuffer.toString();
     Files.S.writeString(f, content);
     pr("\n" + content);
+    setMessageDuration(20);
+    setFooterMessage("Printed", f);
     return this;
   }
 
