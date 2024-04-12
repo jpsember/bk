@@ -18,9 +18,18 @@ public class PrintManager extends BaseObject {
 
   public static final PrintManager SHARED_INSTANCE = new PrintManager();
 
+  public void printExpandedLedger(Account a) {
+    auxPrintLedger(a, true);
+  }
+
   public void printLedger(Account a) {
-    //    alertVerbose();
+    auxPrintLedger(a, false);
+  }
+
+  public void auxPrintLedger(Account a, boolean expanded) {
+    alertVerbose();
     init();
+    mExpanded = expanded;
 
     var ts = storage().readTransactionsForAccount(a.number());
     ts.sort(TRANSACTION_COMPARATOR);
@@ -29,9 +38,14 @@ public class PrintManager extends BaseObject {
 
     right().setMaxLength(CHARS_CURRENCY).addCol("debit amt");
     right().setMaxLength(CHARS_CURRENCY).addCol("credit amt");
-    setMaxLength(CHARS_ACCOUNT_NUMBER_AND_NAME).stretchPct(30).addCol("other name");
+    if (mExpanded) {
+      setMaxLength(CHARS_ACCOUNT_NUMBER_AND_NAME).stretchPct(30).addCol("other name");
+    } else {
+      setMaxLength(CHARS_ACCOUNT_NAME).stretchPct(30).addCol("other name");
+    }
     right().setMaxLength(CHARS_CURRENCY).addCol("balance");
-    setMaxLength(CHARS_TRANSACTION_DESCRIPTION).stretchPct(100).addCol("description");
+    if (mExpanded)
+      setMaxLength(CHARS_TRANSACTION_DESCRIPTION).stretchPct(100).addCol("description");
 
     var date = formatDate(epochSecondsToday());
     setTitle(a.number(), a.name(), date);
@@ -49,10 +63,16 @@ public class PrintManager extends BaseObject {
       else
         col("").col(curStr);
 
-      col(accountNumberWithNameString(otherAccount(t, a.number())));
+      var ac = otherAccount(t, a.number());
+      if (mExpanded) {
+        col(accountNumberWithNameString(ac));
+      } else {
+        col(ac.name());
+      }
 
       col(formatCurrency(currBal));
-      col(t.description());
+      if (mExpanded)
+        col(t.description());
       endLine();
     }
 
@@ -95,15 +115,6 @@ public class PrintManager extends BaseObject {
       b.append(c);
     }
     return b.toString().trim();
-  }
-
-  private String trimToWidth(String s, int maxWidth) {
-    if (s.length() > maxWidth) {
-      if (maxWidth < 8)
-        return s.substring(0, maxWidth);
-      return s.substring(0, maxWidth - 3) + "...";
-    }
-    return s;
   }
 
   private PrintManager cr() {
@@ -326,4 +337,5 @@ public class PrintManager extends BaseObject {
   private PrintCol mCurrentPrintCol;
   private int mColNumber;
   private int mLineLength;
+  private boolean mExpanded;
 }

@@ -540,10 +540,21 @@ public final class Util {
     return trs;
   }
 
-  public static final int CHARS_ACCOUNT_NAME = 20;
+  public static String trimToWidth(String s, int maxWidth) {
+    var dots = "..";
+    int minLengthForDots = 8;
+    if (s.length() > maxWidth) {
+      if (maxWidth < minLengthForDots)
+        return s.substring(0, maxWidth);
+      return s.substring(0, maxWidth - dots.length()) + dots;
+    }
+    return s;
+  }
+
+  public static final int CHARS_ACCOUNT_NAME = 25;
   public static final int CHARS_DATE = 10;
   public static final int CHARS_CURRENCY = 16;
   public static final int CHARS_TRANSACTION_DESCRIPTION = 30;
-  public static final int CHARS_ACCOUNT_NUMBER_AND_NAME = 28;
+  public static final int CHARS_ACCOUNT_NUMBER_AND_NAME = CHARS_ACCOUNT_NAME + 5;
 
 }
