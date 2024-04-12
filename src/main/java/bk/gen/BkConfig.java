@@ -2,7 +2,6 @@ package bk.gen;
 
 import java.io.File;
 import js.data.AbstractData;
-import js.file.Files;
 import js.json.JSMap;
 
 public class BkConfig implements AbstractData {
@@ -11,8 +10,12 @@ public class BkConfig implements AbstractData {
     return mCreate;
   }
 
-  public File file() {
-    return mFile;
+  public File database() {
+    return mDatabase;
+  }
+
+  public File logFile() {
+    return mLogFile;
   }
 
   @Override
@@ -21,7 +24,8 @@ public class BkConfig implements AbstractData {
   }
 
   protected static final String _0 = "create";
-  protected static final String _1 = "file";
+  protected static final String _1 = "database";
+  protected static final String _2 = "log_file";
 
   @Override
   public String toString() {
@@ -32,7 +36,8 @@ public class BkConfig implements AbstractData {
   public JSMap toJson() {
     JSMap m = new JSMap();
     m.putUnsafe(_0, mCreate);
-    m.putUnsafe(_1, mFile.toString());
+    m.putUnsafe(_1, mDatabase.toString());
+    m.putUnsafe(_2, mLogFile.toString());
     return m;
   }
 
@@ -49,10 +54,17 @@ public class BkConfig implements AbstractData {
   private BkConfig(JSMap m) {
     mCreate = m.opt(_0, false);
     {
-      mFile = Files.DEFAULT;
+      mDatabase = _D1;
       String x = m.opt(_1, (String) null);
       if (x != null) {
-        mFile = new File(x);
+        mDatabase = new File(x);
+      }
+    }
+    {
+      mLogFile = _D2;
+      String x = m.opt(_2, (String) null);
+      if (x != null) {
+        mLogFile = new File(x);
       }
     }
   }
@@ -72,7 +84,9 @@ public class BkConfig implements AbstractData {
       return false;
     if (!(mCreate == other.mCreate))
       return false;
-    if (!(mFile.equals(other.mFile)))
+    if (!(mDatabase.equals(other.mDatabase)))
+      return false;
+    if (!(mLogFile.equals(other.mLogFile)))
       return false;
     return true;
   }
@@ -83,21 +97,24 @@ public class BkConfig implements AbstractData {
     if (r == 0) {
       r = 1;
       r = r * 37 + (mCreate ? 1 : 0);
-      r = r * 37 + mFile.hashCode();
+      r = r * 37 + mDatabase.hashCode();
+      r = r * 37 + mLogFile.hashCode();
       m__hashcode = r;
     }
     return r;
   }
 
   protected boolean mCreate;
-  protected File mFile;
+  protected File mDatabase;
+  protected File mLogFile;
   protected int m__hashcode;
 
   public static final class Builder extends BkConfig {
 
     private Builder(BkConfig m) {
       mCreate = m.mCreate;
-      mFile = m.mFile;
+      mDatabase = m.mDatabase;
+      mLogFile = m.mLogFile;
     }
 
     @Override
@@ -115,7 +132,8 @@ public class BkConfig implements AbstractData {
     public BkConfig build() {
       BkConfig r = new BkConfig();
       r.mCreate = mCreate;
-      r.mFile = mFile;
+      r.mDatabase = mDatabase;
+      r.mLogFile = mLogFile;
       return r;
     }
 
@@ -124,17 +142,26 @@ public class BkConfig implements AbstractData {
       return this;
     }
 
-    public Builder file(File x) {
-      mFile = (x == null) ? Files.DEFAULT : x;
+    public Builder database(File x) {
+      mDatabase = (x == null) ? _D1 : x;
+      return this;
+    }
+
+    public Builder logFile(File x) {
+      mLogFile = (x == null) ? _D2 : x;
       return this;
     }
 
   }
 
+  private static final File _D1 = new File("database.json");
+  private static final File _D2 = new File("bk_log.txt");
+
   public static final BkConfig DEFAULT_INSTANCE = new BkConfig();
 
   private BkConfig() {
-    mFile = Files.DEFAULT;
+    mDatabase = _D1;
+    mLogFile = _D2;
   }
 
 }

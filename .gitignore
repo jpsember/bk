@@ -28,5 +28,7 @@ _SKIP_*
 #
 target
 
-accounts.json
+database.json
 project_config
+
+bk_log.txt

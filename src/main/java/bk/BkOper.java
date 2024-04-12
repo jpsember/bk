@@ -3,8 +3,6 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
-import java.io.File;
-
 import bk.gen.Account;
 import bk.gen.BkConfig;
 import bk.gen.Transaction;
@@ -48,11 +46,9 @@ public class BkOper extends AppOper
 
   @Override
   public void perform() {
-    if (EXP)
-      doExp();
 
     {
-      var f = Files.ifEmpty(config().file(), new File("database.json"));
+      var f = Files.assertNonEmpty(config().database());
       f = Files.addExpectedExtension(f, Files.EXT_JSON);
       if (!f.exists()) {
         if (!config().create())
@@ -62,6 +58,8 @@ public class BkOper extends AppOper
     }
 
     var mgr = winMgr();
+
+    logger(new Logger(config().logFile()));
 
     try {
       mgr.open();
@@ -198,33 +196,8 @@ public class BkOper extends AppOper
     focusManager().pop();
   }
 
-  public static void doExp() {
-    if (EXP) {
-
-      long todaySeconds = dateToEpochSeconds("");
-      pr("today epoch seconds:", todaySeconds);
-      var dateStr = epochSecondsToDateString(todaySeconds);
-      pr("today:", dateStr);
-
-      var m = map();
-      String ss[] = { "", "2024/10/04", "10/04", "/10/4", "2024  10  04", "10/4", "8/4", "024/10/2",
-          "24/10/2", "apr 1", "2023 Apr 1", };
-      for (var s : ss) {
-        var c = DATE_VALIDATOR.validate(s);
-        int epochSeconds = c.typedValue();
-        String res = "";
-        if (epochSeconds != 0)
-          res = epochSecondsToDateString(epochSeconds);
-        m.putNumbered(s, res);
-      }
-      pr(m);
-      halt();
-    }
-  }
-
   private BkConfig mConfig;
   private AccountList mAccounts;
   private TransactionLedger mAllTransactionsLedger;
-  // private TransactionLedger mSpecificAccountLedger;
 
 }

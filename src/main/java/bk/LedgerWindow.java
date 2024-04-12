@@ -31,6 +31,10 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     return 0;
   }
 
+  public void discardCachedAccountInfo() {
+    mTriggerStringMap = null;
+  }
+
   @Override
   protected String supplyName() {
     return "LedgerWindow";
@@ -268,7 +272,7 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
   }
 
   public LedgerWindow openEntry() {
-    discardHintState();
+    discardCachedAccountInfo();
     checkState(mLedgerFieldList == null);
     mLedgerFieldList = arrayList();
     return this;
@@ -393,7 +397,7 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
   };
 
   private Map<String, Pair<Integer, Integer>> helperTriggers() {
-    if (mTriggerStringMap == null || alert("always rebuilding helper triggers")) {
+    if (mTriggerStringMap == null) {
       mTriggerStringMap = hashMap();
       var m = mTriggerStringMap;
       for (int pass = 0; pass < 2; pass++) {
@@ -428,11 +432,6 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
   // ------------------------------------------------------------------
   // Hint
   // ------------------------------------------------------------------
-
-  private void discardHintState() {
-    resetHintCursor();
-    mTriggerStringMap = null;
-  }
 
   private void resetHintCursor() {
     mHintBuffer.setLength(0);

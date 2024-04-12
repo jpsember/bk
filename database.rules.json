@@ -1,7 +1,7 @@
 { "rules" : { "sample" : {   "accounts" : [ 5100 ],
                               "actions" : [ { "account" : 1020,
                                                "action" : "transfer",
-                                               "amount" : "30%"
+                                               "amount" : "66.7%"
                                             } ],
                            "conditions" : [  ]
                          } } }

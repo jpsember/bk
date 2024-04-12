@@ -31,5 +31,5 @@ java \
 :/Users/home/.m2/repository/com/github/jpsember/java-testutil/1.3.1/java-testutil-1.3.1.jar\
 :/Users/home/.m2/repository/junit/junit/4.13.2/junit-4.13.2.jar\
 :/Users/home/.m2/repository/com/googlecode/lanterna/lanterna/3.1.2/lanterna-3.1.2.jar bk.Bk \
-file accounts.json
+"$@"
 

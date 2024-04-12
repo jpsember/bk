@@ -13,6 +13,7 @@ import bk.gen.Datatype;
 public class AccountList extends LedgerWindow implements ChangeListener {
 
   public AccountList(AccountListListener listener, TransactionListener transListener) {
+    loadTools();
     changeManager().addListener(this);
     mListener = listener;
     mTransListener = transListener;
@@ -139,8 +140,8 @@ public class AccountList extends LedgerWindow implements ChangeListener {
 
   @Override
   public void dataChanged(List<Integer> accountIds, List<Long> transactionIds) {
+    discardCachedAccountInfo();
     rebuild();
-    todo("!verify that it attempts to restore cursor to more or less the same location");
   }
 
   private AccountListListener mListener;

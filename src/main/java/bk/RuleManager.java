@@ -19,7 +19,6 @@ public class RuleManager extends BaseObject {
   public static final RuleManager SHARED_INSTANCE = new RuleManager();
 
   private RuleManager() {
-    todo("!don't allow editing of generated transactions");
     // alertVerbose();
   }
 
@@ -124,6 +123,7 @@ public class RuleManager extends BaseObject {
     int otherAccountNum = actionMap.getInt("account");
 
     var amount = determineTransactionAmount(parent, actionMap, "amount");
+
     int dr, cr;
     dr = cr = otherAccountNum;
     if (parent.debit() == mTriggerAccountNumber) {
@@ -151,7 +151,7 @@ public class RuleManager extends BaseObject {
     tr.amount(amount);
     tr.debit(dr);
     tr.credit(cr);
-    tr.description("(generated) " + parent.description());
+    tr.description(mTransferPercentDesc + " of " + formatCurrency(parent.amount()));
     tr.parent(mParent.timestamp());
     mNewChildren.add(tr.build());
   }
@@ -181,8 +181,9 @@ public class RuleManager extends BaseObject {
       var s = (String) val;
       // fucking regexes are stupidly complicated, abandoning them
       if (s.endsWith("%")) {
-        double pct = Double.parseDouble(s.substring(0, s.length() - 1));
-        amountInCents = Math.round(parentTransaction.amount() * (pct / 100));
+        mTransferPercent = Double.parseDouble(s.substring(0, s.length() - 1));
+        mTransferPercentDesc = s;
+        amountInCents = Math.round(parentTransaction.amount() * (mTransferPercent / 100));
       } else {
         badArg("for now, expected percentage, e.g. '33.333%'");
         amountInCents = Math.round(Double.parseDouble(s) * 100); // x 100 cents per dollar 
@@ -225,5 +226,7 @@ public class RuleManager extends BaseObject {
   private Transaction mParent;
   private int mTriggerAccountNumber;
   private List<Transaction> mNewChildren = arrayList();
+  private double mTransferPercent;
+  private String mTransferPercentDesc;
 
 }

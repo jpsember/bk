@@ -1,2 +1,2 @@
-touch _SKIP_log.txt
-tail -f _SKIP_log.txt
+touch bk_log.txt
+tail -f bk_log.txt

@@ -4,5 +4,8 @@ fields {
   bool create;
 
   // The location of the database
-  File file;
+  File database = "database.json";
+
+  // Where to write the logs (if empty, doesn't write logs anywhere)
+  File log_file = "bk_log.txt";
 }
