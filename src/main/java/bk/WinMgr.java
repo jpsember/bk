@@ -179,13 +179,7 @@ public class WinMgr extends BaseObject {
   }
 
   public void mainLoop() {
-    boolean exp = false;
     while (isOpen()) {
-      if (exp) {
-        alert("doing rules experiment");
-        RuleManager.SHARED_INSTANCE.applyRulesToAllTransactions();
-        exp = false;
-      }
       update();
       sleepMs(10);
       storage().flush();

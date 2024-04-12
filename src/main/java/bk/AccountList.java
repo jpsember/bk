@@ -108,6 +108,10 @@ public class AccountList extends LedgerWindow implements ChangeListener {
       focusManager().pushAppend(new TransactionLedger(0, mTransListener));
       break;
 
+    case ":R":
+      RuleManager.SHARED_INSTANCE.applyRulesToAllTransactions();
+      break;
+      
     case KeyEvent.ADD:
       mListener.addAccount();
       rebuild();

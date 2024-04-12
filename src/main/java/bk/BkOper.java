@@ -55,6 +55,7 @@ public class BkOper extends AppOper
           setError("Cannot locate database file:", f);
       }
       storage().read(f);
+      RuleManager.SHARED_INSTANCE.applyRulesToAllTransactions();
     }
 
     var mgr = winMgr();

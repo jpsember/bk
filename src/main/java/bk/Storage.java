@@ -36,20 +36,14 @@ public class Storage extends BaseObject {
   public void flush() {
     if (!mModified)
       return;
-
-    //if (mark("writing is DISABLED"))
-    //  return;
-
     var f = file();
     if (f.exists()) {
       bkup().makeBackup(f);
     }
-
     File tmp = new File(Files.parent(f), "_temporary_.json");
-    Files.S.writeWithPrettyIf(tmp, mDatabase, alert("!writing pretty"));
+    Files.S.writeWithPrettyIf(tmp, mDatabase, false && alert("!writing pretty"));
     Files.S.deleteFile(f);
     Files.S.moveFile(tmp, f);
-
     mModified = false;
   }
 

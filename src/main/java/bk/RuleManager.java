@@ -133,7 +133,6 @@ public class RuleManager extends BaseObject {
       dr = mTriggerAccountNumber;
 
     checkState(cr != dr, "account numbers are the same:", cr);
-    todo("!why are generated transactions appearing before their parents in the account ledger?");
 
     // If there is already a generated transaction in the child list matching this one, do nothing
     var existing = findChildTransaction(dr, cr, amount);
