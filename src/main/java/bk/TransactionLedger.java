@@ -154,6 +154,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       break;
 
     case KeyEvent.ADD:
+    case ":a":
       mListener.addTransaction(mAccountNumber);
       handled = true;
       break;
