@@ -200,7 +200,9 @@ public class RuleManager extends BaseObject {
       log("read rules:", INDENT, mRules);
       // Reformat them, and save (with backup) if it has changed
       var str = mRules.toString();
-      var content = Files.readString(file(), "{}");
+      if (!file().exists())
+        Files.S.writeString(file(), "{}");
+      var content = Files.readString(file());
       if (!content.equals(str)) {
         log("...rules changed with formatting from:", INDENT, content);
         log("to:", INDENT, str);
