@@ -4,6 +4,7 @@ import static bk.Util.*;
 import static js.base.Tools.*;
 
 import java.io.File;
+import java.util.List;
 
 import com.googlecode.lanterna.Symbols;
 
@@ -18,8 +19,21 @@ public class PrintManager extends BaseObject {
   public static final PrintManager SHARED_INSTANCE = new PrintManager();
 
   public void printLedger(Account a) {
-    loadTools();
-    loadUtil();
+
+    var ts = storage().readTransactionsForAccount(a.number());
+    ts.sort(TRANSACTION_COMPARATOR);
+
+    int maxCurrency = 0;
+    int maxDesc = 0;
+    {
+      long currBal = 0;
+      for (var t : ts) {
+        currBal += t.amount();
+        maxCurrency = Math.max(maxCurrency, formatCurrency(currBal).length());
+        maxCurrency = Math.max(maxCurrency, formatCurrency(t.amount()).length());
+        maxDesc = Math.max(maxDesc, t.description().length());
+      }
+    }
 
     var date = formatDate(epochSecondsToday());
     setTitle(a.number(), a.name(), date);
@@ -34,24 +48,26 @@ public class PrintManager extends BaseObject {
     dashes(mMaxLineLength);
     cr();
 
-    var ts = storage().readTransactionsForAccount(a.number());
-    ts.sort(TRANSACTION_COMPARATOR);
+    int minDesc = Math.min(maxDesc, CHARS_TRANSACTION_DESCRIPTION);
 
-    int max = 0;
-    long currBal = 0;
-    for (var t : ts) {
-      currBal += t.amount();
-      max = Math.max(max, formatCurrency(currBal).length());
-      max = Math.max(max, formatCurrency(t.amount()).length());
+    int charsCurrency = Math.max(maxCurrency, 8);
+    int extra = (CHARS_CURRENCY - charsCurrency) * 3 - 5;
+    if (minDesc == 0)
+      extra += 3;
+    extra += (CHARS_TRANSACTION_DESCRIPTION - minDesc);
+
+    int charsDesc = 0;
+    int ex1 = Math.max(10, extra);
+    int charsAccountNumName = CHARS_ACCOUNT_NUMBER_AND_NAME + ex1;
+    extra -= ex1;
+    if (minDesc != 0) {
+      charsDesc = minDesc;
+      int extra2 = Math.min(maxDesc - charsDesc, extra);
+      charsDesc += extra2;
+      extra -= extra2;
     }
 
-    int charsCurrency = Math.max(max, 8);
-    int extra = (CHARS_CURRENCY - charsCurrency) * 3 - 5;
-    int extra2 = extra / 2;
-    int charsDesc = CHARS_TRANSACTION_DESCRIPTION + extra2;
-    int charsAccountNumName = CHARS_ACCOUNT_NUMBER_AND_NAME + 10 + extra2;
-
-    currBal = 0;
+    long currBal = 0;
     mColumnSeps = true;
     for (var t : ts) {
       var other = otherAccount(t, a.number()).number();
@@ -178,11 +194,17 @@ public class PrintManager extends BaseObject {
     var f = new File(mDir, filename);
     log("saving to:", f);
     Files.S.writeString(f, mPageBuffer.toString());
+    log(mPageBuffer.toString());
     return this;
   }
 
   public PrintManager toDirectory(File dir) {
     mDir = Files.assertDirectoryExists(dir, "PrintManager.toDirectory");
+    return this;
+  }
+
+  public PrintManager pageWidth(int numChars) {
+    mMaxLineLength = numChars;
     return this;
   }
 
@@ -194,4 +216,23 @@ public class PrintManager extends BaseObject {
   private boolean mColumnSeps;
   private String mTitle = "untitled";
   private File mDir;
+
+  private static class Column {
+
+    public void add(Object msg) {
+      var s = "";
+      if (msg != null)
+        s = msg.toString();
+      mText.add(s);
+      mMaxTextLength = Math.max(mMaxTextLength, s.length());
+    }
+
+    public void setSeparator(String sep) {
+      mSeparator = sep;
+    }
+
+    List<String> mText;
+    int mMaxTextLength;
+    String mSeparator = " | ";
+  }
 }
