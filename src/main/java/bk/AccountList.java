@@ -31,18 +31,10 @@ public class AccountList extends LedgerWindow implements ChangeListener {
     return true;
   }
 
-  private static final boolean MERGED = true;
-
   private void addColumns() {
     spaceSeparators();
-    if (MERGED) {
-      addColumn(Column.newBuilder().name("Account").datatype(Datatype.TEXT)
-          .width(CHARS_ACCOUNT_NUMBER_AND_NAME).growPct(100));
-    } else {
-      addColumn(Column.newBuilder().name("#").datatype(Datatype.ACCOUNT_NUMBER));
-      addColumn(
-          Column.newBuilder().name("Name").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NAME).growPct(100));
-    }
+    addColumn(Column.newBuilder().name("Account").datatype(Datatype.TEXT)
+        .width(12).growPct(100));
     addColumn(Column.newBuilder().name("Balance").alignment(Alignment.RIGHT).width(CHARS_CURRENCY)
         .datatype(Datatype.CURRENCY));
   }
@@ -58,13 +50,7 @@ public class AccountList extends LedgerWindow implements ChangeListener {
 
     for (var t : sorted) {
       openEntry();
-      if (MERGED) {
-        add(new AccountNameField(t.number(), storage().accountName(t.number())));
-      } else {
-        add(new AccountNumberField(t.number()));
-        add(new AccountNameField(t.name()));
-      }
-
+      add(new AccountNameField(t.number(), storage().accountName(t.number())));
       add(new CurrencyField(t.balance()));
       closeEntry(t);
     }
@@ -111,7 +97,7 @@ public class AccountList extends LedgerWindow implements ChangeListener {
     case ":R":
       RuleManager.SHARED_INSTANCE.applyRulesToAllTransactions();
       break;
-      
+
     case KeyEvent.ADD:
       mListener.addAccount();
       rebuild();
