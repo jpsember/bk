@@ -26,7 +26,8 @@ public class AccountForm extends FormWindow {
     mType = type;
     setSizeChars(12);
     mListener = listener;
-    mNumber = validator(new AccountValidator()).value(account.number()).addField("#");
+    var val = new AccountValidator().withForNewAccount(type == TYPE_ADD);
+    mNumber = validator(val).value(account.number()).addField("#");
     mName = validator(ACCOUNT_NAME_VALIDATOR).value(account.name()).fieldWidth(ACCOUNT_NAME_MAX_LENGTH)
         .addField("Name");
     mBudget = validator(BUDGET_VALIDATOR).value(account.budget()).addField("Budget");

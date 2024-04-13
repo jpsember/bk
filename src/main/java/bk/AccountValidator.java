@@ -34,17 +34,23 @@ public class AccountValidator extends BaseObject implements Validator {
       nameStr = s;
     }
     try {
-      log("parsing:", numberStr);
       var i = Integer.parseInt(numberStr);
       if (i < 1000 || i > 5999)
         throw badArg("unexpected account number", i);
 
-      result = new ValidationResult(accountNumberWithNameString(i, nameStr), i);
+      Integer intRes = i;
+      String s;
+      if (mForNewAccountFlag && account(i) != null) {
+        s = numberStr + " !!! Already exists";
+        intRes = null;
+      } else {
+        s = accountNumberWithNameString(i, nameStr);
+      }
+      result = new ValidationResult(s, intRes);
       result.setExtraString(nameStr);
     } catch (Throwable t) {
       log("failed to validate:", quote(value), "got:", t);
     }
-
     return result;
   }
 
@@ -64,5 +70,12 @@ public class AccountValidator extends BaseObject implements Validator {
     }
     return out;
   }
+
+  public AccountValidator withForNewAccount(boolean b) {
+    mForNewAccountFlag = b;
+    return this;
+  }
+
+  public boolean mForNewAccountFlag;
 
 }

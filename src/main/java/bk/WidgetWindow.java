@@ -7,7 +7,7 @@ import js.geometry.MyMath;
 
 public class WidgetWindow extends JWindow implements FocusHandler {
   
-  public static final int DEFAULT_WIDTH = 16;
+  public static final int DEFAULT_WIDTH = 30;
 
   
   public WidgetWindow width(int width) {
