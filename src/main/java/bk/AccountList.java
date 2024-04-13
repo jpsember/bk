@@ -17,8 +17,18 @@ public class AccountList extends LedgerWindow implements ChangeListener {
     changeManager().addListener(this);
     mListener = listener;
     mTransListener = transListener;
+    setFooterHeight(3);
     addColumns();
     rebuild();
+  }
+
+  @Override
+  public void plotFooterContent(int y, int height) {
+    var r = Render.SHARED_INSTANCE;
+    var b = r.clipBounds();
+    int x = b.x;
+    plotString("A:add     ret:ledger  T:trans  opt-z:undo", x, y);
+    plotString("E:edit  opt-D:delete  P:print  opt-Z:redo  Q:quit", x, y + 1);
   }
 
   @Override
@@ -33,8 +43,7 @@ public class AccountList extends LedgerWindow implements ChangeListener {
 
   private void addColumns() {
     spaceSeparators();
-    addColumn(Column.newBuilder().name("Account").datatype(Datatype.TEXT)
-        .width(12).growPct(100));
+    addColumn(Column.newBuilder().name("Account").datatype(Datatype.TEXT).width(12).growPct(100));
     addColumn(Column.newBuilder().name("Balance").alignment(Alignment.RIGHT).width(CHARS_CURRENCY)
         .datatype(Datatype.CURRENCY));
   }
@@ -84,7 +93,7 @@ public class AccountList extends LedgerWindow implements ChangeListener {
       winMgr().quit();
       break;
 
-    case KeyEvent.ENTER:
+    case KeyEvent.RETURN:
       if (a != null) {
         mListener.viewAccount(a);
       }

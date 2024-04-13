@@ -27,6 +27,10 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     mHeaderHeight = height;
   }
 
+  public void setFooterHeight(int height) {
+    mFooterHeight = height;
+  }
+
   public int chooseCurrentRow() {
     return 0;
   }
@@ -64,6 +68,23 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     }
   }
 
+  public void plotFooter(int y, int height) {
+    if (height >= 2) {
+      plotHorzLine(y);
+      y++;
+      height--;
+    }
+    plotFooterContent(y, height);
+  }
+
+  public void plotFooterContent(int y, int height) {
+    var r = Render.SHARED_INSTANCE;
+    var b = r.clipBounds();
+    int x = b.x;
+    for (int i = 0; i < height; i++)
+      plotString("***plotFooterContent unimplemented***", x, y);
+  }
+
   @Override
   public void paint() {
     prepareToRender();
@@ -71,14 +92,21 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     var clip = r.clipBounds();
 
     int headerRowTotal = mHeaderHeight;
+    var footerRowTotal = mFooterHeight;
+    if (!hasFocus()) {
+      footerRowTotal = 0;
+    }
     int headerScreenY = clip.y;
-    int bodyRowTotal = clip.height - headerRowTotal;
+    int bodyRowTotal = clip.height - headerRowTotal - footerRowTotal;
     int bodyScreenY = headerScreenY + headerRowTotal;
+    var footerScreenY = bodyScreenY + bodyRowTotal;
     mLastBodyRowTotal = bodyRowTotal;
 
     calculateColumnWidths(clip.width);
 
     plotHeader(headerScreenY, mHeaderHeight);
+    if (footerRowTotal > 0)
+      plotFooter(footerScreenY, footerRowTotal);
 
     // Determine the starting offset, to keep the cursor row near the center of the window
     int firstLedgerRowNum = Math.max(0, (mCursorRow - bodyRowTotal / 2));
@@ -193,6 +221,10 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     if (targetEntry != null) {
       setCurrentRowIndex(targetEntry);
     }
+  }
+
+  protected void plotString(String text, int x, int y) {
+    plotString(text, x, y, Alignment.LEFT, -1);
   }
 
   protected void plotString(String text, int x, int y, Alignment alignment, int width) {
@@ -493,4 +525,5 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
   private Map<String, Pair<Integer, Integer>> mTriggerStringMap;
   private long mLastHintKeyTime;
   private int mHeaderHeight = 2;
+  private int mFooterHeight = 0;
 }

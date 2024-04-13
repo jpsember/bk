@@ -13,7 +13,7 @@ import static js.base.Tools.*;
 public class KeyEvent {
 
   public static final String //
-  ENTER = ":Enter" //
+  RETURN = ":Enter" //
       , ESCAPE = ":Escape" //
       , DELETE_TRANSACTION = ":∂" //
       , DELETE_ACCOUNT = ":Î" //
@@ -21,7 +21,7 @@ public class KeyEvent {
       , ADD = ":A" //
       , EDIT = ":E" //   
       , OPTION_Z = ":Ω" //
-      , PRINT = ":π" //
+      , PRINT = ":P" //
       , OPTION_SHIFT_Z = ":¸" //
       , OPTION_Q = ":œ" //
       , ARROW_UP = ":ArrowUp" //

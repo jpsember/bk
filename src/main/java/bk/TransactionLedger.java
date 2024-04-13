@@ -20,6 +20,8 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     // Be careful not to store the actual Account reference, since it may change unexpectedly!
     mAccountNumber = accountNumberOrZero;
     setHeaderHeight(hasBudget() ? 5 : 4);
+
+    setFooterHeight(3);
     rebuild();
   }
 
@@ -65,6 +67,18 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       }
     }
     super.plotHeader(y, headerHeight);
+  }
+
+  @Override
+  public void plotFooterContent(int y, int height) {
+    var r = Render.SHARED_INSTANCE;
+    var b = r.clipBounds();
+    int x = b.x;
+    plotString("A:add       ret:edit   opt-z:undo", x, y);
+    var msg = "opt-d:delete  P:print  opt-Z:redo  esc:back";
+    if (mAccountNumber == 0)
+      msg.replace("P:print", "       ");
+    plotString(msg, x, y + 1);
   }
 
   private void plotLabelledAmount(String label, long amount, int slot, int y) {
@@ -149,7 +163,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     switch (k.toString()) {
 
     case KeyEvent.EDIT:
-    case KeyEvent.ENTER:
+    case KeyEvent.RETURN:
       if (t != null && !isGenerated(t)) {
         mListener.editTransaction(mAccountNumber, t);
       }
@@ -170,6 +184,12 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       handled = true;
       break;
 
+    case KeyEvent.PRINT:
+      handled = true;
+      if (mAccountNumber != 0) {
+        PrintManager.SHARED_INSTANCE.printLedger(getAccount());
+      }
+      break;
     }
     if (!handled)
       super.processKeyEvent(k);
