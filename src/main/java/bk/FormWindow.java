@@ -21,13 +21,18 @@ public class FormWindow extends JContainer {
     return this;
   }
 
-  public FormWindow addMessageLine() {
+  public final FormWindow addMessageLine() {
     checkState(mMessage == null);
     MessageWindow widget;
     widget = new MessageWindow();
     widget.setSize(1);
     addChild(widget);
     mMessage = widget;
+    return this;
+  }
+
+  public final FormWindow addFooter(int size) {
+    todo("addFooter size:", size);
     return this;
   }
 

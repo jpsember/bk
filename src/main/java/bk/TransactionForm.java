@@ -38,9 +38,13 @@ public class TransactionForm extends FormWindow {
         .fieldWidth(CHARS_ACCOUNT_NUMBER_AND_NAME).addField("Cr").helper(new AccountIdHelper());
     mDesc = validator(DESCRIPTION_VALIDATOR).value(b.description()).fieldWidth(80).addField("Description");
     addButton("Ok", () -> okHandler());
-    addButton("Cancel", () -> cancelHandler());
+    if (!alert("we don't need a cancel button; esc serves"))
+      addButton("Cancel", () -> cancelHandler());
     addVertSpace(1);
     addMessageLine();
+    alert("now adding stretchable vertical space");
+     addVertSpace(-100);
+     addFooter(2);
   }
 
   private void okHandler() {
