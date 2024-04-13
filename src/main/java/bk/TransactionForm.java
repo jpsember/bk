@@ -55,10 +55,8 @@ public class TransactionForm extends FormWindow {
   }
 
   private void okHandler() {
-
-    String problem = "One or more fields is invalid.";
     var tr = Transaction.newBuilder();
-
+    String problem = "This field is invalid.";
     do {
 
       if (mAccountNumber != 0) {
@@ -97,13 +95,15 @@ public class TransactionForm extends FormWindow {
       tr.credit(mCr.validResult());
       tr.description(mDesc.validResult());
 
-      problem = validateTransaction(tr);
-      if (problem != null)
+      if (tr.debit() == tr.credit()) {
+        problem = "The account numbers cannot be the same!";
+        focusManager().set(mDr);
         break;
-
+      }
+      problem = null;
       // If user specified accounts that don't exist, create them
       createMissingAccounts(tr, mDr.validationResult().extraString(), mCr.validationResult().extraString());
-      problem = null;
+
     } while (false);
 
     if (problem != null) {
