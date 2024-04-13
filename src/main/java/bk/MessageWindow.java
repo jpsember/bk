@@ -21,7 +21,6 @@ public class MessageWindow extends JWindow {
   public void paint() {
     var r = Render.SHARED_INSTANCE;
     var b = r.clipBounds();
-    pr("message window paint, bounds:",b);
     b = b.withInset(1, 0);
 
     for (int row = 0; row < 3; row++) {

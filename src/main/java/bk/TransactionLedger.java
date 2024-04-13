@@ -121,12 +121,11 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       add(new DateField(t.date()));
 
       var amt = t.amount();
-      // Adjust sign based on which of debit or credit matches the current account 
+      // If ledger is for a particular account, negate sign
+      // based on which of debit or credit matches the current account 
       if (mAccountNumber != 0) {
         if (t.credit() == mAccountNumber)
           amt = -amt;
-      } else {
-        todo("what do we do here for the general ledger?");
       }
 
       add(new CurrencyField(amt));

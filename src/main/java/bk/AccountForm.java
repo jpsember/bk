@@ -39,33 +39,44 @@ public class AccountForm extends FormWindow {
   }
 
   private void okHandler() {
-    String problem = "One or more fields is invalid.";
     var ac = Account.newBuilder();
-    if (mNumber.valid() && mName.valid() && mBudget.valid()) {
+
+    String problem = "This field is invalid.";
+
+    outer: do {
+      if (mNumber.showAlert())
+        break;
+      if (mName.showAlert())
+        break;
+      if (mBudget.showAlert())
+        break;
+
       ac.number(mNumber.validResult());
       ac.name(mName.validResult());
       ac.budget(mBudget.validResult());
-      problem = validateAccount(ac);
-    }
-
-    if (problem == null) {
 
       switch (mType) {
       case TYPE_ADD: {
         var existing = account(ac.number());
-        if (existing != null)
-          problem = "That account number is taken!";
+        if (existing != null) {
+          problem = "This account number is taken!";
+          break outer;
+        }
       }
         break;
 
       case TYPE_EDIT: {
         var existing = storage().account(ac.number());
-        if (existing != null && ac.number() != mOriginalAccount.number())
-          problem = "That account number is taken!";
+        if (existing != null && ac.number() != mOriginalAccount.number()) {
+          problem = "This account number is taken!";
+          break outer;
+        }
       }
         break;
       }
-    }
+      problem = null;
+    } while (false);
+
     if (problem != null) {
       setMessage(problem);
       return;
