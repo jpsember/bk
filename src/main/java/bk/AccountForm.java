@@ -21,7 +21,6 @@ public class AccountForm extends FormWindow {
   public static final int TYPE_ADD = 0, TYPE_EDIT = 1;
 
   public AccountForm(int type, Account account, Listener listener) {
-    loadTools();
     account = nullTo(account, Account.DEFAULT_INSTANCE).build();
     mOriginalAccount = account;
     mType = type;

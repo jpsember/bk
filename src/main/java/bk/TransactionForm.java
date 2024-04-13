@@ -25,11 +25,6 @@ public class TransactionForm extends FormWindow {
     mOrig = b.build();
 
     mType = type;
-    if (FORMEXP) {
-      alert("not setting size");
-    } else {
-      setSizeChars(FORMEXP ? 20 : 8);
-    }
 
     var dt = b.date();
     if (dt == 0)
@@ -42,27 +37,18 @@ public class TransactionForm extends FormWindow {
         .fieldWidth(CHARS_ACCOUNT_NUMBER_AND_NAME).addField("Cr").helper(new AccountIdHelper());
     mDesc = validator(DESCRIPTION_VALIDATOR).value(b.description()).fieldWidth(80).addField("Description");
     addButton("Ok", () -> okHandler());
-    if (!alert("we don't need a cancel button; esc serves"))
+   if (false) // we don't need a cancel button; esc will do
       addButton("Cancel", () -> cancelHandler());
 
     addVertSpace(1);
     addMessageLine();
-    if (true) {
-      alert("now adding stretchable vertical space");
-      addVertSpace(-100);
-    }
+    addVertSpace(-100);
 
-    if (FORMEXP) {
-
+    {
       var f = new FooterWindow();
-
       addChild(f);
-
-      f.setMessageAt(0, " esc:cancel");
-      f.setMessageAt(1, "   hey ");
-
+      f.setMessageAt(1, " esc:cancel");
     }
-
   }
 
   private void okHandler() {
