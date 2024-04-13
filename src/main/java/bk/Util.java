@@ -26,6 +26,8 @@ import js.json.JSMap;
 
 public final class Util {
 
+  public static final boolean FORMEXP = true;
+
   public static final int BORDER_NONE = 0;
   public static final int BORDER_THIN = 1;
   public static final int BORDER_THICK = 2;

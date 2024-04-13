@@ -5,6 +5,8 @@ import static js.base.Tools.*;
 
 import java.util.List;
 
+import com.googlecode.lanterna.Symbols;
+
 import js.base.BaseObject;
 import js.geometry.IRect;
 
@@ -190,6 +192,11 @@ public class JWindow extends BaseObject {
   void setBorder(int type) {
     checkArgument(type >= 0 && type < BORDER_TOTAL);
     mFlags = (mFlags & ~FLG_BORDER) | type;
+  }
+
+  public final void plotHorzLine(int y) {
+    var r = Render.SHARED_INSTANCE;
+    r.clearRow(y, Symbols.SINGLE_LINE_HORIZONTAL);
   }
 
   private int mSizeExpr = -50;

@@ -25,7 +25,11 @@ public class TransactionForm extends FormWindow {
     mOrig = b.build();
 
     mType = type;
-    setSizeChars(12);
+    if (FORMEXP) {
+      alert("not setting size");
+    } else {
+      setSizeChars(FORMEXP ? 20 : 8);
+    }
 
     var dt = b.date();
     if (dt == 0)
@@ -40,11 +44,25 @@ public class TransactionForm extends FormWindow {
     addButton("Ok", () -> okHandler());
     if (!alert("we don't need a cancel button; esc serves"))
       addButton("Cancel", () -> cancelHandler());
+
     addVertSpace(1);
     addMessageLine();
-    alert("now adding stretchable vertical space");
-     addVertSpace(-100);
-     addFooter(2);
+    if (true) {
+      alert("now adding stretchable vertical space");
+      addVertSpace(-100);
+    }
+
+    if (FORMEXP) {
+
+      var f = new FooterWindow();
+
+      addChild(f);
+
+      f.setMessageAt(0, " esc:cancel");
+      f.setMessageAt(1, "   hey ");
+
+    }
+
   }
 
   private void okHandler() {

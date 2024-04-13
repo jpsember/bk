@@ -10,7 +10,7 @@ public class FormWindow extends JContainer {
 
   public FormWindow() {
     todo("?incorporate this into WinMgr");
-    setBorder(BORDER_ROUNDED);
+  setBorder(BORDER_THICK);
   }
 
   public FormWindow addButton(String label, ButtonListener listener) {
@@ -32,8 +32,15 @@ public class FormWindow extends JContainer {
   }
 
   public final FormWindow addFooter(int size) {
-    todo("addFooter size:", size);
+    var msg = new MessageWindow();
+    msg.setSize(size);
+    addChild(msg);
+    mFooter = msg;
     return this;
+  }
+
+  public final MessageWindow footer() {
+    return mFooter;
   }
 
   public FormWindow setMessage(String message) {
@@ -79,5 +86,6 @@ public class FormWindow extends JContainer {
   private Validator mPendingValidator;
   private Object mPendingValue;
   private MessageWindow mMessage;
-  private int mPendingWidth = WidgetWindow.DEFAULT_WIDTH;;
+  private int mPendingWidth = WidgetWindow.DEFAULT_WIDTH;
+  private MessageWindow mFooter;
 }

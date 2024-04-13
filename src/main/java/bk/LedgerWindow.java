@@ -56,11 +56,7 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     }
   }
 
-  public void plotHorzLine(int y) {
-    var r = Render.SHARED_INSTANCE;
-    r.clearRow(y, Symbols.SINGLE_LINE_HORIZONTAL);
-  }
-
+ 
   public void plotHeader(int y, int headerHeight) {
     if (headerHeight >= 2) {
       plotColumnLabels(y + headerHeight - 2);
