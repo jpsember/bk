@@ -290,8 +290,6 @@ public final class Util {
   public static final Validator CURRENCY_VALIDATOR = new CurrencyValidator();
   public static final Validator BUDGET_VALIDATOR = new CurrencyValidator().withCanBeZero(true);
 
-  public static final Validator ACCOUNT_VALIDATOR = new AccountValidator();
-
   public static final Validator ACCOUNT_NAME_VALIDATOR = new Validator() {
     public ValidationResult validate(String value) {
       var result = ValidationResult.NONE;
@@ -356,11 +354,13 @@ public final class Util {
     return null;
   }
 
-  public static void createMissingAccounts(Transaction t) {
+  public static void createMissingAccounts(Transaction t, String optNameDr, String optNameCr) {
     for (int pass = 0; pass < 2; pass++) {
       int n = pass == 0 ? t.debit() : t.credit();
+      String optName = pass == 0 ? optNameDr : optNameCr;
       if (account(n) == null) {
-        var a = Account.newBuilder().number(n).name("*** New #" + n + " ***");
+        var a = Account.newBuilder().number(n);
+        a.name(optName);
         setMessageDuration(30);
         setFooterMessage("Created account:", a.name());
         storage().addOrReplace(a);
@@ -488,14 +488,15 @@ public final class Util {
     return sChangeManager;
   }
 
-  public static String accountNumberWithNameString(int optAccountNumber, boolean emptyIfNotExist) {
+  public static String accountNumberWithNameString(int optAccountNumber, String nameIfMissing) {
     if (optAccountNumber == 0)
       return "";
     var ac = account(optAccountNumber);
     if (ac == null) {
-      if (emptyIfNotExist)
-        return "";
-      return optAccountNumber + " ???";
+      var arg = " ???";
+      if (!nullOrEmpty(nameIfMissing))
+        arg = " " + nameIfMissing + arg;
+      return optAccountNumber + arg;
     }
     return accountNumberWithNameString(ac);
   }

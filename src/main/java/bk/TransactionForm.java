@@ -31,14 +31,17 @@ public class TransactionForm extends FormWindow {
       dt = epochSecondsToday();
     mDate = validator(DATE_VALIDATOR).value(dt).addField("Date");
     mAmount = validator(CURRENCY_VALIDATOR).value(b.amount()).addField("Amount");
-    mDr = validator(ACCOUNT_VALIDATOR).value(accountNumberWithNameString(b.debit(), false))
+
+    mDrV = new AccountValidator();
+    mCrV = new AccountValidator();
+
+    mDr = validator(mDrV).value(accountNumberWithNameString(b.debit(), ""))
         .fieldWidth(CHARS_ACCOUNT_NUMBER_AND_NAME).addField("Dr").helper(new AccountIdHelper());
-    mCr = validator(ACCOUNT_VALIDATOR).value(accountNumberWithNameString(b.credit(), false))
+    mCr = validator(mCrV).value(accountNumberWithNameString(b.credit(), ""))
         .fieldWidth(CHARS_ACCOUNT_NUMBER_AND_NAME).addField("Cr").helper(new AccountIdHelper());
+
     mDesc = validator(DESCRIPTION_VALIDATOR).value(b.description()).fieldWidth(80).addField("Description");
     addButton("Ok", () -> okHandler());
-   if (false) // we don't need a cancel button; esc will do
-      addButton("Cancel", () -> cancelHandler());
 
     addVertSpace(1);
     addMessageLine();
@@ -80,6 +83,13 @@ public class TransactionForm extends FormWindow {
       }
       problem = null;
 
+      problem = checkNameMissingForNew(mDr);
+      if (problem != null)
+        break;
+      problem = checkNameMissingForNew(mCr);
+      if (problem != null)
+        break;
+
       tr.timestamp(storage().uniqueTimestamp());
       tr.date(mDate.validResult());
       tr.amount(mAmount.validResult());
@@ -92,8 +102,7 @@ public class TransactionForm extends FormWindow {
         break;
 
       // If user specified accounts that don't exist, create them
-      createMissingAccounts(tr);
-
+      createMissingAccounts(tr, mDr.validationResult().extraString(), mCr.validationResult().extraString());
       problem = null;
     } while (false);
 
@@ -125,13 +134,22 @@ public class TransactionForm extends FormWindow {
     mListener.editedTransaction(this, edited);
   }
 
-  private void cancelHandler() {
-    mListener.editedTransaction(this, null);
+  private String checkNameMissingForNew(WidgetWindow w) {
+    var v = w.validationResult();
+    int number = v.typedValue();
+    if (account(number) == null) {
+      if (v.extraString().isEmpty()) {
+        focusManager().set(w);
+        return "No such account! Specify a name to create a new one, e.g. '" + number + " xyz'";
+      }
+    }
+    return null;
   }
 
   private Listener mListener;
   private int mType;
   private WidgetWindow mDate, mAmount, mDr, mCr, mDesc;
+  private AccountValidator mDrV, mCrV;
   private int mAccountNumber;
   private Transaction mOrig;
 }

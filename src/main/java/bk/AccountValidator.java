@@ -13,24 +13,34 @@ public class AccountValidator extends BaseObject implements Validator {
 
     value = value.trim();
 
+    // Split it into up into two sections:
+    // 1) the number
+    // 2) anything following the first space or colon, to treat as a potential name
+
+    String numberStr, nameStr;
     // If there is anything following the first space or ":", replace the whole
     // thing with the account number + name.
     {
       int i = value.indexOf(' ');
       if (i < 0)
+        i = value.indexOf(':');
+      if (i < 0)
         i = value.length();
-      int j = value.indexOf(':');
-      if (j < 0)
-        j = value.length();
-      value = value.substring(0, Math.min(i, j));
-      log("trimmed name:", value);
+
+      numberStr = value.substring(0, i).trim();
+
+      var s = chompPrefix(value.substring(i), ":").trim();
+      s = chomp(s, "???").trim();
+      nameStr = s;
     }
     try {
-      log("parsing:", value);
-      var i = Integer.parseInt(value);
+      log("parsing:", numberStr);
+      var i = Integer.parseInt(numberStr);
       if (i < 1000 || i > 5999)
         throw badArg("unexpected account number", i);
-      result = new ValidationResult(accountNumberWithNameString(i, false), i);
+
+      result = new ValidationResult(accountNumberWithNameString(i, nameStr), i);
+      result.setExtraString(nameStr);
     } catch (Throwable t) {
       log("failed to validate:", quote(value), "got:", t);
     }
@@ -54,4 +64,5 @@ public class AccountValidator extends BaseObject implements Validator {
     }
     return out;
   }
+
 }

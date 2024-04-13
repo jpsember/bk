@@ -10,16 +10,23 @@ public class ValidationResult {
     mValidatedValue = validatedValue;
   }
 
+  public void setExtraString(String s) {
+    mExtraStringValue = nullToEmpty(s);
+  }
+
   @Override
   public String toString() {
     var m = map();
     m.put("string", mStringValue);
     m.put("value", db(mValidatedValue));
+    if (nonEmpty(extraString()))
+      m.put("string_extra", extraString());
     return m.toString();
   }
 
   private String mStringValue;
   private Object mValidatedValue;
+  private String mExtraStringValue;
 
   public String string() {
     return mStringValue;
@@ -27,6 +34,10 @@ public class ValidationResult {
 
   public Object value() {
     return mValidatedValue;
+  }
+
+  public String extraString() {
+    return nullToEmpty(mExtraStringValue);
   }
 
   public <T> T typedValue() {
