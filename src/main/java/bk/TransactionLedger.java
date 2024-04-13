@@ -56,9 +56,10 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       var s = accountNumberWithNameString(a);
       plotString(s, clip.x, y, Alignment.LEFT, CHARS_ACCOUNT_NUMBER_AND_NAME);
       if (hasBudget()) {
+        long spent = -a.balance();
         plotLabelledAmount("Budget", a.budget(), 1, y);
-        plotLabelledAmount("Spent", a.balance(), 0, y + 1);
-        plotLabelledAmount("Avail", a.budget() - a.balance(), 1, y + 1);
+        plotLabelledAmount("Spent", spent, 0, y + 1);
+        plotLabelledAmount("Avail", a.budget() - spent, 1, y + 1);
       } else {
         plotLabelledAmount("Balance", a.balance(), 1, y);
       }

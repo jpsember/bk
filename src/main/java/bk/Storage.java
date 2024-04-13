@@ -22,6 +22,8 @@ public class Storage extends BaseObject {
     //alertVerbose();
     withFile(file);
     var m = JSMap.fromFileIfExists(file());
+    if (!file().exists())
+      setModified();
     var db = Files.parseAbstractData(Database.DEFAULT_INSTANCE, m);
     mDatabase = db.toBuilder();
     log("read", accounts().size(), "accounts and", transactions().size(), "transactions");
