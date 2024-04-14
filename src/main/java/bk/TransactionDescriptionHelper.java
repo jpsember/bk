@@ -3,6 +3,8 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
+import java.util.List;
+
 public class TransactionDescriptionHelper extends WidgetHelper {
 
   @Override
@@ -22,7 +24,13 @@ public class TransactionDescriptionHelper extends WidgetHelper {
         t.addSentence(tr.description(), null);
       }
       sTri = t;
-      todo("have change listener update the tri");
+      changeManager()
+          .addListener((List<Integer> modifiedAccountNumbers, List<Long> modifiedTransactionTimestamps) -> {
+            for (var tt : modifiedTransactionTimestamps) {
+              var tr = storage().transaction(tt);
+              sTri.addSentence(tr.description(), null);
+            }
+          });
     }
     return sTri;
   }
