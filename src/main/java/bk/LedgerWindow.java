@@ -408,6 +408,13 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     }
   }
 
+  public void updateCurrentRowData(Object auxData, boolean marked) {
+    checkState(mCursorRow < mEntries.size());
+    var ent = mEntries.get(mCursorRow);
+    ent.auxData = auxData;
+    ent.marked = marked;
+  }
+
   private int clampCursor(int cursor) {
     cursor = MyMath.clamp(cursor, 0, Math.max(0, mEntries.size() - 1));
     return cursor;
