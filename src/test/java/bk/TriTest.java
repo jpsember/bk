@@ -15,9 +15,14 @@ public class TriTest extends MyTestCase {
     ask("a", "ab", "abc", "abcd", "b");
   }
 
-  private void add(Object... strs) {
+  private void add(String... strs) {
     for (var x : strs) {
-      tri().add(x.toString());
+      tri().addSentence(x.toString());
+    }
+    for (var x : strs) {
+      for (var y : split(x, ' ')) {
+        tri().addWord(y);
+      }
     }
   }
 
@@ -27,11 +32,9 @@ public class TriTest extends MyTestCase {
       result().putNumbered(s, res);
     }
     var x = result().prettyPrint();
-    log(x);
+    log("\n" + x);
     assertHash(x);
   }
-
-  private Tri mTri;
 
   private Tri tri() {
     if (mTri == null) {
@@ -48,5 +51,6 @@ public class TriTest extends MyTestCase {
     return mRes;
   }
 
+  private Tri mTri;
   private JSMap mRes;
 }
