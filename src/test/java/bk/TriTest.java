@@ -54,6 +54,14 @@ public class TriTest extends MyTestCase {
     ask("a", "al", "alp", "alph", "alpha", "alphab");
   }
 
+  @Test
+  public void b() {
+    tri().addSentence("1200 Foo", "s1");
+    tri().addSentence("5050 Management and admin fees", "s2");
+    log("Tri:", INDENT, tri());
+    ask("f", "fe", "fee", "feeb");
+  }
+
   private void add(String... strs) {
     // Add a prefix to demonstrate that the output sentence can differ from the input one
     for (var x : strs)

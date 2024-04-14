@@ -89,15 +89,16 @@ public class Tri extends BaseObject {
       if (ci < 0)
         return "";
       node = node.childNodes[ci];
-      if (best == null || best.answer.length() < i + 1) {
-        best = node;
-      } else {
-        int r = Boolean.compare(node.isSentencePrefix, best.isSentencePrefix);
-        if (r == 0)
-          r = -Integer.compare(node.answer.length(), best.answer.length());
-        if (r > 0)
-          best = node;
-      }
+      best = node;
+//      if (best == null || best.answer.length() < i + 1) {
+//        best = node;
+//      } else {
+//        int r = Boolean.compare(node.isSentencePrefix, best.isSentencePrefix);
+//        if (r == 0)
+//          r = -Integer.compare(node.answer.length(), best.answer.length());
+//        if (r > 0)
+//          best = node;
+//      }
     }
     return best.answer;
   }

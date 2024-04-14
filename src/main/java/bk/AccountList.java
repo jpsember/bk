@@ -59,6 +59,7 @@ public class AccountList extends LedgerWindow implements ChangeListener {
 
     for (var t : sorted) {
       openEntry();
+      addHint(accountNumberWithNameString(t));
       add(new AccountNameField(t.number(), storage().accountName(t.number())));
       add(new CurrencyField(t.balance()));
       closeEntry(t);
@@ -139,7 +140,7 @@ public class AccountList extends LedgerWindow implements ChangeListener {
 
   @Override
   public void dataChanged(List<Integer> accountIds, List<Long> transactionIds) {
-    discardCachedAccountInfo();
+    //  discardCachedAccountInfo();
     rebuild();
   }
 
