@@ -35,6 +35,11 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     return true;
   }
 
+  @Override 
+  public boolean isMarked(Object auxData) {
+    return isMarked((Transaction)auxData);
+  }
+  
   private boolean hasBudget() {
     return getAccount().budget() != 0;
   }
@@ -191,8 +196,8 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
     case KeyEvent.MARK:
       if (t != null) {
-        t = storage().toggleMark(t);
-        updateCurrentRowData(id(t), isTrue(t.mark()));
+        toggleMark(t);
+       // updateCurrentRowData(id(t), isMarked(t));
         repaint();
       }
       break;

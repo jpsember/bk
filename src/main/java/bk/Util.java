@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 import bk.gen.Account;
@@ -626,6 +627,19 @@ public final class Util {
       setFooterMessage();
     }
   }
+
+  public static void toggleMark(Transaction t) {
+    checkState(UndoManager.SHARED_INSTANCE.live());
+    var id = id(t);
+    if (!sMarkedTransactionSet.remove(id))
+      sMarkedTransactionSet.add(id);
+  }
+
+  public static boolean isMarked(Transaction t) {
+    return sMarkedTransactionSet.contains(id(t));
+  }
+
+  public static Set<Long> sMarkedTransactionSet = hashSet();
 
   public static final int CHARS_ACCOUNT_NAME = 25;
   public static final int CHARS_DATE = 10;

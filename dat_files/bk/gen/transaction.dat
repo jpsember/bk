@@ -11,5 +11,4 @@ fields {
 
   // If non-zero, this transaction was generated via a rule from this transaction
   long parent;
-  bool mark;
 }

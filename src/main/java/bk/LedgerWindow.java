@@ -23,6 +23,10 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     setBorder(BORDER_THICK);
   }
 
+  public boolean isMarked(Object auxData) {
+    return false;
+  }
+
   public void setHeaderHeight(int height) {
     mHeaderHeight = height;
   }
@@ -113,14 +117,16 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
       int rowNum = bodyRowIndex + firstLedgerRowNum;
 
       Entry ent = null;
+      boolean marked = false;
       if (!(rowNum < 0 || rowNum >= mEntries.size())) {
         ent = mEntries.get(rowNum);
+        marked = isMarked(ent.auxData);
       }
       var style = STYLE_NORMAL;
       var hl = hasFocus() && rowNum == mCursorRow;
       if (hl)
-        style = ent.marked ? STYLE_INVERSE_AND_MARK : STYLE_INVERSE;
-      else if (ent != null && ent.marked)
+        style = marked ? STYLE_INVERSE_AND_MARK : STYLE_INVERSE;
+      else if (marked)
         style = STYLE_MARKED;
 
       r.pushStyle(style);
@@ -310,7 +316,7 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     discardCachedAccountInfo();
     checkState(mLedgerFieldList == null);
     mLedgerFieldList = arrayList();
-    mPendingMarked = false;
+    //    mPendingMarked = false;
     return this;
   }
 
@@ -322,12 +328,12 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     mLedgerFieldList.add(f);
     return this;
   }
-
-  public LedgerWindow marked(boolean f) {
-    checkState(mLedgerFieldList != null);
-    mPendingMarked = f;
-    return this;
-  }
+  //
+  //  public LedgerWindow marked(boolean f) {
+  //    checkState(mLedgerFieldList != null);
+  //    mPendingMarked = f;
+  //    return this;
+  //  }
 
   public LedgerWindow closeEntry(Object auxData) {
     checkState(mLedgerFieldList != null);
@@ -337,7 +343,7 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     var ent = new Entry();
     ent.auxData = auxData;
     ent.fields = new ArrayList<>(fields);
-    ent.marked = mPendingMarked;
+    //    ent.marked = mPendingMarked;
     mEntries.add(ent);
     mLedgerFieldList = null;
     mTriggerStringMap = null;
@@ -408,13 +414,6 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     }
   }
 
-  public void updateCurrentRowData(Object auxData, boolean marked) {
-    checkState(mCursorRow < mEntries.size());
-    var ent = mEntries.get(mCursorRow);
-    ent.auxData = auxData;
-    ent.marked = marked;
-  }
-
   private int clampCursor(int cursor) {
     cursor = MyMath.clamp(cursor, 0, Math.max(0, mEntries.size() - 1));
     return cursor;
@@ -423,7 +422,6 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
   private static class Entry {
     Object auxData;
     List<LedgerField> fields;
-    boolean marked;
   }
 
   private static final Column COLUMN_SEPARATOR_VERTICAL_BAR = Column.newBuilder().datatype(Datatype.TEXT)
@@ -542,7 +540,6 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
 
   private StringBuilder mHintBuffer = new StringBuilder();
   private Map<String, Pair<Integer, Integer>> mTriggerStringMap;
-  private boolean mPendingMarked;
   private long mLastHintKeyTime;
   private int mHeaderHeight = 2;
   private int mFooterHeight = 0;

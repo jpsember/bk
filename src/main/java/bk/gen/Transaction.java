@@ -39,10 +39,6 @@ public class Transaction implements AbstractData {
     return mParent;
   }
 
-  public boolean mark() {
-    return mMark;
-  }
-
   @Override
   public Builder toBuilder() {
     return new Builder(this);
@@ -56,7 +52,6 @@ public class Transaction implements AbstractData {
   protected static final String _5 = "description";
   protected static final String _6 = "children";
   protected static final String _7 = "parent";
-  protected static final String _8 = "mark";
 
   @Override
   public String toString() {
@@ -74,7 +69,6 @@ public class Transaction implements AbstractData {
     m.putUnsafe(_5, mDescription);
     m.putUnsafe(_6, DataUtil.encodeBase64Maybe(mChildren));
     m.putUnsafe(_7, mParent);
-    m.putUnsafe(_8, mMark);
     return m;
   }
 
@@ -103,7 +97,6 @@ public class Transaction implements AbstractData {
       }
     }
     mParent = m.opt(_7, 0L);
-    mMark = m.opt(_8, false);
   }
 
   public static Builder newBuilder() {
@@ -135,8 +128,6 @@ public class Transaction implements AbstractData {
       return false;
     if (!(mParent == other.mParent))
       return false;
-    if (!(mMark == other.mMark))
-      return false;
     return true;
   }
 
@@ -153,7 +144,6 @@ public class Transaction implements AbstractData {
       r = r * 37 + mDescription.hashCode();
       r = r * 37 + Arrays.hashCode(mChildren);
       r = r * 37 + (int)mParent;
-      r = r * 37 + (mMark ? 1 : 0);
       m__hashcode = r;
     }
     return r;
@@ -167,7 +157,6 @@ public class Transaction implements AbstractData {
   protected String mDescription;
   protected long[] mChildren;
   protected long mParent;
-  protected boolean mMark;
   protected int m__hashcode;
 
   public static final class Builder extends Transaction {
@@ -181,7 +170,6 @@ public class Transaction implements AbstractData {
       mDescription = m.mDescription;
       mChildren = m.mChildren;
       mParent = m.mParent;
-      mMark = m.mMark;
     }
 
     @Override
@@ -206,7 +194,6 @@ public class Transaction implements AbstractData {
       r.mDescription = mDescription;
       r.mChildren = mChildren;
       r.mParent = mParent;
-      r.mMark = mMark;
       return r;
     }
 
@@ -247,11 +234,6 @@ public class Transaction implements AbstractData {
 
     public Builder parent(long x) {
       mParent = x;
-      return this;
-    }
-
-    public Builder mark(boolean x) {
-      mMark = x;
       return this;
     }
 

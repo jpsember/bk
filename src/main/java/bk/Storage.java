@@ -38,8 +38,6 @@ public class Storage extends BaseObject {
   public void flush() {
     if (!mModified)
       return;
-    mark("reporting flushing");
-    pr("...flushing...");
     var f = file();
     if (f.exists()) {
       bkup().makeBackup(f);
@@ -381,19 +379,6 @@ public class Storage extends BaseObject {
     accounts().put(a.number(), a);
     u.addAccount(a);
     setModified();
-  }
-
-  public Transaction toggleMark(Transaction t) {
-    checkState(UndoManager.SHARED_INSTANCE.live());
-
-    t = t.toBuilder().mark(!t.mark()).build();
-    // We don't want to set the modified flag just for this operation.
-    // Save it and restore it...
-    var oldnm = mModified;
-    transactions().put(t.timestamp(), t);
-    mModified = oldnm;
-    // Don't call the change listener, as it is too aggressive for this
-    return t;
   }
 
 }
