@@ -23,7 +23,7 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     setBorder(BORDER_THICK);
   }
 
-  public boolean isMarked(Object auxData) {
+  public boolean isItemMarked(Object auxData) {
     return false;
   }
 
@@ -120,7 +120,7 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
       boolean marked = false;
       if (!(rowNum < 0 || rowNum >= mEntries.size())) {
         ent = mEntries.get(rowNum);
-        marked = isMarked(ent.auxData);
+        marked = isItemMarked(ent.auxData);
       }
       var style = STYLE_NORMAL;
       var hl = hasFocus() && rowNum == mCursorRow;

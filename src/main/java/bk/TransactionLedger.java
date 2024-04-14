@@ -35,11 +35,11 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     return true;
   }
 
-  @Override 
-  public boolean isMarked(Object auxData) {
-    return isMarked((Transaction)auxData);
+  @Override
+  public boolean isItemMarked(Object auxData) {
+    return isMarked((Transaction) auxData);
   }
-  
+
   private boolean hasBudget() {
     return getAccount().budget() != 0;
   }
@@ -79,8 +79,10 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     var r = Render.SHARED_INSTANCE;
     var b = r.clipBounds();
     int x = b.x;
-    plotString("A:add       ret:edit   opt-z:undo", x, y);
-    var msg = "opt-d:delete  P:print  opt-Z:redo  esc:back";
+    plotString(//
+        "A:add       ret:edit   opt-z:undo      .:mark/unmark", x, y);
+    var msg = //
+        "opt-d:delete  P:print  opt-Z:redo  opt-.:unmark all    esc:back";
     if (mAccountNumber == 0)
       msg.replace("P:print", "       ");
     plotString(msg, x, y + 1);
@@ -197,7 +199,6 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     case KeyEvent.MARK:
       if (t != null) {
         toggleMark(t);
-       // updateCurrentRowData(id(t), isMarked(t));
         repaint();
       }
       break;
