@@ -40,7 +40,7 @@ public class TransactionForm extends FormWindow {
     mCr = validator(mCrV).value(accountNumberWithNameString(b.credit(), ""))
         .fieldWidth(CHARS_ACCOUNT_NUMBER_AND_NAME).addField("Cr").helper(new AccountIdHelper());
 
-    mDesc = validator(DESCRIPTION_VALIDATOR).value(b.description()).fieldWidth(80).addField("Description");
+    mDesc = validator(DESCRIPTION_VALIDATOR).value(b.description()).fieldWidth(80).addField("Description").helper(new TransactionDescriptionHelper());
     addButton("Ok", () -> okHandler());
 
     addVertSpace(1);

@@ -36,6 +36,7 @@ public class Trie extends BaseObject {
     var node = mRoot;
 
     for (int i = 0; i < textBytes.length; i++) {
+
       // Determine next node
       Node nextNode;
       byte nextLetter = textBytes[i];
@@ -45,8 +46,10 @@ public class Trie extends BaseObject {
         nextNode.isSentencePrefix = sentenceFlag;
         nextNode.answer = outputSentence;
         node.addChild(nextLetter, nextNode);
-      } else
+      } else {
         nextNode = node.childNodes[ci];
+      }
+      node = nextNode;
 
       // Update answer for current node if current prefix is "better"
       boolean update = node.answer == null;
@@ -65,7 +68,6 @@ public class Trie extends BaseObject {
         node.isSentencePrefix = sentenceFlag;
         node.answer = outputSentence;
       }
-      node = nextNode;
     }
   }
 
@@ -75,7 +77,6 @@ public class Trie extends BaseObject {
     var textBytes = toLowerCaseLetters(text);
     var node = mRoot;
 
-    pr(VERT_SP, "query:", text);
     Node best = null;
     for (int i = 0; i < textBytes.length; i++) {
       byte c = textBytes[i];
@@ -83,24 +84,9 @@ public class Trie extends BaseObject {
       if (ci < 0)
         return "";
       var ch = node.childNodes[ci];
-      pr(VERT_SP, "current node:", INDENT, node);
-      pr("i:", i, "char:", (char) c);
-      pr("child node:", INDENT, ch);
-     
       node = ch;
       best = node;
-
-      //      if (best == null || best.answer.length() < i + 1) {
-      //        best = node;
-      //      } else {
-      //        int r = Boolean.compare(node.isSentencePrefix, best.isSentencePrefix);
-      //        if (r == 0)
-      //          r = -Integer.compare(node.answer.length(), best.answer.length());
-      //        if (r > 0)
-      //          best = node;
-      //      }
     }
-    pr("...returning:", best.answer);
     return best.answer;
   }
 

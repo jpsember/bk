@@ -143,7 +143,6 @@ public class AccountList extends LedgerWindow implements ChangeListener {
 
   @Override
   public void dataChanged(List<Integer> accountIds, List<Long> transactionIds) {
-    //  discardCachedAccountInfo();
     rebuild();
   }
 
