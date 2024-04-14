@@ -6,24 +6,19 @@ import js.base.BaseObject;
 import js.data.DataUtil;
 import js.json.JSMap;
 
-public class Tri extends BaseObject {
+public class Trie extends BaseObject {
 
-  public Tri addSentence(String inputSentence, String optOutputSentence) {
+  public Trie addSentence(String inputSentence, String optOutputSentence) {
     // It should perhaps automatically add words for all sentences, AFTER the sentences have been added? Or do we get the same tri?
     optOutputSentence = ifNullOrEmpty(optOutputSentence, inputSentence);
     add(inputSentence, optOutputSentence, true);
-
-    // Add the individual words to generate themselves?
-    // if (autoFlag)
-    addWords(inputSentence, optOutputSentence);
+    for (var wd : split(inputSentence, ' '))
+      addWord(wd, optOutputSentence);
     return this;
   }
 
-  public Tri addWords(String spaceSeparatedWords, String outputSentence) {
-    for (var wd : split(spaceSeparatedWords, ' ')) {
-      add(wd, outputSentence, false);
-    }
-    return this;
+  public void addWord(String inputWord, String outputSentence) {
+    add(inputWord, outputSentence, false);
   }
 
   private void add(String inputText, String outputSentence, boolean sentenceFlag) {
@@ -53,24 +48,22 @@ public class Tri extends BaseObject {
       } else
         nextNode = node.childNodes[ci];
 
-      if (i > 0) {
-        // Update answer for current node if current prefix is better
-        boolean update = node.answer == null;
-        while (!update) {
-          if (sentenceFlag) {
-            if (node.isSentencePrefix && node.answer.length() <= inputText.length())
-              break;
-            update = true;
-          } else {
-            if (node.isSentencePrefix || node.answer.length() <= inputText.length())
-              break;
-            update = true;
-          }
+      // Update answer for current node if current prefix is "better"
+      boolean update = node.answer == null;
+      while (!update) {
+        if (sentenceFlag) {
+          if (node.isSentencePrefix && node.answer.length() <= inputText.length())
+            break;
+          update = true;
+        } else {
+          if (node.isSentencePrefix || node.answer.length() <= inputText.length())
+            break;
+          update = true;
         }
-        if (update) {
-          node.isSentencePrefix = sentenceFlag;
-          node.answer = outputSentence;
-        }
+      }
+      if (update) {
+        node.isSentencePrefix = sentenceFlag;
+        node.answer = outputSentence;
       }
       node = nextNode;
     }
@@ -82,24 +75,32 @@ public class Tri extends BaseObject {
     var textBytes = toLowerCaseLetters(text);
     var node = mRoot;
 
+    pr(VERT_SP, "query:", text);
     Node best = null;
     for (int i = 0; i < textBytes.length; i++) {
       byte c = textBytes[i];
       var ci = indexOf(node.childLetters, c);
       if (ci < 0)
         return "";
-      node = node.childNodes[ci];
+      var ch = node.childNodes[ci];
+      pr(VERT_SP, "current node:", INDENT, node);
+      pr("i:", i, "char:", (char) c);
+      pr("child node:", INDENT, ch);
+     
+      node = ch;
       best = node;
-//      if (best == null || best.answer.length() < i + 1) {
-//        best = node;
-//      } else {
-//        int r = Boolean.compare(node.isSentencePrefix, best.isSentencePrefix);
-//        if (r == 0)
-//          r = -Integer.compare(node.answer.length(), best.answer.length());
-//        if (r > 0)
-//          best = node;
-//      }
+
+      //      if (best == null || best.answer.length() < i + 1) {
+      //        best = node;
+      //      } else {
+      //        int r = Boolean.compare(node.isSentencePrefix, best.isSentencePrefix);
+      //        if (r == 0)
+      //          r = -Integer.compare(node.answer.length(), best.answer.length());
+      //        if (r > 0)
+      //          best = node;
+      //      }
     }
+    pr("...returning:", best.answer);
     return best.answer;
   }
 
@@ -128,6 +129,16 @@ public class Tri extends BaseObject {
       childNodes[used] = child;
       used++;
     }
+
+    @Override
+    public String toString() {
+      var m = map();
+      m.put("", "Node");
+      m.put("# children", used);
+      m.put("answer", (isSentencePrefix ? "S:" : "W:") + answer);
+      return m.prettyPrint();
+    }
+
   }
 
   private static byte[] toLowerCaseLetters(String s) {
@@ -174,4 +185,5 @@ public class Tri extends BaseObject {
   }
 
   private Node mRoot = new Node();
+
 }

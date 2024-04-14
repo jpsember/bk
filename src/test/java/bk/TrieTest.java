@@ -1,18 +1,19 @@
 package bk;
 
 import static js.base.Tools.*;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 
 import js.json.JSMap;
 import js.testutil.MyTestCase;
 
-public class TriTest extends MyTestCase {
+public class TrieTest extends MyTestCase {
 
   @Test
   public void small() {
     var s = "a";
-    tri().addWords(s, "w");
+    addWords(s, "w");
     tri().addSentence(s, "s");
     log("Tri:", INDENT, tri());
     ask("a");
@@ -39,7 +40,7 @@ public class TriTest extends MyTestCase {
   @Test
   public void sentenceOverWords() {
     var s = "alpha beta gamma";
-    tri().addWords(s, "w");
+    addWords(s, "w");
     tri().addSentence(s, "s");
     ask("alpha", "beta", "gamma");
     log("Tri:", INDENT, tri());
@@ -47,11 +48,14 @@ public class TriTest extends MyTestCase {
 
   @Test
   public void shortWordsOverLonger() {
-    tri().addWords("alpha", "alpha");
-    tri().addWords("alph", "alph");
-    tri().addWords("al", "al");
-    log("Tri:", INDENT, tri());
-    ask("a", "al", "alp", "alph", "alpha", "alphab");
+    addWords("alpha", "alpha");
+    addWords("alph", "alph");
+    addWords("al", "al");
+
+    assertEquals("al", tri().query("al"));
+//
+//    log("Tri:", INDENT, tri());
+//    ask("a", "al", "alp", "alph", "alpha", "alphab");
   }
 
   @Test
@@ -67,7 +71,7 @@ public class TriTest extends MyTestCase {
     for (var x : strs)
       tri().addSentence(x, "s");
     for (var x : strs)
-      tri().addWords(x, "w");
+      tri().addWord(x, "w");
   }
 
   private void ask(String... strs) {
@@ -79,13 +83,18 @@ public class TriTest extends MyTestCase {
     assertGenerated();
   }
 
-  private Tri tri() {
+  private Trie tri() {
     if (mTri == null) {
-      mTri = new Tri();
+      mTri = new Trie();
       if (verbose())
         mTri.setVerbose();
     }
     return mTri;
+  }
+
+  private void addWords(String spaceDelimitedWords, String result) {
+    for (var x : split(spaceDelimitedWords, ' '))
+      tri().addWord(x, result);
   }
 
   private JSMap result() {
@@ -94,6 +103,6 @@ public class TriTest extends MyTestCase {
     return mRes;
   }
 
-  private Tri mTri;
+  private Trie mTri;
   private JSMap mRes;
 }

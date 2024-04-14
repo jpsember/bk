@@ -57,12 +57,15 @@ public class AccountList extends LedgerWindow implements ChangeListener {
     List<Account> sorted = storage().readAllAccounts();
     sorted.sort(ACCOUNT_COMPARATOR);
 
-    for (var t : sorted) {
+    for (var a : sorted) {
       openEntry();
-      addHint(accountNumberWithNameString(t));
-      add(new AccountNameField(t.number(), storage().accountName(t.number())));
-      add(new CurrencyField(t.balance()));
-      closeEntry(t);
+
+      addHint(accountNumberWithNameString(a));
+      addHint(a.name());
+
+      add(new AccountNameField(a.number(), storage().accountName(a.number())));
+      add(new CurrencyField(a.balance()));
+      closeEntry(a);
     }
     setCurrentRow(mCurrentAccount);
     repaint();

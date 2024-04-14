@@ -5,6 +5,7 @@ import static js.base.Tools.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.googlecode.lanterna.Symbols;
 import com.googlecode.lanterna.input.KeyType;
@@ -327,24 +328,25 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     return this;
   }
 
-  private static final int TARGET_AS_INTEGER_OFFSET = 1_000_000;
+  //private static final int TARGET_AS_INTEGER_OFFSET = 1_000_000;
 
   public LedgerWindow addHint(String sentence) {
     checkState(mLedgerFieldList != null);
     int target = mEntries.size();
-    todo(
-        "this is curious: the output sentence could actually be any type, though we favor shorter ones over longer ones...");
-    String targetSentence = Integer.toString(target + TARGET_AS_INTEGER_OFFSET);
-    pr("adding hint sentence:", quote(sentence), "=>", quote(targetSentence));
-    trie().addSentence(sentence, targetSentence);
+    pr("adding hint sentence:", quote(sentence), "=>", target);
+    trie().addSentence(sentence, null);
+    mHintToRowNumberMap.put(sentence, target);
     return this;
   }
 
-  private Tri mTrie;
+  private Map<String, Integer> mHintToRowNumberMap;
 
-  private Tri trie() {
+  private Trie mTrie;
+
+  private Trie trie() {
     if (mTrie == null) {
-      mTrie = new Tri();
+      mTrie = new Trie();
+      mHintToRowNumberMap = hashMap();
     }
     return mTrie;
   }
@@ -498,12 +500,9 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
 
   private Integer determineHelperValue(String prefix) {
     var result = trie().query(prefix);
-    mark("query:", quote(prefix), CR, "yielded:", result);
-    if (result.isEmpty())
-      return null;
-
-    var rowNumber = Integer.parseInt(result) - TARGET_AS_INTEGER_OFFSET;
-    return rowNumber;
+    Integer rowNum = mHintToRowNumberMap.get(result);
+    mark("query:", quote(prefix), CR, "yielded:", result, "rowNum:", rowNum);
+    return rowNum;
   }
 
   private StringBuilder mHintBuffer = new StringBuilder();
