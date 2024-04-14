@@ -38,6 +38,8 @@ public class Storage extends BaseObject {
   public void flush() {
     if (!mModified)
       return;
+    mark("reporting flushing");
+    pr("...flushing...");
     var f = file();
     if (f.exists()) {
       bkup().makeBackup(f);
@@ -67,21 +69,21 @@ public class Storage extends BaseObject {
     return mDatabase.transactions();
   }
 
-  public List<Account> readAllAccounts() {
-    return new ArrayList<>(mDatabase.accounts().values());
+  public List<Integer> readAllAccounts() {
+    return new ArrayList<>(mDatabase.accounts().keySet());
   }
 
-  public List<Transaction> readAllTransactions() {
-    return new ArrayList<>(transactions().values());
+  public List<Long> readAllTransactions() {
+    return new ArrayList<>(transactions().keySet());
   }
 
-  public List<Transaction> readTransactionsForAccount(int accountNumber) {
+  public List<Long> readTransactionsForAccount(int accountNumber) {
     checkArgument(accountNumber >= 1000 && accountNumber <= 5999, "unexpected account number:",
         accountNumber);
-    List<Transaction> out = arrayList();
+    List<Long> out = arrayList();
     for (var tr : transactions().values()) {
       if (tr.debit() == accountNumber || tr.credit() == accountNumber)
-        out.add(tr);
+        out.add(id(tr));
     }
     return out;
   }
@@ -259,8 +261,9 @@ public class Storage extends BaseObject {
 
     if (u.live()) {
       // Delete all transactions
-      var tr = readTransactionsForAccount(number);
-      for (var t : tr) {
+      var tir = readTransactionsForAccount(number);
+      for (var ti : tir) {
+        var t = transaction(ti);
         u.deleteTransaction(t);
         deleteTransaction(t);
       }
@@ -379,6 +382,19 @@ public class Storage extends BaseObject {
     accounts().put(a.number(), a);
     u.addAccount(a);
     setModified();
+  }
+
+  public Transaction toggleMark(Transaction t) {
+    checkState(UndoManager.SHARED_INSTANCE.live());
+
+    t = t.toBuilder().mark(!t.mark()).build();
+    // We don't want to set the modified flag just for this operation.
+    // Save it and restore it...
+    var oldnm = mModified;
+    transactions().put(t.timestamp(), t);
+    mModified = oldnm;
+    // Don't call the change listener, as it is too aggressive for this
+    return t;
   }
 
 }

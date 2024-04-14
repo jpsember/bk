@@ -23,6 +23,7 @@ public class KeyEvent {
       , OPTION_Z = ":Ω" //
       , PRINT = ":P" //
       , OPTION_SHIFT_Z = ":¸" //
+      , MARK = ":." //
       , OPTION_Q = ":œ" //
       , ARROW_UP = ":ArrowUp" //
       , ARROW_DOWN = ":ArrowDown" //

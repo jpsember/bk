@@ -59,10 +59,9 @@ public final class Render {
 
   private static final char[] sBorderChars = { //
       Symbols.SINGLE_LINE_HORIZONTAL, Symbols.SINGLE_LINE_VERTICAL,
-     
-      Symbols.SINGLE_LINE_TOP_LEFT_CORNER,
-      Symbols.SINGLE_LINE_BOTTOM_LEFT_CORNER, Symbols.SINGLE_LINE_TOP_RIGHT_CORNER,
-      Symbols.SINGLE_LINE_BOTTOM_RIGHT_CORNER, //
+
+      Symbols.SINGLE_LINE_TOP_LEFT_CORNER, Symbols.SINGLE_LINE_BOTTOM_LEFT_CORNER,
+      Symbols.SINGLE_LINE_TOP_RIGHT_CORNER, Symbols.SINGLE_LINE_BOTTOM_RIGHT_CORNER, //
 
       Symbols.DOUBLE_LINE_HORIZONTAL, Symbols.DOUBLE_LINE_VERTICAL, Symbols.DOUBLE_LINE_TOP_LEFT_CORNER,
       Symbols.DOUBLE_LINE_BOTTOM_LEFT_CORNER, Symbols.DOUBLE_LINE_TOP_RIGHT_CORNER,
@@ -141,9 +140,17 @@ public final class Render {
     mWindow = window;
     mClipBounds = window.totalBounds();
     mStack = new Stack<>();
-    mTextGraphics = winMgr().abstractScreen().newTextGraphics();
+    var t = winMgr().abstractScreen().newTextGraphics();
+    if (mNormBgnd == null) {
+      mNormBgnd = t.getBackgroundColor();
+      mNormFgnd = t.getForegroundColor();
+    }
+    mTextGraphics = t;
     mPartial = partial;
   }
+
+  private TextColor mNormFgnd;
+  private TextColor mNormBgnd;
 
   static Render unprepare() {
     SHARED_INSTANCE.auxUnprepare();
@@ -179,11 +186,24 @@ public final class Render {
     checkArgument(style >= 0 && style < STYLE_TOTAL);
     mStack.push(mTextGraphics);
     var t = winMgr().abstractScreen().newTextGraphics();
+
     switch (style) {
     case STYLE_INVERSE:
       t.setForegroundColor(TextColor.ANSI.WHITE_BRIGHT);
       t.setBackgroundColor(TextColor.ANSI.BLACK);
       break;
+    case STYLE_NORMAL:
+      t.setForegroundColor(mNormFgnd);
+      t.setBackgroundColor(mNormBgnd);
+      break;
+    case STYLE_MARKED:
+      t.setForegroundColor(TextColor.ANSI.WHITE);
+      t.setBackgroundColor(TextColor.ANSI.BLUE);
+      break;
+    case STYLE_INVERSE_AND_MARK:
+      t.setForegroundColor(TextColor.ANSI.WHITE_BRIGHT);
+      t.setBackgroundColor(TextColor.ANSI.BLUE_BRIGHT);
+     break;
     }
     mTextGraphics = t;
     return this;

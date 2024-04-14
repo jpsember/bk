@@ -112,11 +112,12 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     var currentTrans = getCurrentRow();
     clearEntries();
 
-    List<Transaction> sorted = (mAccountNumber == 0) ? storage().readAllTransactions()
+    List<Long> sorted = (mAccountNumber == 0) ? storage().readAllTransactions()
         : storage().readTransactionsForAccount(mAccountNumber);
     sorted.sort(TRANSACTION_COMPARATOR);
 
-    for (var t : sorted) {
+    for (var ti2 : sorted) {
+      var t = storage().transaction(ti2);
       openEntry();
       add(new DateField(t.date()));
 
@@ -132,7 +133,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       add(new AccountNameField(t.debit(), storage().accountName(t.debit())));
       add(new AccountNameField(t.credit(), storage().accountName(t.credit())));
       add(new TextField(t.description()));
-      closeEntry(t);
+      closeEntry(ti2);
     }
     setCurrentRow(currentTrans);
     repaint();
@@ -144,7 +145,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     if (mCurrentTrans != null) {
       int x = size();
       for (int i = 0; i < x; i++) {
-        Transaction t = entry(i);
+        Transaction t = storage().transaction(entry(i).longValue());
         if (t.date() >= mCurrentTrans.date()) {
           bestMatch = i;
           break;
@@ -156,17 +157,19 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
   @Override
   public void processKeyEvent(KeyEvent k) {
-    boolean handled = false;
     Transaction t = getCurrentRow();
 
     switch (k.toString()) {
+
+    default:
+      super.processKeyEvent(k);
+      break;
 
     case KeyEvent.EDIT:
     case KeyEvent.RETURN:
       if (t != null && !isGenerated(t)) {
         mListener.editTransaction(mAccountNumber, t);
       }
-      handled = true;
       break;
 
     case KeyEvent.DELETE_TRANSACTION:
@@ -174,24 +177,28 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
         if (!isGenerated(t))
           mListener.deleteTransaction(t);
       }
-      handled = true;
       break;
 
     case KeyEvent.ADD:
     case ":a":
       mListener.addTransaction(mAccountNumber);
-      handled = true;
       break;
 
     case KeyEvent.PRINT:
-      handled = true;
       if (mAccountNumber != 0) {
         PrintManager.SHARED_INSTANCE.printLedger(getAccount());
       }
       break;
+
+    case KeyEvent.MARK:
+      if (t != null) {
+        t = storage().toggleMark(t);
+        updateCurrentRowData(id(t), isTrue(t.mark()));
+        repaint();
+      }
+      break;
+
     }
-    if (!handled)
-      super.processKeyEvent(k);
     mCurrentTrans = getCurrentRow();
   }
 

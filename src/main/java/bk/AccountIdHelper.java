@@ -41,7 +41,8 @@ public class AccountIdHelper extends WidgetHelper {
       }
       log("parsed as account number:", parsedAccountNumber, "with bounds:", accMin, accMax);
 
-      for (var account : accounts) {
+      for (var accountNumber : accounts) {
+        var account = account(accountNumber);
         if (account.number() >= accMin && account.number() < accMax) {
           var ent = accEntry(account);
           log("account has prefix, adding:", ent);
@@ -53,8 +54,9 @@ public class AccountIdHelper extends WidgetHelper {
       // Favor account names that contain the prefix as a single word.
 
       List<AccEntry> prefCandidates = arrayList();
-
-      outer: for (var account : accounts) {
+var s = storage();
+      outer: for (var ai : accounts) {
+        var account = s.account(ai);
         var name = account.name();
         var words = split(name, ' ');
         for (var w : words) {

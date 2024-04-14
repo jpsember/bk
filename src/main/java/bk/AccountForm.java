@@ -101,8 +101,9 @@ public class AccountForm extends FormWindow {
       List<Transaction> modTrans = arrayList();
       if (orig.number() != mod.number()) {
         // create modified versions of all transactions from this account
-        var origTrans = filterOutGenerated(storage().readTransactionsForAccount(orig.number()));
-        for (var t : origTrans) {
+        var origTransIds = filterOutGenerated(storage().readTransactionsForAccount(orig.number()));
+        for (var ti : origTransIds) {
+          var t = storage().transaction(ti);
           var b = t.toBuilder();
           if (b.debit() == orig.number())
             b.debit(mod.number());
@@ -112,7 +113,7 @@ public class AccountForm extends FormWindow {
         }
 
         // Delete the original transactions
-        for (var t : origTrans) {
+        for (var t : origTransIds) {
           storage().deleteTransaction(t);
         }
 

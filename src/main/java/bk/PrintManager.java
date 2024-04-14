@@ -31,8 +31,8 @@ public class PrintManager extends BaseObject {
     init();
     mExpanded = expanded;
 
-    var ts = storage().readTransactionsForAccount(a.number());
-    ts.sort(TRANSACTION_COMPARATOR);
+    var tis = storage().readTransactionsForAccount(a.number());
+    tis.sort(TRANSACTION_COMPARATOR);
 
     setMaxLength(CHARS_DATE).addCol("date");
 
@@ -53,7 +53,8 @@ public class PrintManager extends BaseObject {
     setTitle(a.number(), a.name(), date);
 
     long currBal = 0;
-    for (var t : ts) {
+    for (var ti : tis) {
+      var t = storage().transaction(ti);
       var other = otherAccount(t, a.number()).number();
       var signedAmount = signedAmount(t, a.number());
       currBal += signedAmount;

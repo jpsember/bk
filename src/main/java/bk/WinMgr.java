@@ -216,8 +216,9 @@ public class WinMgr extends BaseObject {
           break;
         }
 
-        if (!processed)
+        if (!processed) {
           focusManager().focus().processKeyEvent(key);
+        }
       }
 
       // Call listeners for any changes that have occurred.  This gives them

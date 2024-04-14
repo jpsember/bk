@@ -10,9 +10,11 @@ import java.util.Map;
 import com.googlecode.lanterna.Symbols;
 import com.googlecode.lanterna.input.KeyType;
 
+import bk.gen.Account;
 import bk.gen.Alignment;
 import bk.gen.Column;
 import bk.gen.Datatype;
+import bk.gen.Transaction;
 import js.base.DateTimeTools;
 import js.base.Pair;
 import js.geometry.MyMath;
@@ -56,7 +58,6 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     }
   }
 
- 
   public void plotHeader(int y, int headerHeight) {
     if (headerHeight >= 2) {
       plotColumnLabels(y + headerHeight - 2);
@@ -112,15 +113,23 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
       msb.setLength(0);
 
       int rowNum = bodyRowIndex + firstLedgerRowNum;
-      var hl = hasFocus() && rowNum == mCursorRow;
-      r.pushStyle(hl ? STYLE_INVERSE : STYLE_NORMAL);
-      if (hl)
-        r.clearRow(rowScreenY, ' ');
 
+      Entry ent = null;
       if (!(rowNum < 0 || rowNum >= mEntries.size())) {
+        ent = mEntries.get(rowNum);
+      }
+      var style = STYLE_NORMAL;
+      var hl = hasFocus() && rowNum == mCursorRow;
+      if (hl)
+        style = ent.marked ? STYLE_INVERSE_AND_MARK : STYLE_INVERSE;
+      else if (ent != null && ent.marked)
+        style = STYLE_MARKED;
 
+      r.pushStyle(style);
+      r.clearRow(rowScreenY, ' ');
+
+      if (ent != null) {
         // Render the fields
-        var ent = mEntries.get(rowNum);
         int x = clip.x;
         mCurrentColumn = INIT_INDEX;
         for (var col : mColumns) {
@@ -303,6 +312,7 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     discardCachedAccountInfo();
     checkState(mLedgerFieldList == null);
     mLedgerFieldList = arrayList();
+    mPendingMarked = false;
     return this;
   }
 
@@ -315,14 +325,21 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     return this;
   }
 
-  public LedgerWindow closeEntry(Object auxData) {
+  public LedgerWindow marked(boolean f) {
+    checkState(mLedgerFieldList != null);
+    mPendingMarked = f;
+    return this;
+  }
+
+  public LedgerWindow closeEntry(Number auxData) {
     checkState(mLedgerFieldList != null);
     var fields = mLedgerFieldList;
     checkArgument(fields.size() == mColumns.size(), "expected", mColumns.size(), "entries, got",
         fields.size());
     var ent = new Entry();
-    ent.auxData = auxData;
+    ent.auxValue = auxData;
     ent.fields = new ArrayList<>(fields);
+    ent.marked = mPendingMarked;
     mEntries.add(ent);
     mLedgerFieldList = null;
     mTriggerStringMap = null;
@@ -351,17 +368,35 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     return b;
   }
 
-  public <T> T getCurrentRow() {
+  public Account getCurrentAccount() {
     if (mCursorRow >= mEntries.size())
       return null;
-    return entry(mCursorRow);
+    return storage().account( entry(mCursorRow).intValue());
+  }
+  public Transaction getCurrentTransaction() {
+    if (mCursorRow >= mEntries.size())
+      return null;
+    return storage().transaction( entry(mCursorRow).longValue());
+  }
+//  
+//  public Number getCurrentRow() {
+//    if (mCursorRow >= mEntries.size())
+//      return null;
+//    return entry(mCursorRow);
+//  }
+
+  public void updateCurrentRowData(Number auxData, boolean marked) {
+    checkState(mCursorRow < mEntries.size());
+    var ent = mEntries.get(mCursorRow);
+    ent.auxValue = auxData;
+    ent.marked = marked;
   }
 
-  private int indexOfAuxData(Object auxData) {
+  private int indexOfAuxData(Number auxData) {
     int j = INIT_INDEX;
     for (var x : mEntries) {
       j++;
-      if (x.auxData.equals(auxData))
+      if (x.auxValue.equals(auxData))
         return j;
     }
     return -1;
@@ -371,8 +406,8 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     return mEntries.size();
   }
 
-  public <T> T entry(int index) {
-    return (T) mEntries.get(index).auxData;
+  public Number entry(int index) {
+    return  mEntries.get(index).auxValue;
   }
 
   public <T> void setCurrentRow(T auxData) {
@@ -399,8 +434,9 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
   }
 
   private static class Entry {
-    Object auxData;
+    Number auxValue;
     List<LedgerField> fields;
+    boolean marked;
   }
 
   private static final Column COLUMN_SEPARATOR_VERTICAL_BAR = Column.newBuilder().datatype(Datatype.TEXT)
@@ -519,6 +555,7 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
 
   private StringBuilder mHintBuffer = new StringBuilder();
   private Map<String, Pair<Integer, Integer>> mTriggerStringMap;
+  private boolean mPendingMarked;
   private long mLastHintKeyTime;
   private int mHeaderHeight = 2;
   private int mFooterHeight = 0;
