@@ -15,15 +15,23 @@ public class TriTest extends MyTestCase {
     ask("a", "ab", "abc", "abcd", "b");
   }
 
+  @Test
+  public void longerSentencePriorityOverShorterWord() {
+    add("abc def", "ha ab");
+    ask("a", "ab", "abc", "abcd", "b");
+  }
+
+  @Test
+  public void wordMatch() {
+    add("abc def");
+    ask("de", "def", "defg");
+  }
+
   private void add(String... strs) {
-    for (var x : strs) {
-      tri().addSentence(x.toString());
-    }
-    for (var x : strs) {
-      for (var y : split(x, ' ')) {
-        tri().addWord(y);
-      }
-    }
+    for (var x : strs)
+      tri().addSentence(x);
+    for (var x : strs)
+      tri().addWords(x);
   }
 
   private void ask(String... strs) {
@@ -31,9 +39,8 @@ public class TriTest extends MyTestCase {
       var res = tri().query(s);
       result().putNumbered(s, res);
     }
-    var x = result().prettyPrint();
-    log("\n" + x);
-    assertHash(x);
+    generateMessage(result().prettyPrint());
+    assertGenerated();
   }
 
   private Tri tri() {

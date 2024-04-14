@@ -1,1 +1,5 @@
-{ "a" : 4702 }
+{                                     "a" : 3767,
+                                      "b" : 7930,
+  "longerSentencePriorityOverShorterWord" : 7930,
+                              "wordMatch" : 1516
+}
