@@ -8,6 +8,7 @@ import js.data.DataUtil;
 public class Tri extends BaseObject {
 
   public Tri addSentence(String st) {
+    todo("we want the ability to support a typed sentence, e.g. insurance, and return a different sentence, e.g. 5020 insurance");
     add(st, true);
     return this;
   }
