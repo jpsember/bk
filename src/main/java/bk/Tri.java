@@ -4,26 +4,32 @@ import static js.base.Tools.*;
 
 import js.base.BaseObject;
 import js.data.DataUtil;
+import js.json.JSMap;
 
 public class Tri extends BaseObject {
 
   public Tri addSentence(String inputSentence, String optOutputSentence) {
-    todo(
-        "we want the ability to support a typed sentence, e.g. insurance, and return a different sentence, e.g. 5020 insurance");
+    // It should perhaps automatically add words for all sentences, AFTER the sentences have been added? Or do we get the same tri?
     optOutputSentence = ifNullOrEmpty(optOutputSentence, inputSentence);
     add(inputSentence, optOutputSentence, true);
+    
+    // Add the individual words to generate themselves?
+    // if (autoFlag)
+    addWords(inputSentence, optOutputSentence);
     return this;
   }
 
-  public Tri addWords(String outputSentence) {
-    for (var wd : split(outputSentence, ' ')) {
+  public Tri addWords(String spaceSeparatedWords, String outputSentence) {
+    for (var wd : split(spaceSeparatedWords, ' ')) {
       add(wd, outputSentence, false);
     }
     return this;
   }
 
   private void add(String inputText, String outputSentence, boolean sentenceFlag) {
-    log("add", sentenceFlag ? "sentence:" : "input:", inputText);
+    if (verbose())
+      log("add", (sentenceFlag ? "sentence:" : "word:"), quote(inputText), "outputText:",
+          quote(outputSentence));
     if (inputText.isEmpty())
       return;
     var textBytes = toLowerCaseLetters(inputText);
@@ -41,8 +47,8 @@ public class Tri extends BaseObject {
       var ci = indexOf(node.childLetters, textBytes[i]);
       if (ci < 0) {
         nextNode = new Node();
+        nextNode.isSentencePrefix = sentenceFlag;
         nextNode.answer = outputSentence;
-        log("...creating new node for", i, "char:", nextLetter);
         node.addChild(nextLetter, nextNode);
       } else
         nextNode = node.childNodes[ci];
@@ -60,7 +66,6 @@ public class Tri extends BaseObject {
               break;
             update = true;
           }
-
         }
         if (update) {
           node.isSentencePrefix = sentenceFlag;
@@ -77,14 +82,24 @@ public class Tri extends BaseObject {
     var textBytes = toLowerCaseLetters(text);
     var node = mRoot;
 
+    Node best = null;
     for (int i = 0; i < textBytes.length; i++) {
       byte c = textBytes[i];
       var ci = indexOf(node.childLetters, c);
       if (ci < 0)
         return "";
       node = node.childNodes[ci];
+      if (best == null || best.answer.length() < i + 1) {
+        best = node;
+      } else {
+        int r = Boolean.compare(node.isSentencePrefix, best.isSentencePrefix);
+        if (r == 0)
+          r = -Integer.compare(node.answer.length(), best.answer.length());
+        if (r > 0)
+          best = node;
+      }
     }
-    return node.answer;
+    return best.answer;
   }
 
   private static final Node[] EMPTY_NODE_ARRAY = new Node[0];
@@ -136,5 +151,27 @@ public class Tri extends BaseObject {
     return s;
   }
 
+  @Override
+  public JSMap toJson() {
+    var m = map();
+    auxMap(m, mRoot);
+    return m;
+  }
+
+  private void auxMap(JSMap m, Node n) {
+    if (n != mRoot) {
+      var label = (n.isSentencePrefix ? "S:" : "W:") + n.answer;
+      m.put("", label);
+    }
+    for (int i = 0; i < n.used; i++) {
+      var c = n.childLetters[i];
+      var cn = n.childNodes[i];
+      var m2 = map();
+      m.put(Character.toString((char) c), m2);
+      auxMap(m2, cn);
+    }
+  }
+
   private Node mRoot = new Node();
+  //  public boolean autoFlag;
 }

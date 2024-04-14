@@ -5,7 +5,6 @@ import static js.base.Tools.*;
 
 import java.util.List;
 
-
 public class AccountIdHelper extends WidgetHelper {
 
   @Override
@@ -28,7 +27,7 @@ public class AccountIdHelper extends WidgetHelper {
         t.addSentence(a.name(), output);
       }
       for (var s : outputSentences)
-        t.addWords(s);
+        t.addWords(s, s);
       sTri = t;
       todo("have change listener update the tri");
     }
