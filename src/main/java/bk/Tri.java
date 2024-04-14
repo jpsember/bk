@@ -12,7 +12,7 @@ public class Tri extends BaseObject {
     // It should perhaps automatically add words for all sentences, AFTER the sentences have been added? Or do we get the same tri?
     optOutputSentence = ifNullOrEmpty(optOutputSentence, inputSentence);
     add(inputSentence, optOutputSentence, true);
-    
+
     // Add the individual words to generate themselves?
     // if (autoFlag)
     addWords(inputSentence, optOutputSentence);
@@ -173,5 +173,4 @@ public class Tri extends BaseObject {
   }
 
   private Node mRoot = new Node();
-  //  public boolean autoFlag;
 }
