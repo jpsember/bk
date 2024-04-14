@@ -10,11 +10,9 @@ import java.util.Map;
 import com.googlecode.lanterna.Symbols;
 import com.googlecode.lanterna.input.KeyType;
 
-import bk.gen.Account;
 import bk.gen.Alignment;
 import bk.gen.Column;
 import bk.gen.Datatype;
-import bk.gen.Transaction;
 import js.base.DateTimeTools;
 import js.base.Pair;
 import js.geometry.MyMath;
@@ -331,13 +329,13 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     return this;
   }
 
-  public LedgerWindow closeEntry(Number auxData) {
+  public LedgerWindow closeEntry(Object auxData) {
     checkState(mLedgerFieldList != null);
     var fields = mLedgerFieldList;
     checkArgument(fields.size() == mColumns.size(), "expected", mColumns.size(), "entries, got",
         fields.size());
     var ent = new Entry();
-    ent.auxValue = auxData;
+    ent.auxData = auxData;
     ent.fields = new ArrayList<>(fields);
     ent.marked = mPendingMarked;
     mEntries.add(ent);
@@ -368,35 +366,17 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     return b;
   }
 
-  public Account getCurrentAccount() {
+  public <T> T getCurrentRow() {
     if (mCursorRow >= mEntries.size())
       return null;
-    return storage().account( entry(mCursorRow).intValue());
-  }
-  public Transaction getCurrentTransaction() {
-    if (mCursorRow >= mEntries.size())
-      return null;
-    return storage().transaction( entry(mCursorRow).longValue());
-  }
-//  
-//  public Number getCurrentRow() {
-//    if (mCursorRow >= mEntries.size())
-//      return null;
-//    return entry(mCursorRow);
-//  }
-
-  public void updateCurrentRowData(Number auxData, boolean marked) {
-    checkState(mCursorRow < mEntries.size());
-    var ent = mEntries.get(mCursorRow);
-    ent.auxValue = auxData;
-    ent.marked = marked;
+    return entry(mCursorRow);
   }
 
-  private int indexOfAuxData(Number auxData) {
+  private int indexOfAuxData(Object auxData) {
     int j = INIT_INDEX;
     for (var x : mEntries) {
       j++;
-      if (x.auxValue.equals(auxData))
+      if (x.auxData.equals(auxData))
         return j;
     }
     return -1;
@@ -406,8 +386,8 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     return mEntries.size();
   }
 
-  public Number entry(int index) {
-    return  mEntries.get(index).auxValue;
+  public <T> T entry(int index) {
+    return (T) mEntries.get(index).auxData;
   }
 
   public <T> void setCurrentRow(T auxData) {
@@ -434,7 +414,7 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
   }
 
   private static class Entry {
-    Number auxValue;
+    Object auxData;
     List<LedgerField> fields;
     boolean marked;
   }

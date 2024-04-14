@@ -387,10 +387,7 @@ public final class Util {
 
   private static Storage sStorage;
 
-  public static final Comparator<Long> TRANSACTION_COMPARATOR = (ti1, ti2) -> {
-    var s = storage();
-    var t1 = s.transaction(ti1);
-    var t2 = s.transaction(ti2);
+  public static final Comparator<Transaction> TRANSACTION_COMPARATOR = (t1, t2) -> {
     int sep = Long.compare(t1.date(), t2.date());
     if (sep == 0) {
       int c1 = t1.parent() != 0 ? 1 : 0;
@@ -409,8 +406,9 @@ public final class Util {
     return sep;
   };
 
-  public static final Comparator<Integer> ACCOUNT_COMPARATOR = (ti1, ti2) -> {
-    return Integer.compare(ti1, ti2);
+  public static final Comparator<Account> ACCOUNT_COMPARATOR = (t1, t2) -> {
+    return Integer.compare(t1.number(), t2.number());
+
   };
 
   public static boolean quitCommand(KeyEvent k) {
@@ -511,13 +509,12 @@ public final class Util {
 
   private static ChangeManager sChangeManager;
 
-  public static List<Long> filterOutGenerated(Collection<Long> trans) {
-    List<Long> out = arrayList();
-    for (var ti : trans) {
-      var t = storage().transaction(ti);
+  public static List<Transaction> filterOutGenerated(Collection<Transaction> trans) {
+    List<Transaction> out = arrayList();
+    for (var t : trans) {
       if (isGenerated(t))
         continue;
-      out.add(ti);
+      out.add(t);
     }
     return out;
   }

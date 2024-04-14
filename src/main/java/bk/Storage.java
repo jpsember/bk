@@ -69,21 +69,21 @@ public class Storage extends BaseObject {
     return mDatabase.transactions();
   }
 
-  public List<Integer> readAllAccounts() {
-    return new ArrayList<>(mDatabase.accounts().keySet());
+  public List<Account> readAllAccounts() {
+    return new ArrayList<>(mDatabase.accounts().values());
   }
 
-  public List<Long> readAllTransactions() {
-    return new ArrayList<>(transactions().keySet());
+  public List<Transaction> readAllTransactions() {
+    return new ArrayList<>(transactions().values());
   }
 
-  public List<Long> readTransactionsForAccount(int accountNumber) {
+  public List<Transaction> readTransactionsForAccount(int accountNumber) {
     checkArgument(accountNumber >= 1000 && accountNumber <= 5999, "unexpected account number:",
         accountNumber);
-    List<Long> out = arrayList();
+    List<Transaction> out = arrayList();
     for (var tr : transactions().values()) {
       if (tr.debit() == accountNumber || tr.credit() == accountNumber)
-        out.add(id(tr));
+        out.add(tr);
     }
     return out;
   }
@@ -261,9 +261,8 @@ public class Storage extends BaseObject {
 
     if (u.live()) {
       // Delete all transactions
-      var tir = readTransactionsForAccount(number);
-      for (var ti : tir) {
-        var t = transaction(ti);
+      var tr = readTransactionsForAccount(number);
+      for (var t : tr) {
         u.deleteTransaction(t);
         deleteTransaction(t);
       }

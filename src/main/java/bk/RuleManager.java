@@ -24,8 +24,7 @@ public class RuleManager extends BaseObject {
 
   public void deleteAllGeneratedTransactions() {
     var allTrans = storage().readAllTransactions();
-    for (var ti : allTrans) {
-      var t = storage().transaction(ti);
+    for (var t : allTrans) {
       if (t.parent() != 0) {
         storage().deleteTransaction(t);
       } else {
@@ -40,8 +39,8 @@ public class RuleManager extends BaseObject {
   public void applyRulesToAllTransactions() {
     deleteAllGeneratedTransactions();
     var allTrans = storage().readAllTransactions();
-    for (var ti : allTrans) {
-      applyRules(storage().transaction(ti));
+    for (var t : allTrans) {
+      t = applyRules(t);
     }
   }
 

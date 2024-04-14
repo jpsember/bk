@@ -51,22 +51,17 @@ public class AccountList extends LedgerWindow implements ChangeListener {
   private Account mCurrentAccount;
 
   public void rebuild() {
-    Account acc = null;
-    var id = getCurrentRow();
-    if (id != null)
-      acc = storage().account(id.intValue());
-    mCurrentAccount = acc;
+    mCurrentAccount = getCurrentRow();
 
     clearEntries();
-    List<Integer> sorted = storage().readAllAccounts();
+    List<Account> sorted = storage().readAllAccounts();
     sorted.sort(ACCOUNT_COMPARATOR);
 
-    for (var ti : sorted) {
-      var t = storage().account(ti);
+    for (var t : sorted) {
       openEntry();
       add(new AccountNameField(t.number(), storage().accountName(t.number())));
       add(new CurrencyField(t.balance()));
-      closeEntry(ti);
+      closeEntry(t);
     }
     setCurrentRow(mCurrentAccount);
     repaint();
@@ -78,7 +73,7 @@ public class AccountList extends LedgerWindow implements ChangeListener {
     if (mCurrentAccount != null) {
       int x = size();
       for (int i = 0; i < x; i++) {
-        Account a = storage().account(entry(i).intValue());
+        Account a = entry(i);
         if (a.number() >= mCurrentAccount.number()) {
           bestMatch = i;
           break;

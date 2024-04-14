@@ -112,12 +112,11 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     var currentTrans = getCurrentRow();
     clearEntries();
 
-    List<Long> sorted = (mAccountNumber == 0) ? storage().readAllTransactions()
+    List<Transaction> sorted = (mAccountNumber == 0) ? storage().readAllTransactions()
         : storage().readTransactionsForAccount(mAccountNumber);
     sorted.sort(TRANSACTION_COMPARATOR);
 
-    for (var ti2 : sorted) {
-      var t = storage().transaction(ti2);
+    for (var t : sorted) {
       openEntry();
       add(new DateField(t.date()));
 
@@ -133,7 +132,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       add(new AccountNameField(t.debit(), storage().accountName(t.debit())));
       add(new AccountNameField(t.credit(), storage().accountName(t.credit())));
       add(new TextField(t.description()));
-      closeEntry(ti2);
+      closeEntry(t);
     }
     setCurrentRow(currentTrans);
     repaint();
@@ -145,7 +144,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     if (mCurrentTrans != null) {
       int x = size();
       for (int i = 0; i < x; i++) {
-        Transaction t = storage().transaction(entry(i).longValue());
+        Transaction t = entry(i);
         if (t.date() >= mCurrentTrans.date()) {
           bestMatch = i;
           break;
