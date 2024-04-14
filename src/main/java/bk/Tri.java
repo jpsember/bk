@@ -7,26 +7,28 @@ import js.data.DataUtil;
 
 public class Tri extends BaseObject {
 
-  public Tri addSentence(String st) {
-    todo("we want the ability to support a typed sentence, e.g. insurance, and return a different sentence, e.g. 5020 insurance");
-    add(st, true);
+  public Tri addSentence(String inputSentence, String optOutputSentence) {
+    todo(
+        "we want the ability to support a typed sentence, e.g. insurance, and return a different sentence, e.g. 5020 insurance");
+    optOutputSentence = ifNullOrEmpty(optOutputSentence, inputSentence);
+    add(inputSentence, optOutputSentence, true);
     return this;
   }
 
-  public Tri addWords(String st) {
-    for (var wd : split(st, ' ')) {
-      add(wd, false);
+  public Tri addWords(String outputSentence) {
+    for (var wd : split(outputSentence, ' ')) {
+      add(wd, outputSentence, false);
     }
     return this;
   }
 
-  private void add(String text, boolean sentence) {
-    log("add", sentence ? "sentence:" : "word:", text);
-    if (text.isEmpty())
+  private void add(String inputText, String outputSentence, boolean sentenceFlag) {
+    log("add", sentenceFlag ? "sentence:" : "input:", inputText);
+    if (inputText.isEmpty())
       return;
-    var textBytes = toLowerCaseLetters(text);
+    var textBytes = toLowerCaseLetters(inputText);
     if (textBytes == null) {
-      log("non-ASCII character found in text:", text);
+      log("non-ASCII character found in text:", inputText);
       return;
     }
 
@@ -39,7 +41,7 @@ public class Tri extends BaseObject {
       var ci = indexOf(node.childLetters, textBytes[i]);
       if (ci < 0) {
         nextNode = new Node();
-        nextNode.answer = text;
+        nextNode.answer = outputSentence;
         log("...creating new node for", i, "char:", nextLetter);
         node.addChild(nextLetter, nextNode);
       } else
@@ -49,20 +51,20 @@ public class Tri extends BaseObject {
         // Update answer for current node if current prefix is better
         boolean update = node.answer == null;
         while (!update) {
-          if (sentence) {
-            if (node.isSentencePrefix && node.answer.length() <= text.length())
+          if (sentenceFlag) {
+            if (node.isSentencePrefix && node.answer.length() <= inputText.length())
               break;
             update = true;
           } else {
-            if (node.isSentencePrefix || node.answer.length() <= text.length())
+            if (node.isSentencePrefix || node.answer.length() <= inputText.length())
               break;
             update = true;
           }
 
         }
         if (update) {
-          node.isSentencePrefix = sentence;
-          node.answer = text;
+          node.isSentencePrefix = sentenceFlag;
+          node.answer = outputSentence;
         }
       }
       node = nextNode;

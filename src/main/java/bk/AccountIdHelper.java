@@ -3,10 +3,8 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
-import java.util.Comparator;
 import java.util.List;
 
-import bk.gen.Account;
 
 public class AccountIdHelper extends WidgetHelper {
 
@@ -22,14 +20,17 @@ public class AccountIdHelper extends WidgetHelper {
     if (sTri == null) {
       var t = new Tri();
       var ac = storage().readAllAccounts();
+      List<String> outputSentences = arrayList();
       for (var a : ac) {
-        t.addSentence("" + a.number());
-        t.addSentence(a.name());
+        var output = accountNumberWithNameString(a);
+        outputSentences.add(output);
+        t.addSentence("" + a.number(), output);
+        t.addSentence(a.name(), output);
       }
-      for (var a : ac) {
-        t.addWords(a.name());
-      }
+      for (var s : outputSentences)
+        t.addWords(s);
       sTri = t;
+      todo("have change listener update the tri");
     }
     return sTri;
   }

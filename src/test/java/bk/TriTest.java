@@ -28,8 +28,9 @@ public class TriTest extends MyTestCase {
   }
 
   private void add(String... strs) {
+    // Add a prefix to demonstrate that the output sentence can differ from the input one
     for (var x : strs)
-      tri().addSentence(x);
+      tri().addSentence(x, "out: " + x);
     for (var x : strs)
       tri().addWords(x);
   }
