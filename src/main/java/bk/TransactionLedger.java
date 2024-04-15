@@ -19,7 +19,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     mListener = listener;
     // Be careful not to store the actual Account reference, since it may change unexpectedly!
     mAccountNumber = accountNumberOrZero;
-    setHeaderHeight(5);
+    setHeaderHeight(6);
     setFooterHeight(3);
     rebuild();
   }
@@ -77,12 +77,15 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
         resetSlotWidth();
         var strBalance = labelledAmount("Balance", a.balance());
         var strMarked = labelledAmount("Marked", mMarkedBalance);
+        var strUnmarked = labelledAmount("Unmarked", a.balance() - mMarkedBalance);
         var strAboveCursor = labelledAmount("Above", mAboveBalance);
         var strBelowCursor = labelledAmount("At,below", mBelowBalance);
         plotLabelledAmount(strBalance, HEADER_SLOTS - 1, y);
         int y1 = y + 1;
-        if (mMarkedCount != 0)
-          plotLabelledAmount(strMarked, 0, y1);
+        if (mMarkedCount != 0) {
+          plotLabelledAmount(strMarked, 1, y1 + 1);
+          plotLabelledAmount(strUnmarked, 2, y1 + 1);
+        }
         if (currentRowIndex() != 0) {
           plotLabelledAmount(strAboveCursor, 1, y1);
           plotLabelledAmount(strBelowCursor, 2, y1);

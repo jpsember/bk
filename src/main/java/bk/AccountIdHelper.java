@@ -3,7 +3,11 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
-public class AccountIdHelper extends WidgetHelper {
+import java.util.List;
+
+import bk.gen.Account;
+
+public class AccountIdHelper extends WidgetHelper implements ChangeListener {
 
   @Override
   public String constructHint(String prefix) {
@@ -17,15 +21,27 @@ public class AccountIdHelper extends WidgetHelper {
       var t = new Trie();
       var ac = storage().readAllAccounts();
       for (var a : ac) {
-        var output = accountNumberWithNameString(a);
-        t.addSentence("" + a.number(), output);
-        t.addSentence(a.name(), output);
+        addAccountInfo(t, a);
       }
       sTri = t;
-      todo("have change listener update the tri");
+      changeManager().addListener(this);
     }
     return sTri;
   }
 
+  private void addAccountInfo(Trie t, Account a) {
+    var output = accountNumberWithNameString(a);
+    t.addSentence("" + a.number(), output);
+    t.addSentence(a.name(), output);
+  }
+
   private static Trie sTri;
+
+  @Override
+  public void dataChanged(List<Integer> modifiedAccountNumbers, List<Long> modifiedTransactionTimestamps) {
+    for (var aa : modifiedAccountNumbers) {
+      var a = storage().account(aa);
+      addAccountInfo(tri(), a);
+    }
+  }
 }
