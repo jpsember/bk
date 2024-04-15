@@ -100,10 +100,10 @@ public final class Util {
   private static final List<DateTimeFormatter> sDateParsers;
 
   private static final long sEpochSecondsToday;
-  private static final String sYearsToday;
   private static final DateTimeFormatter sDateFormatter;
 
   private static long sDefaultEpochSeconds;
+  private static String sDefaultFormattedDate;
 
   public static long defaultEpochSeconds() {
     var x = sDefaultEpochSeconds;
@@ -112,12 +112,19 @@ public final class Util {
     return x;
   }
 
+  public static String defaultFormattedDate() {
+    if (sDefaultFormattedDate == null)
+      sDefaultFormattedDate = formatDate(defaultEpochSeconds());
+    return sDefaultFormattedDate;
+  }
+
   public static long epochSecondsToday() {
     return sEpochSecondsToday;
   }
 
   public static void setDefaultEpochSeconds(long x) {
     sDefaultEpochSeconds = x;
+    sDefaultFormattedDate = null;
   }
 
   public static boolean validDate(long epochSeconds) {
@@ -151,14 +158,17 @@ public final class Util {
     str = str.replace(' ', '/');
     var pt = split(str, '/');
 
-    // If year has been omitted, add current year
+    // If year or month have been omitted, use previous date's
+    if (pt.size() == 1) {
+      pt.add(0, defaultFormattedDate().substring(5, 5 + 2));
+    }
     if (pt.size() == 2)
-      pt.add(0, sYearsToday);
+      pt.add(0, defaultFormattedDate().substring(0, 0 + 4));
 
     if (pt.size() == 3) {
       var first = pt.get(0);
       if (first.length() == 2)
-        pt.set(0, sYearsToday.substring(0, 2) + first);
+        pt.set(0, defaultFormattedDate().substring(0, 2) + first);
 
       var second = pt.get(1).toLowerCase();
       var mi = sMonthAbbrev.indexOf(second);
@@ -221,8 +231,6 @@ public final class Util {
 
     }
     sDateFormatter = new DateTimeFormatterBuilder().appendPattern("uuuu/MM/dd").toFormatter();
-    var s = epochSecondsToDateString(sEpochSecondsToday);
-    sYearsToday = s.substring(0, 4);
   }
 
   public static final long MAX_CURRENCY = 100_000_000_00L;
