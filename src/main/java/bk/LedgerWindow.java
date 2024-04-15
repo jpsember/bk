@@ -312,10 +312,8 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
   }
 
   public LedgerWindow openEntry() {
-    // discardCachedAccountInfo();
     checkState(mLedgerFieldList == null);
     mLedgerFieldList = arrayList();
-    //    mPendingMarked = false;
     return this;
   }
 
@@ -328,12 +326,9 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     return this;
   }
 
-  //private static final int TARGET_AS_INTEGER_OFFSET = 1_000_000;
-
   public LedgerWindow addHint(String sentence) {
     checkState(mLedgerFieldList != null);
     int target = mEntries.size();
-    pr("adding hint sentence:", quote(sentence), "=>", target);
     trie().addSentence(sentence, null);
     mHintToRowNumberMap.put(sentence, target);
     return this;
@@ -391,6 +386,10 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     if (mCursorRow >= mEntries.size())
       return null;
     return entry(mCursorRow);
+  }
+
+  public int currentRowIndex() {
+    return mCursorRow;
   }
 
   private int indexOfAuxData(Object auxData) {

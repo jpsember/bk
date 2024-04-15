@@ -19,8 +19,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     mListener = listener;
     // Be careful not to store the actual Account reference, since it may change unexpectedly!
     mAccountNumber = accountNumberOrZero;
-    setHeaderHeight(hasBudget() ? 5 : 4);
-
+    setHeaderHeight(5);
     setFooterHeight(3);
     rebuild();
   }
@@ -62,16 +61,56 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     } else {
       var s = accountNumberWithNameString(a);
       plotString(s, clip.x, y, Alignment.LEFT, CHARS_ACCOUNT_NUMBER_AND_NAME);
+
       if (hasBudget()) {
         long spent = -a.balance();
-        plotLabelledAmount("Budget", a.budget(), 1, y);
-        plotLabelledAmount("Spent", spent, 0, y + 1);
-        plotLabelledAmount("Avail", a.budget() - spent, 1, y + 1);
+        resetSlotWidth();
+        var strBudget = labelledAmount("Budget", a.budget());
+        var strSpent = labelledAmount("Spent", spent);
+        var strAvail = labelledAmount("Avail", a.budget() - spent);
+
+        plotLabelledAmount(strBudget, HEADER_SLOTS - 1, y);
+        plotLabelledAmount(strSpent, 0, y + 1);
+        plotLabelledAmount(strAvail, 1, y + 1);
       } else {
-        plotLabelledAmount("Balance", a.balance(), 1, y);
+        calcBalances();
+        resetSlotWidth();
+        var strBalance = labelledAmount("Balance", a.balance());
+        var strMarked = labelledAmount("Marked", mMarkedBalance);
+        var strAboveCursor = labelledAmount("Above", mAboveBalance);
+        var strBelowCursor = labelledAmount("At,below", mBelowBalance);
+        plotLabelledAmount(strBalance, HEADER_SLOTS - 1, y);
+        int y1 = y + 1;
+        if (mMarkedCount != 0)
+          plotLabelledAmount(strMarked, 0, y1);
+        if (currentRowIndex() != 0) {
+          plotLabelledAmount(strAboveCursor, 1, y1);
+          plotLabelledAmount(strBelowCursor, 2, y1);
+        }
       }
     }
     super.plotHeader(y, headerHeight);
+  }
+
+  private void calcBalances() {
+    long balMarked = 0;
+    long balAbove = 0;
+    mMarkedCount = 0;
+
+    int index = INIT_INDEX;
+    for (var t : mDisplayedTransactions) {
+      var amt = normalizeTransactionAmount(t);
+      index++;
+      if (isMarked(t)) {
+        mMarkedCount++;
+        balMarked += amt;
+      }
+      if (index < currentRowIndex())
+        balAbove += amt;
+    }
+    mAboveBalance = balAbove;
+    mBelowBalance = getAccount().balance() - mAboveBalance;
+    mMarkedBalance = balMarked;
   }
 
   @Override
@@ -88,16 +127,23 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     plotString(msg, x, y + 1);
   }
 
-  private void plotLabelledAmount(String label, long amount, int slot, int y) {
-    var s = leftPad(label + ": ", 9) + leftPad(formatCurrencyEvenZero(amount), CHARS_CURRENCY);
-    var r = Render.SHARED_INSTANCE;
-    var clip = r.clipBounds();
-    var CHARS_SLOT = 34;
-    plotString(s, clip.endX() - (CHARS_SLOT * (2 - slot)), y, Alignment.RIGHT, CHARS_SLOT);
+  private static final int HEADER_SLOTS = 3;
+  private static final int SLOT_SEP = 4;
+
+  private String labelledAmount(String label, long amount) {
+    var s = label + ": " + formatCurrencyEvenZero(amount);
+    mSlotWidth = Math.max(SLOT_SEP + s.length(), mSlotWidth);
+    return s;
   }
 
-  private String leftPad(String str, int minLength) {
-    return spaces(minLength - str.length()) + str;
+  private void resetSlotWidth() {
+    mSlotWidth = SLOT_SEP + 20;
+  }
+
+  private void plotLabelledAmount(String s, int slot, int y) {
+    var r = Render.SHARED_INSTANCE;
+    var clip = r.clipBounds();
+    plotString(s, clip.endX() - (mSlotWidth * (HEADER_SLOTS - slot)), y, Alignment.RIGHT, mSlotWidth);
   }
 
   private void addColumns() {
@@ -122,18 +168,12 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     List<Transaction> sorted = (mAccountNumber == 0) ? storage().readAllTransactions()
         : storage().readTransactionsForAccount(mAccountNumber);
     sorted.sort(TRANSACTION_COMPARATOR);
-
+    mDisplayedTransactions = sorted;
     for (var t : sorted) {
       openEntry();
       add(new DateField(t.date()));
 
-      var amt = t.amount();
-      // If ledger is for a particular account, negate sign
-      // based on which of debit or credit matches the current account 
-      if (mAccountNumber != 0) {
-        if (t.credit() == mAccountNumber)
-          amt = -amt;
-      }
+      var amt = normalizeTransactionAmount(t);
 
       add(new CurrencyField(amt));
       add(new AccountNameField(t.debit(), storage().accountName(t.debit())));
@@ -142,7 +182,19 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       closeEntry(t);
     }
     setCurrentRow(currentTrans);
+
     repaint();
+  }
+
+  private long normalizeTransactionAmount(Transaction t) {
+    long amt = t.amount();
+    // If ledger is for a particular account, negate sign
+    // based on which of debit or credit matches the current account 
+    if (mAccountNumber != 0) {
+      if (t.credit() == mAccountNumber)
+        amt = -amt;
+    }
+    return amt;
   }
 
   @Override
@@ -216,4 +268,10 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   private int mAccountNumber;
   private boolean mColumnsAdded;
   private Transaction mCurrentTrans;
+  private long mMarkedBalance;
+  private int mMarkedCount;
+  private long mAboveBalance;
+  private long mBelowBalance;
+  private List<Transaction> mDisplayedTransactions = arrayList();
+  private int mSlotWidth;
 }
