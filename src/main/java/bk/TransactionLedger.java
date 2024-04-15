@@ -121,13 +121,17 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     var r = Render.SHARED_INSTANCE;
     var b = r.clipBounds();
     int x = b.x;
-    plotString(//
-        "A:add       ret:edit   opt-z:undo      .:mark/unmark", x, y);
-    var msg = //
-        "opt-d:delete  P:print  opt-Z:redo  opt-.:unmark all    esc:back";
-    if (mAccountNumber == 0)
-      msg.replace("P:print", "       ");
-    plotString(msg, x, y + 1);
+    String msg1;
+    String msg2;
+    if (mAccountNumber != 0) {
+      msg1 = "A:add       ret:edit   opt-z:undo      .:mark/unmark     J:jump";
+      msg2 = "opt-d:delete  P:print  opt-Z:redo  opt-.:unmark all    esc:back";
+    } else {
+      msg1 = "A:add       ret:edit   opt-z:undo      .:mark/unmark";
+      msg2 = "opt-d:delete           opt-Z:redo  opt-.:unmark all    esc:back";
+    }
+    plotString(msg1, x, y);
+    plotString(msg2, x, y + 1);
   }
 
   private static final int HEADER_SLOTS = 3;
@@ -248,6 +252,14 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     case KeyEvent.PRINT:
       if (mAccountNumber != 0) {
         PrintManager.SHARED_INSTANCE.printLedger(getAccount());
+      }
+      break;
+
+    case KeyEvent.JUMP:
+      if (t != null && mAccountNumber != 0) {
+        var otherNum = otherAccount(t, mAccountNumber).number();
+        mAccountNumber = otherNum;
+        rebuild();
       }
       break;
 

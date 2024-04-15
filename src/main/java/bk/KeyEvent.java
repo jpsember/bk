@@ -22,6 +22,7 @@ public class KeyEvent {
       , EDIT = ":E" //   
       , OPTION_Z = ":Ω" //
       , PRINT = ":P" //
+      , JUMP = ":j" //
       , OPTION_SHIFT_Z = ":¸" //
       , MARK = ":." //
       , OPTION_Q = ":œ" //
