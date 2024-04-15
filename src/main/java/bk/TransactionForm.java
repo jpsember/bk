@@ -28,7 +28,7 @@ public class TransactionForm extends FormWindow {
 
     var dt = b.date();
     if (dt == 0)
-      dt = epochSecondsToday();
+      dt = defaultEpochSeconds();
     mDate = validator(DATE_VALIDATOR).value(dt).addField("Date");
     mAmount = validator(CURRENCY_VALIDATOR).value(b.amount()).addField("Amount");
 
@@ -40,7 +40,8 @@ public class TransactionForm extends FormWindow {
     mCr = validator(mCrV).value(accountNumberWithNameString(b.credit(), ""))
         .fieldWidth(CHARS_ACCOUNT_NUMBER_AND_NAME).addField("Cr").helper(new AccountIdHelper());
 
-    mDesc = validator(DESCRIPTION_VALIDATOR).value(b.description()).fieldWidth(80).addField("Description").helper(new TransactionDescriptionHelper());
+    mDesc = validator(DESCRIPTION_VALIDATOR).value(b.description()).fieldWidth(80).addField("Description")
+        .helper(new TransactionDescriptionHelper());
     addButton("Ok", () -> okHandler());
 
     addVertSpace(1);
@@ -114,6 +115,8 @@ public class TransactionForm extends FormWindow {
     var u = UndoManager.SHARED_INSTANCE;
 
     Transaction edited = null;
+
+    setDefaultEpochSeconds(tr.date());
 
     if (mType == TYPE_ADD) {
       u.begin("Add Transaction");

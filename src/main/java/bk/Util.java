@@ -103,8 +103,21 @@ public final class Util {
   private static final String sYearsToday;
   private static final DateTimeFormatter sDateFormatter;
 
+  private static long sDefaultEpochSeconds;
+
+  public static long defaultEpochSeconds() {
+    var x = sDefaultEpochSeconds;
+    if (x == 0)
+      x = sEpochSecondsToday;
+    return x;
+  }
+
   public static long epochSecondsToday() {
     return sEpochSecondsToday;
+  }
+
+  public static void setDefaultEpochSeconds(long x) {
+    sDefaultEpochSeconds = x;
   }
 
   public static boolean validDate(long epochSeconds) {
@@ -256,40 +269,7 @@ public final class Util {
   public static final Validator DEFAULT_VALIDATOR = new Validator() {
   };
 
-  public static final Validator DATE_VALIDATOR = new Validator() {
-
-    /**
-     * Encode a long to a string
-     */
-    public String encode(Object value) {
-      var out = "";
-      if (value != null) {
-        var epochSeconds = (Long) value;
-        out = epochSecondsToDateString(epochSeconds);
-      }
-      return out;
-    }
-
-    public ValidationResult validate(String value) {
-      final boolean db = false && alert("db is on for DATE_VALIDATOR");
-      if (db)
-        pr("validating:", quote(value));
-      long dateInSeconds = 0;
-      String strDate = "";
-      try {
-        dateInSeconds = dateToEpochSeconds(value);
-        strDate = epochSecondsToDateString(dateInSeconds);
-      } catch (Throwable t) {
-        if (db)
-          pr("failed validating:", value, "got:", INDENT, t);
-      }
-      var result = new ValidationResult(strDate, dateInSeconds);
-      if (db)
-        pr("result:", result);
-      return result;
-    }
-  };
-
+  public static final Validator DATE_VALIDATOR = new DateValidator();
   public static final Validator CURRENCY_VALIDATOR = new CurrencyValidator();
   public static final Validator BUDGET_VALIDATOR = new CurrencyValidator().withCanBeZero(true);
 
