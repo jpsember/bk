@@ -155,7 +155,6 @@ public class TransactionForm extends FormWindow implements HintListener {
   public void hintChanged(String text) {
     if (mType != TYPE_ADD)
       return;
-    todo("if user has edited one of the fields themselves, maybe disable the auto fill in");
     var h = mDescHelper;
     var t = h.transactionForDescription(text);
     log("hintChanged, transaction for", quote(text), ":", INDENT, t);
