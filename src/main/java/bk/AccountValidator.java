@@ -63,7 +63,11 @@ public class AccountValidator extends BaseObject implements Validator {
       } else {
         var ival = (Integer) value;
         if (ival != 0) {
-          out = Integer.toString(ival);
+          var acct = storage().account(ival);
+          if (acct != null)
+            out = accountNumberWithNameString(acct);
+          else
+            out = Integer.toString(ival);
           log("encode", db(ival), "to", db(out));
         }
       }
