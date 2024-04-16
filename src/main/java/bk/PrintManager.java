@@ -170,13 +170,9 @@ public class PrintManager extends BaseObject {
     var content = mPageBuffer.toString();
 
     if (mPDF) {
-      var p = new PDFWriter();
-      p.target(f);
-      p.content(content);
-      p.close();
-    } else {
-      Files.S.writeString(f, content);
+      alert("pdf output is disabled");
     }
+    Files.S.writeString(f, content);
     log("\n" + content);
     setMessageDuration(20);
     setFooterMessage("Printed", f);
