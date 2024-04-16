@@ -3,10 +3,8 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
-import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.util.List;
-import java.util.Locale;
 
 import com.googlecode.lanterna.Symbols;
 
