@@ -62,7 +62,7 @@ public class TransactionForm extends FormWindow implements HintListener {
     String problem = "This field is invalid.";
     do {
 
-      if (mAccountNumber != 0) {
+      if (!isGeneralLedger()) {
         // If we are editing it for a particular account, and
         // If exactly one of the debit or credit are empty, set them to that account
 
@@ -161,11 +161,19 @@ public class TransactionForm extends FormWindow implements HintListener {
     log("hintChanged, transaction for", quote(text), ":", INDENT, t);
     if (t == null)
       return;
-    todo("be more selective about which fields to change");
 
     // If any of the auto fields has been human edited, don't change any of them
     if (mAmount.isHumanEdited() || mDr.isHumanEdited() || mCr.isHumanEdited())
       return;
+
+    // If we're in the general ledger, change all.
+    // Otherwise, if one of the debit/credit matches the ledger account number, change all.
+    // Else, do nothing (at least one account number must match).
+    //
+    if (!isGeneralLedger()) {
+      if (t.debit() != mAccountNumber && t.credit() != mAccountNumber)
+        return;
+    }
 
     setToSuggestion(mAmount, t.amount());
     setToSuggestion(mDr, t.debit());
@@ -175,6 +183,10 @@ public class TransactionForm extends FormWindow implements HintListener {
   private void setToSuggestion(WidgetWindow widget, Object value) {
     widget.setContent(widget.validator().encode(value));
     widget.repaint();
+  }
+
+  private boolean isGeneralLedger() {
+    return mAccountNumber == 0;
   }
 
   private Listener mListener;

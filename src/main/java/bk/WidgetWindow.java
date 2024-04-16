@@ -238,8 +238,6 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     case Character: {
       var c = k.getCharacter();
       insertChar(c);
-      if (!mHumanEdited)
-        pr("*** human edited:", mContent);
       mHumanEdited = true;
     }
       break;

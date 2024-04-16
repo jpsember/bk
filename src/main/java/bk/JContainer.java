@@ -95,7 +95,7 @@ public class JContainer extends JWindow {
         pr("sizeExpr:", sizeExpr, "chars:", chars);
       if (db)
         pr("charsDynamicTotal:", charsDynamicTotal, "clamped chars:", chars);
-      if (chars == 0) {
+      if (db && chars == 0) {
         alert("problem fitting window");
       }
 
