@@ -49,13 +49,14 @@ public class PrintManager extends BaseObject {
       setMaxLength(CHARS_ACCOUNT_NAME).stretchPct(30).shrinkPct(25).addCol("other name");
     }
     right().setMaxLength(CHARS_CURRENCY).addCol("balance");
+    var SMALL_DESCR_LEN = 16;
+
     if (mExpanded)
       setMaxLength(CHARS_TRANSACTION_DESCRIPTION).stretchPct(100).shrinkPct(50).addCol("description");
     else
-      setMaxLength(4).shrinkPct(100).stretchPct(0).addCol("footnote");
+      setMaxLength(SMALL_DESCR_LEN).shrinkPct(0).stretchPct(0).addCol("footnote");
 
     var date = formatDate(epochSecondsToday());
-    setTitle(a.number(), a.name(), date);
 
     long currBal = 0;
     for (var t : ts) {
@@ -83,13 +84,15 @@ public class PrintManager extends BaseObject {
         col(t.description());
       else {
         var note = t.description();
-        note = addFootnoteIfNonEmpty(note);
+        if (note.length() > SMALL_DESCR_LEN)
+          note = addFootnoteIfNonEmpty(note);
         col(note);
       }
       endLine();
     }
 
     determineColumnWidths();
+    setTitle(a.number(), a.name(), date, "FONT" + PDFWriter.tmp, "PW", mLineLength);
 
     {
       var s = mBuffer;
@@ -118,7 +121,7 @@ public class PrintManager extends BaseObject {
     if (false)
       note = randomText(150, false);
     mFootnotes.add(note);
-    return Integer.toString(mFootnotes.size());
+    return "Note " + Integer.toString(mFootnotes.size());
   }
 
   public PrintManager setTitle(Object... msg) {
@@ -152,8 +155,10 @@ public class PrintManager extends BaseObject {
   }
 
   private PrintManager dashes(int count) {
+    pr("printing dashes:", count);
     for (int i = 0; i < count; i++)
       mBuffer.append(Symbols.SINGLE_LINE_HORIZONTAL);
+    //halt();
     return this;
   }
 
@@ -283,6 +288,9 @@ public class PrintManager extends BaseObject {
   }
 
   private void determineColumnWidths() {
+    //alertVerbose();
+    log("determine column widths");
+    todo("add support for minimum width in chars to prevent shrinkage too far");
     int widthSum = 0;
     {
       int i = INIT_INDEX;
@@ -291,14 +299,18 @@ public class PrintManager extends BaseObject {
         if (i != 0)
           widthSum += COL_SEP_STRING.length();
         widthSum += c.requiredLength();
+        log("col", i, "width", c.requiredLength(), "sum", widthSum);
       }
     }
 
     if (mTargetLineLength == 0)
       mTargetLineLength = Math.min(widthSum, mMaxLineLength);
 
+    log("target line length:", mTargetLineLength);
+
     int maxExpandChars = Math.max(0, mTargetLineLength - widthSum);
     int maxCropChars = Math.max(0, widthSum - mMaxLineLength);
+    log("exp:", maxExpandChars, "crop:", maxCropChars);
 
     int remain = maxExpandChars;
     boolean expanding;
@@ -325,22 +337,34 @@ public class PrintManager extends BaseObject {
       }
       log("change factors:", f);
       {
+        int biggestFactor = -1;
         int i = INIT_INDEX;
         for (var v : mPrintCols) {
           i++;
           var x = f[i];
+          if (biggestFactor < 0 || x > f[biggestFactor])
+            biggestFactor = i;
           int ourChars = Math.round((x / changeTotal) * origRemain);
           ourChars = Math.min(ourChars, remain);
           if (ourChars != 0) {
-            log("adjusting field", v.name(), "by", ourChars * sign);
-            v.adjustWidth(ourChars * sign);
+            var amt = ourChars * sign;
+            log("adjusting field", v.name(), "by", amt);
+            v.adjustWidth(amt);
             remain -= ourChars;
           }
+        }
+        if (remain > 0 && biggestFactor >= 0) {
+          var v = mPrintCols.get(biggestFactor);
+          int amt = remain * sign;
+          log("final adjustment of field", v.name(), "by", amt);
+          v.adjustWidth(amt);
+          remain = 0;
         }
       }
       widthSum += (origRemain - remain) * sign;
     }
     mLineLength = widthSum;
+    log("modified line length now:", mLineLength);
   }
 
   private void init() {
@@ -371,7 +395,7 @@ public class PrintManager extends BaseObject {
 
   private StringBuilder mBuffer;
   private StringBuilder mPageBuffer;
-  private int mMaxLineLength = 110;
+  private int mMaxLineLength = 92;
   private int mTargetLineLength;
   private String mTitle = "untitled";
   private File mDir;

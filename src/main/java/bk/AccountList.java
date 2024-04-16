@@ -132,7 +132,7 @@ public class AccountList extends LedgerWindow implements ChangeListener {
 
     case KeyEvent.PRINT:
       if (a != null) {
-        PrintManager.SHARED_INSTANCE.pageWidth(110).printLedger(a);
+        PrintManager.SHARED_INSTANCE.printLedger(a);
       }
       break;
     default:

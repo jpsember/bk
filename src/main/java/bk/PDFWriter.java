@@ -59,11 +59,15 @@ public class PDFWriter {
 
   private Font font() {
     if (mFont == null) {
-      mFont = new Font(Font.COURIER, 9, Font.NORMAL, Color.BLACK);
+      var fontSize = 8;
+      if (false)
+        fontSize = tmp;
+      mFont = new Font(Font.COURIER, fontSize, Font.NORMAL, Color.BLACK);
     }
     return mFont;
   }
 
+  public static int tmp = 9;
   private File mTarget;
   private String mContent;
   private Font mFont;
