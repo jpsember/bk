@@ -28,7 +28,7 @@ public class AccountList extends LedgerWindow implements ChangeListener {
     var b = r.clipBounds();
     int x = b.x;
     plotString("A:add     ret:ledger  T:trans  opt-z:undo", x, y);
-    plotString("E:edit  opt-D:delete  P:print  opt-Z:redo  Q:quit", x, y + 1);
+    plotString("E:edit  opt-D:delete  P:print  opt-Z:redo", x, y + 1);
   }
 
   @Override

@@ -76,7 +76,7 @@ public class BkOper extends AppOper
       {
         var h = new MessageWindow();
         Util.sHeader = h;
-        h.setMessageAt(MessageWindow.CENTER, "bk 1.0").setMessageAt(MessageWindow.RIGHT, "option-x to quit");
+        h.setMessageAt(MessageWindow.CENTER, "bk 1.0").setMessageAt(MessageWindow.RIGHT, "opt-x: quit");
         mgr.chars(1).window(h);
       }
 
