@@ -84,6 +84,7 @@ public class PrintManager extends BaseObject {
         col(t.description());
       else {
         var note = t.description();
+        // If the note is too long for the 'small' description length, use a footnote instead
         if (note.length() > SMALL_DESCR_LEN)
           note = addFootnoteIfNonEmpty(note);
         col(note);
@@ -92,7 +93,7 @@ public class PrintManager extends BaseObject {
     }
 
     determineColumnWidths();
-    setTitle(a.number(), a.name(), date, "FONT" + PDFWriter.tmp, "PW", mLineLength);
+    setTitle(a.number(), a.name(), date);
 
     {
       var s = mBuffer;
@@ -155,10 +156,8 @@ public class PrintManager extends BaseObject {
   }
 
   private PrintManager dashes(int count) {
-    pr("printing dashes:", count);
     for (int i = 0; i < count; i++)
       mBuffer.append(Symbols.SINGLE_LINE_HORIZONTAL);
-    //halt();
     return this;
   }
 
