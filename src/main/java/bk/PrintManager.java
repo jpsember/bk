@@ -18,6 +18,11 @@ public class PrintManager extends BaseObject {
 
   public static final PrintManager SHARED_INSTANCE = new PrintManager();
 
+  public PrintManager toPDF(boolean pdf) {
+    mPDF = pdf;
+    return this;
+  }
+
   public void printExpandedLedger(Account a) {
     auxPrintLedger(a, true);
   }
@@ -153,13 +158,23 @@ public class PrintManager extends BaseObject {
   }
 
   public PrintManager saveToDrive() {
-    var filename = checkNonEmpty(mTitle, "no title defined") + ".txt";
+    var filename = checkNonEmpty(mTitle, "no title defined");
+    filename = Files.addExtension(filename, mPDF ? "pdf" : Files.EXT_TEXT);
+
     if (mDir == null)
       toDirectory(Files.getDesktopDirectory());
     var f = new File(mDir, filename);
     log("saving to:", f);
     var content = mPageBuffer.toString();
-    Files.S.writeString(f, content);
+
+    if (mPDF) {
+      var p = new PDFWriter();
+      p.target(f);
+      p.content(content);
+      p.close();
+    } else {
+      Files.S.writeString(f, content);
+    }
     pr("\n" + content);
     setMessageDuration(20);
     setFooterMessage("Printed", f);
@@ -366,4 +381,5 @@ public class PrintManager extends BaseObject {
   private int mLineLength;
   private boolean mExpanded;
   private List<String> mFootnotes;
+  private boolean mPDF = true;
 }
