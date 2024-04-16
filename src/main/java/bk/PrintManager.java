@@ -177,7 +177,7 @@ public class PrintManager extends BaseObject {
     } else {
       Files.S.writeString(f, content);
     }
-    pr("\n" + content);
+    log("\n" + content);
     setMessageDuration(20);
     setFooterMessage("Printed", f);
     return this;
