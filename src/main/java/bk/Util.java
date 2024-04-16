@@ -14,7 +14,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 
 import bk.gen.Account;
 import bk.gen.Transaction;
@@ -63,7 +62,7 @@ public final class Util {
 
   public static String randomText(int maxLength, boolean withLinefeeds) {
     StringBuilder sb = new StringBuilder();
-    Random r = ThreadLocalRandom.current();
+    Random r = random();
     int len = (int) Math.abs(r.nextGaussian() * maxLength);
     while (sb.length() < len) {
       int wordSize = r.nextInt(8) + 2;
