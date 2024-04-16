@@ -6,10 +6,13 @@ import static js.base.Tools.*;
 import js.geometry.MyMath;
 
 public class WidgetWindow extends JWindow implements FocusHandler {
-  
+
   public static final int DEFAULT_WIDTH = 30;
 
-  
+  public interface HintListener {
+    void hintChanged(String text);
+  }
+
   public WidgetWindow width(int width) {
     mWidth = width;
     return this;
@@ -38,6 +41,11 @@ public class WidgetWindow extends JWindow implements FocusHandler {
 
   public WidgetWindow button(ButtonListener listener) {
     mButtonListener = listener;
+    return this;
+  }
+
+  public WidgetWindow hintListener(HintListener hl) {
+    mHintListener = hl;
     return this;
   }
 
@@ -73,7 +81,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   public boolean isEmpty() {
     return nullOrEmpty(mContent);
   }
-  
+
   @Override
   public void paint() {
     var r = Render.SHARED_INSTANCE;
@@ -99,7 +107,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
       var lx = b.x + labelWidth + SEP;
       var ly = b.y;
 
-      var s = mContent; 
+      var s = mContent;
       if (nonEmpty(mHint))
         s = mHint;
 
@@ -230,6 +238,9 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     case Character: {
       var c = k.getCharacter();
       insertChar(c);
+      if (!mHumanEdited)
+        pr("*** human edited:", mContent);
+      mHumanEdited = true;
     }
       break;
     default:
@@ -247,10 +258,20 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     mHint = null;
     if (mHelper != null) {
       var prefix = getHintForHelper();
-      mHint = mHelper.getHint(prefix);
+      var newHint = mHelper.getHint(prefix);
+      if (!newHint.equals(mHint)) {
+        mHint = newHint;
+        callHintListener(mHint);
+      }
     }
 
     repaint();
+  }
+
+  public void setContent(String text) {
+    text = nullToEmpty(text);
+    mContent = text;
+    mCursorPos = -1;
   }
 
   private void insertChar(char c) {
@@ -267,8 +288,13 @@ public class WidgetWindow extends JWindow implements FocusHandler {
    */
   private void applyHint() {
     if (nonEmpty(mHint)) {
-      mContent = mHint;
-      mCursorPos = -1;
+      setContent(mHint);
+    }
+  }
+
+  private void callHintListener(String hint) {
+    if (mHintListener != null) {
+      mHintListener.hintChanged(hint);
     }
   }
 
@@ -276,6 +302,10 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     if (s.length() > maxWidth)
       return s.substring(0, maxWidth);
     return s;
+  }
+
+  public Validator validator() {
+    return mValidator;
   }
 
   private int mCursorPos = -1; // position of cursor, or -1 if entire string is highlighted
@@ -289,7 +319,12 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   private ValidationResult mValidationResult;
   private WidgetHelper mHelper;
   private String mHint;
+  private HintListener mHintListener;
+  private boolean mHumanEdited;
 
+  public boolean isHumanEdited() {
+    return mHumanEdited;
+  }
 
   @Override
   public boolean focusPossible() {

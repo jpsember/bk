@@ -3,9 +3,10 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
+import bk.WidgetWindow.HintListener;
 import bk.gen.Transaction;
 
-public class TransactionForm extends FormWindow {
+public class TransactionForm extends FormWindow implements HintListener {
 
   public interface Listener {
     /**
@@ -29,6 +30,9 @@ public class TransactionForm extends FormWindow {
     var dt = b.date();
     if (dt == 0)
       dt = defaultEpochSeconds();
+    mDescHelper = new TransactionDescriptionHelper();
+    mDesc = validator(DESCRIPTION_VALIDATOR).value(b.description()).fieldWidth(80).addField("Description")
+        .helper(mDescHelper).hintListener(this);
     mDate = validator(DATE_VALIDATOR).value(dt).addField("Date");
     mAmount = validator(CURRENCY_VALIDATOR).value(b.amount()).addField("Amount");
 
@@ -40,8 +44,6 @@ public class TransactionForm extends FormWindow {
     mCr = validator(mCrV).value(accountNumberWithNameString(b.credit(), ""))
         .fieldWidth(CHARS_ACCOUNT_NUMBER_AND_NAME).addField("Cr").helper(new AccountIdHelper());
 
-    mDesc = validator(DESCRIPTION_VALIDATOR).value(b.description()).fieldWidth(80).addField("Description")
-        .helper(new TransactionDescriptionHelper());
     addButton("Ok", () -> okHandler());
 
     addVertSpace(1);
@@ -149,10 +151,38 @@ public class TransactionForm extends FormWindow {
     return null;
   }
 
+  @Override
+  public void hintChanged(String text) {
+    if (mType != TYPE_ADD)
+      return;
+    todo("if user has edited one of the fields themselves, maybe disable the auto fill in");
+    var h = mDescHelper;
+    var t = h.transactionForDescription(text);
+    log("hintChanged, transaction for", quote(text), ":", INDENT, t);
+    if (t == null)
+      return;
+    todo("be more selective about which fields to change");
+
+    // If any of the auto fields has been human edited, don't change any of them
+    if (mAmount.isHumanEdited() || mDr.isHumanEdited() || mCr.isHumanEdited())
+      return;
+
+    setToSuggestion(mAmount, t.amount());
+    setToSuggestion(mDr, t.debit());
+    setToSuggestion(mCr, t.credit());
+  }
+
+  private void setToSuggestion(WidgetWindow widget, Object value) {
+    widget.setContent(widget.validator().encode(value));
+    widget.repaint();
+  }
+
   private Listener mListener;
   private int mType;
   private WidgetWindow mDate, mAmount, mDr, mCr, mDesc;
   private AccountValidator mDrV, mCrV;
   private int mAccountNumber;
   private Transaction mOrig;
+  private TransactionDescriptionHelper mDescHelper;
+
 }

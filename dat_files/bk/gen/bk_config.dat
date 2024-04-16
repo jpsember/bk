@@ -8,4 +8,7 @@ fields {
 
   // Where to write the logs (if empty, doesn't write logs anywhere)
   File log_file = "bk_log.txt";
+
+  // Convert printouts from .txt to .pdf?
+  bool print_pdf;
 }
