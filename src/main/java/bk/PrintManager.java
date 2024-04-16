@@ -6,8 +6,6 @@ import static js.base.Tools.*;
 import java.io.File;
 import java.util.List;
 
-import com.googlecode.lanterna.Symbols;
-
 import bk.gen.Account;
 import bk.gen.Alignment;
 import js.base.BaseObject;
@@ -49,7 +47,7 @@ public class PrintManager extends BaseObject {
       setMaxLength(CHARS_ACCOUNT_NAME).stretchPct(30).shrinkPct(25).addCol("other name");
     }
     right().setMaxLength(CHARS_CURRENCY).addCol("balance");
-    var SMALL_DESCR_LEN = 16;
+    var SMALL_DESCR_LEN = 24;
 
     if (mExpanded)
       setMaxLength(CHARS_TRANSACTION_DESCRIPTION).stretchPct(100).shrinkPct(50).addCol("description");
@@ -157,7 +155,7 @@ public class PrintManager extends BaseObject {
 
   private PrintManager dashes(int count) {
     for (int i = 0; i < count; i++)
-      mBuffer.append(Symbols.SINGLE_LINE_HORIZONTAL);
+      mBuffer.append('-');
     return this;
   }
 
@@ -394,7 +392,7 @@ public class PrintManager extends BaseObject {
 
   private StringBuilder mBuffer;
   private StringBuilder mPageBuffer;
-  private int mMaxLineLength = 92;
+  private int mMaxLineLength = 108;
   private int mTargetLineLength;
   private String mTitle = "untitled";
   private File mDir;

@@ -163,8 +163,9 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     addColumn(Column.newBuilder().name("Debit").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NUMBER_AND_NAME));
     addColumn(
         Column.newBuilder().name("Credit").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NUMBER_AND_NAME));
+    todo("refactor constant 24");
     addColumn(
-        Column.newBuilder().name("Description").datatype(Datatype.TEXT).width(CHARS_TRANSACTION_DESCRIPTION));
+        Column.newBuilder().name("Description").datatype(Datatype.TEXT).width(24));
     mColumnsAdded = true;
   }
 
