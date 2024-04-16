@@ -75,6 +75,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
 
   @Override
   public void gainFocus() {
+    mHintDisabled = false;
     mCursorPos = -1;
   }
 
@@ -200,6 +201,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
       fm.move(mFocusRootWindow, -1);
       break;
     case ArrowLeft:
+      suppressHint();
       if (mCursorPos == 0)
         break;
       if (mCursorPos > 0)
@@ -208,10 +210,12 @@ public class WidgetWindow extends JWindow implements FocusHandler {
         mCursorPos = mContent.length() - 1;
       break;
     case ArrowRight:
+      suppressHint();
       if (mCursorPos < mContent.length())
         mCursorPos++;
       break;
     case Backspace:
+      suppressHint();
       if (mCursorPos > 0) {
         mContent = mContent.substring(0, mCursorPos - 1) + mContent.substring(mCursorPos);
         mCursorPos--;
@@ -221,6 +225,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
       }
       break;
     case Delete:
+      suppressHint();
       if (mCursorPos < 0) {
         mContent = "";
         mCursorPos = 0;
@@ -230,9 +235,11 @@ public class WidgetWindow extends JWindow implements FocusHandler {
       }
       break;
     case Home:
+      suppressHint();
       mCursorPos = 0;
       break;
     case End:
+      suppressHint();
       mCursorPos = mContent.length();
       break;
     case Character: {
@@ -254,16 +261,25 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     mCursorPos = MyMath.clamp(mCursorPos, -1, mWidth);
 
     mHint = null;
-    if (mHelper != null) {
-      var prefix = getHintForHelper();
-      var newHint = mHelper.getHint(prefix);
-      if (!newHint.equals(mHint)) {
-        mHint = newHint;
-        callHintListener(mHint);
+    if (!mHintDisabled) {
+      if (mHelper != null) {
+        var prefix = getHintForHelper();
+        var newHint = mHelper.getHint(prefix);
+        if (!newHint.equals(mHint)) {
+          mHint = newHint;
+          callHintListener(mHint);
+        }
       }
     }
 
     repaint();
+  }
+
+  /**
+   * Disable any more hints during this focus session
+   */
+  private void suppressHint() {
+    mHintDisabled = true;
   }
 
   public void setContent(String text) {
@@ -319,6 +335,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   private String mHint;
   private HintListener mHintListener;
   private boolean mHumanEdited;
+  private boolean mHintDisabled;
 
   public boolean isHumanEdited() {
     return mHumanEdited;
