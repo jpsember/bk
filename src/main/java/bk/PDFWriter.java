@@ -36,6 +36,25 @@ public class PDFWriter {
     }
   }
 
+  public void font(java.awt.Font font) {
+    mJavaFont = font;
+  }
+
+  private Font font() {
+    if (mFont == null) {
+      if (mJavaFont == null) {
+        mFont = new Font(Font.COURIER, 9, Font.NORMAL, Color.BLACK);
+      } else {
+
+notFinished();
+        //      mFont = new Font(java.awt.Font.
+      }
+    }
+    return mFont;
+  }
+
+  private Font mFont;
+
   private void auxClose() {
     Document document = new Document();
 
@@ -44,7 +63,9 @@ public class PDFWriter {
 
     PdfWriter.getInstance(document, outputStream);
     document.open();
-    Font font = new Font(Font.COURIER, 9, Font.NORMAL, Color.BLACK);
+
+    var font = font();
+//    Font font = new Font(Font.COURIER, 9, Font.NORMAL, Color.BLACK);
 
     for (String line : split(mContent, '\n')) {
       var para = new Paragraph(line, font);
@@ -58,4 +79,5 @@ public class PDFWriter {
 
   private File mTarget;
   private String mContent;
+  private java.awt.Font mJavaFont;
 }
