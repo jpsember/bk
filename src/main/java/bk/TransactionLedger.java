@@ -93,7 +93,6 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
         resetSlotWidth();
         plotShareInfo("All", y, mShareCalcAll);
         plotShareInfo("To cursor", y + 1, mShareCalcToCursor);
-        plotShareInfo("Marked", y + 2, mShareCalcMarked);
       }
         break;
       case NORMAL: {
@@ -172,16 +171,11 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   private void calcShareStuff() {
     mShareCalcToCursor = ShareCalc.newBuilder();
     mShareCalcAll = ShareCalc.newBuilder();
-    mShareCalcMarked = ShareCalc.newBuilder();
 
     int index = INIT_INDEX;
     for (var t : mDisplayedTransactions) {
       index++;
       log(VERT_SP, "processing transaction:", INDENT, t);
-      if (isMarked(t))
-        updateShare(t, mShareCalcMarked);
-      if (false) //mark("not updating others"))
-        continue;
       if (index <= currentRowIndex())
         updateShare(t, mShareCalcToCursor);
       updateShare(t, mShareCalcAll);
@@ -444,6 +438,6 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
   // For calculating share quantities, cost base, capital gains
   //
-  private ShareCalc.Builder mShareCalcToCursor, mShareCalcAll, mShareCalcMarked;
+  private ShareCalc.Builder mShareCalcToCursor, mShareCalcAll;
 
 }
