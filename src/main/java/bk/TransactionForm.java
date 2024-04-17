@@ -34,7 +34,8 @@ public class TransactionForm extends FormWindow implements HintListener {
     mDescHelper = new TransactionDescriptionHelper();
     mDesc = validator(new DescriptionValidator()).value(b.description()).fieldWidth(80)
         .addField("Description").helper(mDescHelper).hintListener(this);
-    mAmount = validator(CURRENCY_VALIDATOR).value(b.amount()).addField("Amount");
+    // We need to allow zero-amount transactions for stock switches
+    mAmount = validator(new CurrencyValidator().withCanBeZero(true)).value(b.amount()).addField("Amount");
 
     mDrV = new AccountValidator();
     mCrV = new AccountValidator();
