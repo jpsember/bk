@@ -636,6 +636,9 @@ public final class Util {
    * @return ShareInfo object, or null if there didn't appear to be one
    */
   public static ShareInfo parseShareInfo(String value) {
+    final boolean db = false && alert("verbose");
+    if (db)
+      pr("parseShareInfo, value:", quote(value));
 
     var si = ShareInfo.newBuilder();
     value = value.trim();
@@ -650,24 +653,37 @@ public final class Util {
       if (ind < 0)
         break;
       si.action(ShareAction.values()[ind + 2]);
+      // Remove the 1-char prefix
+      value = value.substring(1);
+
+      if (db)
+        pr("set action:", si.action());
 
       String valueStr = value;
       String noteStr = "";
       var sp = value.indexOf(' ');
       if (sp >= 0) {
         valueStr = value.substring(0, sp);
-        noteStr = value.substring(sp + 1).trim();
+        noteStr = value.substring(sp).trim();
       }
 
+      if (db)
+        pr("valueStr:", quote(valueStr), "noteStr:", quote(noteStr));
       double shares = 0;
       try {
-        shares = Double.parseDouble(valueStr.substring(1));
+        shares = Double.parseDouble(valueStr);
+        if (db)
+          pr("parsed to double:", shares);
       } catch (Throwable t) {
+        if (db)
+          pr("caught error:", t);
         si.action(ShareAction.ERROR);
         break;
       }
       si.shares(shares);
       si.notes(noteStr);
+      if (db)
+        pr("parsed:", INDENT, si);
     } while (false);
     return si.build();
   }
@@ -675,7 +691,7 @@ public final class Util {
   public static String encodeShareInfo(ShareInfo si) {
     if (si.action() == ShareAction.ERROR)
       return "***err: " + si.notes();
-    var sf = String.format("%.3 ", si.shares());
+    var sf = String.format("%.3f ", si.shares());
     switch (si.action()) {
     case NONE:
       return si.notes();
