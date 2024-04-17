@@ -37,10 +37,6 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
   public int chooseCurrentRow() {
     return 0;
   }
-  //
-  //  public void discardCachedAccountInfo() {
-  //    mTriggerStringMap = null;
-  //  }
 
   @Override
   protected String supplyName() {

@@ -606,6 +606,11 @@ public final class Util {
       sMarkedTransactionSet.add(id);
   }
 
+  public static void clearAllMarks() {
+    checkState(UndoManager.SHARED_INSTANCE.live());
+    sMarkedTransactionSet.clear();
+  }
+
   public static boolean isMarked(Transaction t) {
     return sMarkedTransactionSet.contains(id(t));
   }

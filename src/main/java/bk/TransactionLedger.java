@@ -417,6 +417,10 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       }
       break;
 
+    case KeyEvent.UNMARK_ALL:
+      clearAllMarks();
+      repaint();
+      break;
     }
     mCurrentTrans = getCurrentRow();
   }

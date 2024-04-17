@@ -25,6 +25,7 @@ public class KeyEvent {
       , JUMP = ":j" //
       , OPTION_SHIFT_Z = ":¸" //
       , MARK = ":." //
+      , UNMARK_ALL = ":≥" //
       , ARROW_UP = ":ArrowUp" //
       , ARROW_DOWN = ":ArrowDown" //
       , ARROW_LEFT = ":ArrowLeft" //
