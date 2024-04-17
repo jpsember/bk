@@ -289,7 +289,7 @@ public final class Util {
   public static final Validator DATE_VALIDATOR = new DateValidator();
   public static final Validator CURRENCY_VALIDATOR = new CurrencyValidator();
   public static final Validator BUDGET_VALIDATOR = new CurrencyValidator().withCanBeZero(true);
-  public static final Validator STOCK_VALIDATOR = new BoolValidator();
+  public static final Validator STOCK_VALIDATOR = new YesNoValidator();
 
   public static final Validator ACCOUNT_NAME_VALIDATOR = new Validator() {
     public ValidationResult validate(String value) {

@@ -21,6 +21,7 @@ public class AccountForm extends FormWindow {
   public static final int TYPE_ADD = 0, TYPE_EDIT = 1;
 
   public AccountForm(int type, Account account, Listener listener) {
+    //alertVerbose();
     account = nullTo(account, Account.DEFAULT_INSTANCE).build();
     mOriginalAccount = account;
     mType = type;
@@ -97,10 +98,11 @@ public class AccountForm extends FormWindow {
       changeManager().registerModifiedAccount(ac);
     } else {
       u.begin("Modify Account", accountNumberWithNameString(ac));
-      // modify a copy of the original account to include the edits
+
+      // Copy the fields that we wish to preserve from the old account to the new one
       var orig = mOriginalAccount;
-      var mod = orig.build().toBuilder();
-      mod.number(ac.number()).name(ac.name()).budget(ac.budget());
+      ac.balance(orig.balance());
+      var mod = ac;
 
       List<Transaction> modTrans = arrayList();
       if (orig.number() != mod.number()) {
