@@ -270,7 +270,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     String msg1;
     String msg2;
     if (mAccountNumber != 0) {
-      msg1 = "A:add       ret:edit   opt-z:undo      .:mark/unmark     J:jump";
+      msg1 = "A:add      !,ret:edit   opt-z:undo      .:mark/unmark     J:jump";
       msg2 = "opt-d:delete  P:print  opt-Z:redo  opt-.:unmark all    esc:back";
     } else {
       msg1 = "A:add       ret:edit   opt-z:undo      .:mark/unmark";
