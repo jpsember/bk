@@ -31,8 +31,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
         mHeaderType = HEADER_TYPE.STOCK;
     }
 
-    pr("header type:", mHeaderType);
-    setHeaderHeight(mHeaderType == HEADER_TYPE.STOCK ? 7 : 6);
+    setHeaderHeight(6);
     setFooterHeight(3);
     rebuild();
   }
@@ -93,9 +92,8 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
         calcShareStuff();
         resetSlotWidth();
         plotShareInfo("All", y, mShareCalcAll);
-        plotShareInfo("Above", y + 1, mShareCalcAbove);
-        plotShareInfo("At,below", y + 2, mShareCalcAtOrBelow);
-        plotShareInfo("Marked", y + 3, mShareCalcMarked);
+        plotShareInfo("To cursor", y + 1, mShareCalcToCursor);
+        plotShareInfo("Marked", y + 2, mShareCalcMarked);
       }
         break;
       case NORMAL: {
@@ -172,8 +170,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   }
 
   private void calcShareStuff() {
-    mShareCalcAbove = ShareCalc.newBuilder();
-    mShareCalcAtOrBelow = ShareCalc.newBuilder();
+    mShareCalcToCursor = ShareCalc.newBuilder();
     mShareCalcAll = ShareCalc.newBuilder();
     mShareCalcMarked = ShareCalc.newBuilder();
 
@@ -185,10 +182,8 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
         updateShare(t, mShareCalcMarked);
       if (false) //mark("not updating others"))
         continue;
-      if (index < currentRowIndex())
-        updateShare(t, mShareCalcAbove);
-      else
-        updateShare(t, mShareCalcAtOrBelow);
+      if (index <= currentRowIndex())
+        updateShare(t, mShareCalcToCursor);
       updateShare(t, mShareCalcAll);
     }
   }
@@ -304,21 +299,24 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     var r = Render.SHARED_INSTANCE;
     var clip = r.clipBounds();
     plotString(s, clip.endX() - (mSlotWidth * (HEADER_SLOTS - slot)), y, Alignment.RIGHT, mSlotWidth);
-    pr("plotting in header slot", slot, "at y", y, ":", quote(s));
   }
 
   private void addColumns() {
     if (mColumnsAdded)
       return;
+
+    boolean alt = mHeaderType == HEADER_TYPE.STOCK;
+    var add = alt ? 4 : 0;
     spaceSeparators();
     addColumn(Column.newBuilder().name("Date").datatype(Datatype.DATE).width(CHARS_DATE));
     addColumn(Column.newBuilder().name("Amount").alignment(Alignment.RIGHT).datatype(Datatype.CURRENCY)
         .width(CHARS_CURRENCY));
-    addColumn(Column.newBuilder().name("Debit").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NUMBER_AND_NAME));
     addColumn(
-        Column.newBuilder().name("Credit").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NUMBER_AND_NAME));
-    todo("refactor constant 24");
-    addColumn(Column.newBuilder().name("Description").datatype(Datatype.TEXT).width(24));
+        Column.newBuilder().name("Debit").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NUMBER_AND_NAME - add));
+    addColumn(Column.newBuilder().name("Credit").datatype(Datatype.TEXT)
+        .width(CHARS_ACCOUNT_NUMBER_AND_NAME - add));
+    addColumn(Column.newBuilder().name("Description").datatype(Datatype.TEXT)
+        .width(CHARS_TRANSACTION_DESCRIPTION + add));
     mColumnsAdded = true;
   }
 
@@ -446,6 +444,6 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
   // For calculating share quantities, cost base, capital gains
   //
-  private ShareCalc.Builder mShareCalcAbove, mShareCalcAtOrBelow, mShareCalcAll, mShareCalcMarked;
+  private ShareCalc.Builder mShareCalcToCursor, mShareCalcAll, mShareCalcMarked;
 
 }
