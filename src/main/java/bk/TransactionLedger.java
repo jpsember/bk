@@ -249,6 +249,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
         var capitalGains = currencyToDollars(sellAmt) - (si.shares() / c.shares()) * c.bookValue();
         log("cap gains:", capitalGains);
 
+        c.shares(c.shares() - si.shares());
         c.bookValue(newBookValue);
         c.capGain(c.capGain() + capitalGains);
       }
