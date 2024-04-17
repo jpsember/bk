@@ -18,6 +18,10 @@ public class BkConfig implements AbstractData {
     return mLogFile;
   }
 
+  public boolean printPdf() {
+    return mPrintPdf;
+  }
+
   @Override
   public Builder toBuilder() {
     return new Builder(this);
@@ -26,6 +30,7 @@ public class BkConfig implements AbstractData {
   protected static final String _0 = "create";
   protected static final String _1 = "database";
   protected static final String _2 = "log_file";
+  protected static final String _3 = "print_pdf";
 
   @Override
   public String toString() {
@@ -38,6 +43,7 @@ public class BkConfig implements AbstractData {
     m.putUnsafe(_0, mCreate);
     m.putUnsafe(_1, mDatabase.toString());
     m.putUnsafe(_2, mLogFile.toString());
+    m.putUnsafe(_3, mPrintPdf);
     return m;
   }
 
@@ -67,6 +73,7 @@ public class BkConfig implements AbstractData {
         mLogFile = new File(x);
       }
     }
+    mPrintPdf = m.opt(_3, false);
   }
 
   public static Builder newBuilder() {
@@ -88,6 +95,8 @@ public class BkConfig implements AbstractData {
       return false;
     if (!(mLogFile.equals(other.mLogFile)))
       return false;
+    if (!(mPrintPdf == other.mPrintPdf))
+      return false;
     return true;
   }
 
@@ -99,6 +108,7 @@ public class BkConfig implements AbstractData {
       r = r * 37 + (mCreate ? 1 : 0);
       r = r * 37 + mDatabase.hashCode();
       r = r * 37 + mLogFile.hashCode();
+      r = r * 37 + (mPrintPdf ? 1 : 0);
       m__hashcode = r;
     }
     return r;
@@ -107,6 +117,7 @@ public class BkConfig implements AbstractData {
   protected boolean mCreate;
   protected File mDatabase;
   protected File mLogFile;
+  protected boolean mPrintPdf;
   protected int m__hashcode;
 
   public static final class Builder extends BkConfig {
@@ -115,6 +126,7 @@ public class BkConfig implements AbstractData {
       mCreate = m.mCreate;
       mDatabase = m.mDatabase;
       mLogFile = m.mLogFile;
+      mPrintPdf = m.mPrintPdf;
     }
 
     @Override
@@ -134,6 +146,7 @@ public class BkConfig implements AbstractData {
       r.mCreate = mCreate;
       r.mDatabase = mDatabase;
       r.mLogFile = mLogFile;
+      r.mPrintPdf = mPrintPdf;
       return r;
     }
 
@@ -149,6 +162,11 @@ public class BkConfig implements AbstractData {
 
     public Builder logFile(File x) {
       mLogFile = (x == null) ? _D2 : x;
+      return this;
+    }
+
+    public Builder printPdf(boolean x) {
+      mPrintPdf = x;
       return this;
     }
 

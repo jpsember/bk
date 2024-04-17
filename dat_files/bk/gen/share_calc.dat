@@ -1,0 +1,8 @@
+fields {
+  double shares;
+  double book_value;
+  double cap_gain;
+  string error;
+  int num_trans;
+}
+

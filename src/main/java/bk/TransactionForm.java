@@ -31,8 +31,8 @@ public class TransactionForm extends FormWindow implements HintListener {
     if (dt == 0)
       dt = defaultEpochSeconds();
     mDescHelper = new TransactionDescriptionHelper();
-    mDesc = validator(DESCRIPTION_VALIDATOR).value(b.description()).fieldWidth(80).addField("Description")
-        .helper(mDescHelper).hintListener(this);
+    mDesc = validator(new DescriptionValidator()).value(b.description()).fieldWidth(80)
+        .addField("Description").helper(mDescHelper).hintListener(this);
     mDate = validator(DATE_VALIDATOR).value(dt).addField("Date");
     mAmount = validator(CURRENCY_VALIDATOR).value(b.amount()).addField("Amount");
 

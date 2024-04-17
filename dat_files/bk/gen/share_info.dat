@@ -1,0 +1,6 @@
+fields {
+  enum ShareAction action;
+  double shares;
+  string notes;
+ }
+

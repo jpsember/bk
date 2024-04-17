@@ -16,6 +16,8 @@ import java.util.Random;
 import java.util.Set;
 
 import bk.gen.Account;
+import bk.gen.ShareAction;
+import bk.gen.ShareInfo;
 import bk.gen.Transaction;
 import js.base.BasePrinter;
 import js.base.DateTimeTools;
@@ -266,6 +268,14 @@ public final class Util {
     return formatCurrencyEvenZero(cents);
   }
 
+  public static double currencyToDollars(long cents) {
+    return cents / 100.00;
+  }
+
+  public static long dollarsToCurrency(double dollars) {
+    return Math.round(dollars * 100.0);
+  }
+
   public static long generateDate() {
     return sEpochSecondsToday + random().nextInt(31_536_000);
   }
@@ -279,6 +289,7 @@ public final class Util {
   public static final Validator DATE_VALIDATOR = new DateValidator();
   public static final Validator CURRENCY_VALIDATOR = new CurrencyValidator();
   public static final Validator BUDGET_VALIDATOR = new CurrencyValidator().withCanBeZero(true);
+  public static final Validator STOCK_VALIDATOR = new BoolValidator();
 
   public static final Validator ACCOUNT_NAME_VALIDATOR = new Validator() {
     public ValidationResult validate(String value) {
@@ -295,32 +306,6 @@ public final class Util {
         int k = MyMath.clamp(j, 2, 30);
         if (k != j)
           throw badArg("too short or too long");
-        result = new ValidationResult(value, value);
-      } catch (Throwable t) {
-        if (db)
-          pr("failed to validate:", quote(value), "got:", t);
-      }
-      return result;
-    };
-  };
-
-  public static final Validator DESCRIPTION_VALIDATOR = new Validator() {
-    public ValidationResult validate(String value) {
-      var result = ValidationResult.NONE;
-      final boolean db = false && alert("db is on");
-      if (db)
-        pr("validating description:", quote(value));
-      value = value.trim();
-      try {
-        if (db)
-          pr("parsing:", value);
-        if (value.length() > 1000)
-          badArg("description is too long");
-        for (int i = 0; i < value.length(); i++) {
-          var j = value.charAt(i);
-          if (j < ' ' || j > 127)
-            badArg("unexpected character:", j);
-        }
         result = new ValidationResult(value, value);
       } catch (Throwable t) {
         if (db)
@@ -624,6 +609,60 @@ public final class Util {
 
   public static boolean isMarked(Transaction t) {
     return sMarkedTransactionSet.contains(id(t));
+  }
+
+  public static ShareInfo parseShareInfo(String value) {
+
+    var si = ShareInfo.newBuilder();
+    value = value.trim();
+    si.notes(value);
+
+    do {
+      //  private String adjustIfShare(String value) {
+
+      // If it starts with +,-,=, or a digit, assume it is a share quantity
+      if (value.isEmpty())
+        break;
+
+      var ind = "=+-".indexOf(value.charAt(0));
+      if (ind < 0)
+        break;
+      si.action(ShareAction.values()[ind + 2]);
+
+      String valueStr = value;
+      String noteStr = "";
+      var sp = value.indexOf(' ');
+      if (sp >= 0) {
+        valueStr = value.substring(0, sp);
+        noteStr = value.substring(sp + 1).trim();
+      }
+
+      double shares = 0;
+      try {
+        shares = Double.parseDouble(valueStr.substring(1));
+      } catch (Throwable t) {
+        si.action(ShareAction.ERROR);
+        break;
+      }
+      si.shares(shares);
+      si.notes(noteStr);
+    } while (false);
+    return si.build();
+  }
+
+  public static String encodeShareInfo(ShareInfo si) {
+    if (si.action() == ShareAction.ERROR)
+      return "***err: " + si.notes();
+    var sf = String.format("%.3f ", si.shares());
+    switch (si.action()) {
+    case NONE:
+      return si.notes();
+    case ERROR:
+      return "***err: " + si.notes();
+    default:
+      char c = "=+-".charAt(si.action().ordinal() - 2);
+      return (Character.toString(c) + sf + " " + si.notes()).trim();
+    }
   }
 
   public static Set<Long> sMarkedTransactionSet = hashSet();

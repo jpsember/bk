@@ -3,4 +3,5 @@ fields {
   string name;
   long balance;
   long budget;
+  bool stock;
 }

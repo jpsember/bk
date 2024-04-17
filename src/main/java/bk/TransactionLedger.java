@@ -9,6 +9,7 @@ import bk.gen.Account;
 import bk.gen.Alignment;
 import bk.gen.Column;
 import bk.gen.Datatype;
+import bk.gen.ShareCalc;
 import bk.gen.Transaction;
 
 public class TransactionLedger extends LedgerWindow implements ChangeListener {
@@ -59,6 +60,8 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     if (a.number() == 0) {
       plotString("All Transactions", clip.x, y, Alignment.CENTER, clip.width);
     } else {
+
+      pr("account:", mAccountNumber, "hasBudget:", hasBudget(), "stock:", getAccount().stock());
       var s = accountNumberWithNameString(a);
       plotString(s, clip.x, y, Alignment.LEFT, CHARS_ACCOUNT_NUMBER_AND_NAME);
 
@@ -72,6 +75,15 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
         plotLabelledAmount(strBudget, HEADER_SLOTS - 1, y);
         plotLabelledAmount(strSpent, 0, y + 1);
         plotLabelledAmount(strAvail, 1, y + 1);
+      } else if (getAccount().stock()) {
+        calcShareStuff();
+
+        resetSlotWidth();
+        plotShareInfo("All", y, all);
+        plotShareInfo("Above", y + 1, abv);
+        plotShareInfo("At,below", y + 2, bel);
+        plotShareInfo("Marked", y + 3, mrk);
+
       } else {
         calcBalances();
         resetSlotWidth();
@@ -95,6 +107,29 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     super.plotHeader(y, headerHeight);
   }
 
+  private void plotShareInfo(String desc, int y, ShareCalc.Builder c) {
+    if (c.numTrans() == 0)
+      return;
+    var hdr = desc + " ";
+    String str;
+    if (nonEmpty(c.error())) {
+      str = c.error();
+    } else {
+      str = hdr + "bookv " + formatDollars(c.bookValue());
+      plotLabelledAmount(str, 0, y);
+      str = "shares " + String.format(".03f", c.shares());
+      plotLabelledAmount(str, 1, y);
+      str = "CapGn " + formatDollars(c.capGain());
+      plotLabelledAmount(str, 2, y);
+    }
+
+  }
+
+  private static String formatDollars(double dollars) {
+    var curr = dollarsToCurrency(dollars);
+    return formatCurrency(curr);
+  }
+
   private void calcBalances() {
     long balMarked = 0;
     long balAbove = 0;
@@ -114,6 +149,105 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     mAboveBalance = balAbove;
     mBelowBalance = getAccount().balance() - mAboveBalance;
     mMarkedBalance = balMarked;
+  }
+
+  private void calcShareStuff() {
+    alertVerbose();
+    abv = ShareCalc.newBuilder();
+    bel = ShareCalc.newBuilder();
+    all = ShareCalc.newBuilder();
+    mrk = ShareCalc.newBuilder();
+
+    int index = INIT_INDEX;
+    for (var t : mDisplayedTransactions) {
+      index++;
+      log(VERT_SP, "processing transaction:", INDENT, t);
+      updateShare(t, all);
+      if (!alert("not updating others")) {
+        if (isMarked(t))
+          updateShare(t, mrk);
+        if (index < currentRowIndex())
+          updateShare(t, abv);
+        else
+          updateShare(t, bel);
+      }
+      //pr("all:", INDENT, all);
+    }
+  }
+
+  private void updateShare(Transaction t, ShareCalc.Builder c) {
+    log(VERT_SP, "updateShare, calc:", INDENT, c);
+    if (nonEmpty(c.error()))
+      return;
+    var amt = normalizeTransactionAmount(t);
+    var si = parseShareInfo(t.description());
+
+    log("norm amt:", amt);
+    log("parsed share info:", INDENT, si);
+
+    switch (si.action()) {
+    case NONE:
+      return;
+    case ERROR:
+      c.error("descr: " + t.description());
+      break;
+    case ASSIGN:
+      if (amt != 0) {
+        c.error("amount must be zero");
+        break;
+      }
+      if (si.shares() < 0) {
+        c.error("assign neg shares");
+        break;
+      }
+      c.shares(si.shares());
+      break;
+    case BUY:
+      if (amt < 0) {
+        c.error("amount < 0");
+        break;
+      }
+      if (si.shares() <= 0) {
+        c.error("attempt to buy zero or neg shares");
+        break;
+      }
+      checkArgument(si.shares() > 0, "shares <= 0!", INDENT, si);
+      c.shares(c.shares() + si.shares());
+      c.bookValue(c.bookValue() + currencyToDollars(amt));
+      break;
+    case SELL: {
+      var sellAmt = -amt;
+      if (sellAmt <= 0) {
+        c.error("spent zero or neg");
+        break;
+      }
+      if (si.shares() < 0) {
+        c.error("sell neg shares");
+        break;
+      }
+      if (c.shares() - si.shares() < 0) {
+        c.error("shares underflow");
+      } else {
+        var newBookValue = ((c.shares() - si.shares()) / c.shares()) * c.bookValue();
+
+        log("existing shares:", c.shares());
+        log("selling shares :", si.shares());
+        log("remaining share:", (c.shares() - si.shares()));
+        log("new book value:", newBookValue);
+
+        log("proportion of shares being sold:", si.shares() / c.shares());
+        log("book value of that portion:", (si.shares() / c.shares()) * c.bookValue());
+        log("sell for:", currencyToDollars(sellAmt));
+        var capitalGains = currencyToDollars(sellAmt) - (si.shares() / c.shares()) * c.bookValue();
+        log("cap gains:", capitalGains);
+
+        c.bookValue(newBookValue);
+        c.capGain(c.capGain() + capitalGains);
+      }
+    }
+      break;
+    }
+    log("adjusted info:", INDENT, c);
   }
 
   @Override
@@ -164,8 +298,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     addColumn(
         Column.newBuilder().name("Credit").datatype(Datatype.TEXT).width(CHARS_ACCOUNT_NUMBER_AND_NAME));
     todo("refactor constant 24");
-    addColumn(
-        Column.newBuilder().name("Description").datatype(Datatype.TEXT).width(24));
+    addColumn(Column.newBuilder().name("Description").datatype(Datatype.TEXT).width(24));
     mColumnsAdded = true;
   }
 
@@ -290,4 +423,6 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   private long mBelowBalance;
   private List<Transaction> mDisplayedTransactions = arrayList();
   private int mSlotWidth;
+  private ShareCalc.Builder abv, bel, all, mrk;
+
 }

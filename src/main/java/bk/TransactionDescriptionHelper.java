@@ -36,6 +36,8 @@ public class TransactionDescriptionHelper extends WidgetHelper {
           .addListener((List<Integer> modifiedAccountNumbers, List<Long> modifiedTransactionTimestamps) -> {
             for (var tt : modifiedTransactionTimestamps) {
               var tr = storage().transaction(tt);
+              if (tr == null)
+                return;
               sTri.addSentence(tr.description(), null);
               updateDescMap(tr);
             }

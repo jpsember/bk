@@ -31,6 +31,7 @@ public class AccountForm extends FormWindow {
     mName = validator(ACCOUNT_NAME_VALIDATOR).value(account.name()).fieldWidth(ACCOUNT_NAME_MAX_LENGTH)
         .addField("Name");
     mBudget = validator(BUDGET_VALIDATOR).value(account.budget()).addField("Budget");
+    mStock = validator(STOCK_VALIDATOR).value(account.stock()).addField("Stock");
     addVertSpace(1);
     addButton("Ok", () -> okHandler());
     addButton("Cancel", () -> cancelHandler());
@@ -50,11 +51,14 @@ public class AccountForm extends FormWindow {
         break;
       if (mBudget.showAlert())
         break;
+      if (mStock.showAlert())
+        break;
 
       ac.number(mNumber.validResult());
       ac.name(mName.validResult());
       ac.budget(mBudget.validResult());
-
+      ac.stock(mStock.validResult());
+      
       switch (mType) {
       case TYPE_ADD: {
         var existing = account(ac.number());
@@ -141,7 +145,7 @@ public class AccountForm extends FormWindow {
   }
 
   private int mType;
-  private WidgetWindow mNumber, mName, mBudget;
+  private WidgetWindow mNumber, mName, mBudget, mStock;
   private Account mOriginalAccount;
   private Listener mListener;
 
