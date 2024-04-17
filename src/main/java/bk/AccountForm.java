@@ -20,14 +20,15 @@ public class AccountForm extends FormWindow {
 
   public static final int TYPE_ADD = 0, TYPE_EDIT = 1;
 
-  public AccountForm(int type, Account account, Listener listener) {
+  public AccountForm(int type, Account account, Listener listener, boolean canRenumber) {
     //alertVerbose();
     account = nullTo(account, Account.DEFAULT_INSTANCE).build();
     mOriginalAccount = account;
     mType = type;
     setSizeChars(12);
     mListener = listener;
-    var val = new AccountValidator().withForNewAccount(type == TYPE_ADD);
+    var val = new AccountValidator().withForNewAccount(type == TYPE_ADD)
+        .withFixed(canRenumber ? 0 : account.number());
     mNumber = validator(val).value(account.number()).addField("#");
     mName = validator(ACCOUNT_NAME_VALIDATOR).value(account.name()).fieldWidth(ACCOUNT_NAME_MAX_LENGTH)
         .addField("Name");

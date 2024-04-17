@@ -104,7 +104,7 @@ public class AccountList extends LedgerWindow implements ChangeListener {
       break;
 
     case ":T":
-      focusManager().pushAppend(new TransactionLedger(0, mTransListener));
+      focusManager().pushAppend(new TransactionLedger(0, mTransListener, null));
       break;
 
     case ":R":
@@ -125,7 +125,7 @@ public class AccountList extends LedgerWindow implements ChangeListener {
 
     case KeyEvent.EDIT:
       if (a != null) {
-        mListener.editAccount(a);
+        mListener.editAccount(a, true);
         rebuild();
       }
       break;

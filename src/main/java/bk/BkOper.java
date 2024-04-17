@@ -65,7 +65,7 @@ public class BkOper extends AppOper
     try {
       mgr.open();
       mAccounts = new AccountList(this, this);
-      mAllTransactionsLedger = new TransactionLedger(0, this);
+      mAllTransactionsLedger = new TransactionLedger(0, this, null);
       sAccountsView = mAccounts;
       sTransactionsView = mAllTransactionsLedger;
 
@@ -119,14 +119,14 @@ public class BkOper extends AppOper
   // ------------------------------------------------------------------
 
   @Override
-  public void editAccount(Account account) {
-    var form = new AccountForm(AccountForm.TYPE_EDIT, account, this);
+  public void editAccount(Account account, boolean canRenumber) {
+    var form = new AccountForm(AccountForm.TYPE_EDIT, account, this, canRenumber);
     focusManager().pushAppend(form);
   }
 
   @Override
   public void addAccount() {
-    var form = new AccountForm(AccountForm.TYPE_ADD, null, this);
+    var form = new AccountForm(AccountForm.TYPE_ADD, null, this, true);
     focusManager().pushAppend(form);
   }
 
@@ -144,7 +144,7 @@ public class BkOper extends AppOper
 
   @Override
   public void viewAccount(Account account) {
-    var v = new TransactionLedger(account.number(), this);
+    var v = new TransactionLedger(account.number(), this, this);
     focusManager().pushAppend(v);
   }
 

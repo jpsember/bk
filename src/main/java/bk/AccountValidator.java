@@ -34,13 +34,17 @@ public class AccountValidator extends BaseObject implements Validator {
       nameStr = s;
     }
     try {
+      String s;
       var i = Integer.parseInt(numberStr);
       if (i < 1000 || i > 5999)
         throw badArg("unexpected account number", i);
 
       Integer intRes = i;
-      String s;
-      if (mForNewAccountFlag && account(i) != null) {
+
+      if (mFixedNumber != 0 && i != mFixedNumber) {
+        s = numberStr + " !!! Can't change it here";
+        intRes = null;
+      } else if (mForNewAccountFlag && account(i) != null) {
         s = numberStr + " !!! Already exists";
         intRes = null;
       } else {
@@ -80,6 +84,12 @@ public class AccountValidator extends BaseObject implements Validator {
     return this;
   }
 
-  public boolean mForNewAccountFlag;
+  public AccountValidator withFixed(int number) {
+    mFixedNumber = number;
+    return this;
+  }
+
+  private boolean mForNewAccountFlag;
+  private int mFixedNumber;
 
 }

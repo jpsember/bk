@@ -14,10 +14,13 @@ import bk.gen.Transaction;
 
 public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
-  public TransactionLedger(int accountNumberOrZero, TransactionListener listener) {
+  public TransactionLedger(int accountNumberOrZero, TransactionListener listener,
+      AccountListListener acctListener) {
     changeManager().addListener(this);
     addColumns();
     mListener = listener;
+    mAccountListener = acctListener;
+
     // Be careful not to store the actual Account reference, since it may change unexpectedly!
     mAccountNumber = accountNumberOrZero;
 
@@ -384,6 +387,14 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       }
       break;
 
+    case ":!":
+      if (mAccountNumber != 0 && mAccountListener != null) {
+        mAccountListener.editAccount(getAccount(), false);
+        changeManager().dispatch();
+        rebuild();
+      }
+      break;
+
     case KeyEvent.DELETE_TRANSACTION:
       if (t != null) {
         if (!isGenerated(t))
@@ -431,6 +442,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   }
 
   private TransactionListener mListener;
+  private AccountListListener mAccountListener;
   private int mAccountNumber;
   private boolean mColumnsAdded;
   private Transaction mCurrentTrans;
