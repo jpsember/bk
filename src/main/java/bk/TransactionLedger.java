@@ -20,7 +20,19 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     mListener = listener;
     // Be careful not to store the actual Account reference, since it may change unexpectedly!
     mAccountNumber = accountNumberOrZero;
-    setHeaderHeight(6);
+
+    mHeaderType = HEADER_TYPE.GENERAL;
+    if (mAccountNumber != 0) {
+      mHeaderType = HEADER_TYPE.NORMAL;
+      var a = account(mAccountNumber);
+      if (a.budget() != 0)
+        mHeaderType = HEADER_TYPE.BUDGET;
+      else if (a.stock())
+        mHeaderType = HEADER_TYPE.STOCK;
+    }
+
+    pr("header type:", mHeaderType);
+    setHeaderHeight(mHeaderType == HEADER_TYPE.STOCK ? 7 : 6);
     setFooterHeight(3);
     rebuild();
   }
@@ -40,10 +52,6 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     return isMarked((Transaction) auxData);
   }
 
-  private boolean hasBudget() {
-    return getAccount().budget() != 0;
-  }
-
   private Account getAccount() {
     if (mAccountNumber == 0)
       return Account.DEFAULT_INSTANCE;
@@ -52,39 +60,45 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     return a;
   }
 
+  private enum HEADER_TYPE {
+    GENERAL, NORMAL, BUDGET, STOCK
+  };
+
+  private HEADER_TYPE mHeaderType;
+
   @Override
   public void plotHeader(int y, int headerHeight) {
     var a = getAccount();
     var r = Render.SHARED_INSTANCE;
     var clip = r.clipBounds();
-    if (a.number() == 0) {
+
+    if (mHeaderType == HEADER_TYPE.GENERAL) {
       plotString("All Transactions", clip.x, y, Alignment.CENTER, clip.width);
     } else {
-
-      pr("account:", mAccountNumber, "hasBudget:", hasBudget(), "stock:", getAccount().stock());
       var s = accountNumberWithNameString(a);
       plotString(s, clip.x, y, Alignment.LEFT, CHARS_ACCOUNT_NUMBER_AND_NAME);
-
-      if (hasBudget()) {
+      switch (mHeaderType) {
+      case BUDGET: {
         long spent = -a.balance();
         resetSlotWidth();
         var strBudget = labelledAmount("Budget", a.budget());
         var strSpent = labelledAmount("Spent", spent);
         var strAvail = labelledAmount("Avail", a.budget() - spent);
-
-        plotLabelledAmount(strBudget, HEADER_SLOTS - 1, y);
-        plotLabelledAmount(strSpent, 0, y + 1);
-        plotLabelledAmount(strAvail, 1, y + 1);
-      } else if (getAccount().stock()) {
+        plotInHeaderSlot(strBudget, HEADER_SLOTS - 1, y);
+        plotInHeaderSlot(strSpent, 1, y + 1);
+        plotInHeaderSlot(strAvail, 2, y + 1);
+      }
+        break;
+      case STOCK: {
         calcShareStuff();
-
         resetSlotWidth();
-        plotShareInfo("All", y, all);
-        plotShareInfo("Above", y + 1, abv);
-        plotShareInfo("At,below", y + 2, bel);
-        plotShareInfo("Marked", y + 3, mrk);
-
-      } else {
+        plotShareInfo("All", y, mShareCalcAll);
+        plotShareInfo("Above", y + 1, mShareCalcAbove);
+        plotShareInfo("At,below", y + 2, mShareCalcAtOrBelow);
+        plotShareInfo("Marked", y + 3, mShareCalcMarked);
+      }
+        break;
+      case NORMAL: {
         calcBalances();
         resetSlotWidth();
         var strBalance = labelledAmount("Balance", a.balance());
@@ -92,42 +106,48 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
         var strUnmarked = labelledAmount("Unmarked", a.balance() - mMarkedBalance);
         var strAboveCursor = labelledAmount("Above", mAboveBalance);
         var strBelowCursor = labelledAmount("At,below", mBelowBalance);
-        plotLabelledAmount(strBalance, HEADER_SLOTS - 1, y);
+        plotInHeaderSlot(strBalance, HEADER_SLOTS - 1, y);
         int y1 = y + 1;
         if (mMarkedCount != 0) {
-          plotLabelledAmount(strMarked, 1, y1 + 1);
-          plotLabelledAmount(strUnmarked, 2, y1 + 1);
+          plotInHeaderSlot(strMarked, 2, y1 + 1);
+          plotInHeaderSlot(strUnmarked, 3, y1 + 1);
         }
         if (currentRowIndex() != 0) {
-          plotLabelledAmount(strAboveCursor, 1, y1);
-          plotLabelledAmount(strBelowCursor, 2, y1);
+          plotInHeaderSlot(strAboveCursor, 2, y1);
+          plotInHeaderSlot(strBelowCursor, 3, y1);
         }
+      }
+        break;
+      default:
+        notSupported();
+        break;
       }
     }
     super.plotHeader(y, headerHeight);
   }
 
-  private void plotShareInfo(String desc, int y, ShareCalc.Builder c) {
+  private void plotShareInfo(String prompt, int y, ShareCalc.Builder c) {
+    // If there are no transactions, plot nothing
     if (c.numTrans() == 0)
       return;
-    var hdr = desc + " ";
+
+    plotInHeaderSlot(prompt + ":", 0, y);
     String str;
     if (nonEmpty(c.error())) {
-      str = c.error();
+      plotInHeaderSlot(c.error(), 0, y);
     } else {
-      str = hdr + "bookv " + formatDollars(c.bookValue());
-      plotLabelledAmount(str, 0, y);
-      str = "shares " + String.format(".03f", c.shares());
-      plotLabelledAmount(str, 1, y);
-      str = "CapGn " + formatDollars(c.capGain());
-      plotLabelledAmount(str, 2, y);
+      str = "Book value " + formatDollars(c.bookValue());
+      plotInHeaderSlot(str, 1, y);
+      str = "Shares " + String.format("%.03f", c.shares());
+      plotInHeaderSlot(str, 2, y);
+      str = "C. Gain " + formatDollars(c.capGain());
+      plotInHeaderSlot(str, 3, y);
     }
-
   }
 
   private static String formatDollars(double dollars) {
     var curr = dollarsToCurrency(dollars);
-    return formatCurrency(curr);
+    return formatCurrencyEvenZero(curr);
   }
 
   private void calcBalances() {
@@ -152,31 +172,30 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   }
 
   private void calcShareStuff() {
-    alertVerbose();
-    abv = ShareCalc.newBuilder();
-    bel = ShareCalc.newBuilder();
-    all = ShareCalc.newBuilder();
-    mrk = ShareCalc.newBuilder();
+    mShareCalcAbove = ShareCalc.newBuilder();
+    mShareCalcAtOrBelow = ShareCalc.newBuilder();
+    mShareCalcAll = ShareCalc.newBuilder();
+    mShareCalcMarked = ShareCalc.newBuilder();
 
     int index = INIT_INDEX;
     for (var t : mDisplayedTransactions) {
       index++;
       log(VERT_SP, "processing transaction:", INDENT, t);
-      updateShare(t, all);
-      if (!alert("not updating others")) {
-        if (isMarked(t))
-          updateShare(t, mrk);
-        if (index < currentRowIndex())
-          updateShare(t, abv);
-        else
-          updateShare(t, bel);
-      }
-      //pr("all:", INDENT, all);
+      if (isMarked(t))
+        updateShare(t, mShareCalcMarked);
+      if (false) //mark("not updating others"))
+        continue;
+      if (index < currentRowIndex())
+        updateShare(t, mShareCalcAbove);
+      else
+        updateShare(t, mShareCalcAtOrBelow);
+      updateShare(t, mShareCalcAll);
     }
   }
 
   private void updateShare(Transaction t, ShareCalc.Builder c) {
     log(VERT_SP, "updateShare, calc:", INDENT, c);
+    c.numTrans(c.numTrans() + 1);
     if (nonEmpty(c.error()))
       return;
     var amt = normalizeTransactionAmount(t);
@@ -268,7 +287,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     plotString(msg2, x, y + 1);
   }
 
-  private static final int HEADER_SLOTS = 3;
+  private static final int HEADER_SLOTS = 4;
   private static final int SLOT_SEP = 4;
 
   private String labelledAmount(String label, long amount) {
@@ -281,10 +300,11 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     mSlotWidth = SLOT_SEP + 20;
   }
 
-  private void plotLabelledAmount(String s, int slot, int y) {
+  private void plotInHeaderSlot(String s, int slot, int y) {
     var r = Render.SHARED_INSTANCE;
     var clip = r.clipBounds();
     plotString(s, clip.endX() - (mSlotWidth * (HEADER_SLOTS - slot)), y, Alignment.RIGHT, mSlotWidth);
+    pr("plotting in header slot", slot, "at y", y, ":", quote(s));
   }
 
   private void addColumns() {
@@ -423,6 +443,9 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   private long mBelowBalance;
   private List<Transaction> mDisplayedTransactions = arrayList();
   private int mSlotWidth;
-  private ShareCalc.Builder abv, bel, all, mrk;
+
+  // For calculating share quantities, cost base, capital gains
+  //
+  private ShareCalc.Builder mShareCalcAbove, mShareCalcAtOrBelow, mShareCalcAll, mShareCalcMarked;
 
 }

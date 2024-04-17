@@ -3,5 +3,5 @@ fields {
   string name;
   long balance;
   long budget;
-  bool stock;
+  bool stock;   // does this account track a quantity of shares, cost base, and capital gain?
 }

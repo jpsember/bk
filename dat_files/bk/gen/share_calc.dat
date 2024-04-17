@@ -1,3 +1,5 @@
+// Used in calculating book value, capital gains for accounts with stock=true
+//
 fields {
   double shares;
   double book_value;

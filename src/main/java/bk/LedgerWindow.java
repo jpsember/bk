@@ -197,25 +197,28 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
 
     boolean resetHint = true;
 
-    switch (k.keyType()) {
-    case ArrowUp:
+    switch (k.toString()) {
+    case KeyEvent.ARROW_UP:
       targetEntry = mCursorRow - 1;
       break;
-    case ArrowDown:
+    case KeyEvent.ARROW_DOWN:
       targetEntry = mCursorRow + 1;
       break;
-    case PageUp:
+    case ":PageUp":
       targetEntry = mCursorRow - pageSize;
       break;
-    case PageDown:
+    case ":PageDown":
       targetEntry = mCursorRow + pageSize;
       break;
-    case Home:
+    case ":Home":
       targetEntry = 0;
       break;
-    case End:
+    case ":End":
       targetEntry = mEntries.size();
       break;
+    case ":Q":
+      winMgr().quit();
+      return;
     default:
       if (processHelper(k)) {
         resetHint = false;

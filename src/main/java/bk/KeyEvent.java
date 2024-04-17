@@ -25,12 +25,11 @@ public class KeyEvent {
       , JUMP = ":j" //
       , OPTION_SHIFT_Z = ":¸" //
       , MARK = ":." //
-      , OPTION_Q = ":œ" //
       , ARROW_UP = ":ArrowUp" //
       , ARROW_DOWN = ":ArrowDown" //
       , ARROW_LEFT = ":ArrowLeft" //
       , ARROW_RIGHT = ":ArrowRight" //
-      , QUIT = OPTION_Q //
+      , QUIT = ":œ" //
       , UNDO = OPTION_Z // 
       , REDO = OPTION_SHIFT_Z //
   ;

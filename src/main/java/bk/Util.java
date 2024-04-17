@@ -611,6 +611,30 @@ public final class Util {
     return sMarkedTransactionSet.contains(id(t));
   }
 
+  /**
+   * 
+   * Parse a ShareInfo object from a transaction description, if possible.
+   * 
+   * This is how I allow a user to include share quantities within a transaction
+   * for a 'stock' account.
+   * 
+   * Such a description has this format:
+   * 
+   * <pre>
+   * 
+   * (+|-|=)<floating point value> [<optional text for description>]
+   * 
+   * The prefix +,-,= indicates what type of stock transaction it is:
+   * 
+   * + : a share purchase
+   * - : a share sale
+   * = : a special transaction that changes the share balance without affecting the book value;
+   *      for example, a stock split or exchange of one type of shares to another
+   * 
+   * </pre>
+   * 
+   * @return ShareInfo object, or null if there didn't appear to be one
+   */
   public static ShareInfo parseShareInfo(String value) {
 
     var si = ShareInfo.newBuilder();
@@ -618,8 +642,6 @@ public final class Util {
     si.notes(value);
 
     do {
-      //  private String adjustIfShare(String value) {
-
       // If it starts with +,-,=, or a digit, assume it is a share quantity
       if (value.isEmpty())
         break;
@@ -653,7 +675,7 @@ public final class Util {
   public static String encodeShareInfo(ShareInfo si) {
     if (si.action() == ShareAction.ERROR)
       return "***err: " + si.notes();
-    var sf = String.format("%.3f ", si.shares());
+    var sf = String.format("%.3 ", si.shares());
     switch (si.action()) {
     case NONE:
       return si.notes();
