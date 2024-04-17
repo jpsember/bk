@@ -503,6 +503,23 @@ public final class Util {
     return hasBudget(accountMustExist(accountNumber));
   }
 
+  /**
+   * Return true if a budget for this account represents a positive amount in
+   * the credit side, vs debit side
+   */
+  public static boolean isCreditAccount(Account a) {
+    var n = a.number();
+    return (n >= 2000 && n <= 2999) || (n >= 5000 && n <= 5999);
+  }
+
+  public static long balanceOrUnspentBudget(Account a) {
+    if (hasBudget(a)) {
+      int sign = isCreditAccount(a) ? -1 : 1;
+      return a.budget() - sign * a.balance();
+    }
+    return a.balance();
+  }
+
   public static int indexOfChild(Transaction t, long childId) {
     var a = LongArray.with(t.children());
     return a.indexOf(childId);
