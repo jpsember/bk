@@ -45,6 +45,8 @@ public class RuleManager extends BaseObject {
   }
 
   public Transaction applyRules(Transaction t) {
+    if (mDisabled)
+      return t;
     // If this is a generated transaction, don't apply any rules
     if (t.parent() != 0)
       return t;
@@ -117,10 +119,22 @@ public class RuleManager extends BaseObject {
 
   }
 
+  private void disableRules() {
+    if (!mDisabled) {
+      alert("disabling rules due to problems");
+      mDisabled = true;
+    }
+
+  }
+
   private void applyTransferRule(JSMap actionMap) {
 
     var parent = mParent;
     int otherAccountNum = actionMap.getInt("account");
+    if (alertAccountDoesNotExist(otherAccountNum, "RuleManager:applyTransferRule")) {
+      disableRules();
+      return;
+    }
 
     var amount = determineTransactionAmount(parent, actionMap, "amount");
 
@@ -228,5 +242,5 @@ public class RuleManager extends BaseObject {
   private List<Transaction> mNewChildren = arrayList();
   private double mTransferPercent;
   private String mTransferPercentDesc;
-
+  private boolean mDisabled;
 }

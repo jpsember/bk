@@ -78,11 +78,12 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       plotString(s, clip.x, y, Alignment.LEFT, CHARS_ACCOUNT_NUMBER_AND_NAME);
       switch (mHeaderType) {
       case BUDGET: {
-        long spent = -a.balance();
+        int budgetSign = budgetSign(a.number());
+        long normSpent = budgetSpent(a);
         resetSlotWidth();
         var strBudget = labelledAmount("Budget", a.budget());
-        var strSpent = labelledAmount("Spent", spent);
-        var strAvail = labelledAmount("Avail", a.budget() - spent);
+        var strSpent = labelledAmount("Spent", normSpent);
+        var strAvail = labelledAmount("Avail", a.budget() - normSpent);
         plotInHeaderSlot(strBudget, HEADER_SLOTS - 1, y);
         plotInHeaderSlot(strSpent, 1, y + 1);
         plotInHeaderSlot(strAvail, 2, y + 1);

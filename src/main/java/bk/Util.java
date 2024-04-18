@@ -503,18 +503,23 @@ public final class Util {
     return hasBudget(accountMustExist(accountNumber));
   }
 
-  /**
-   * Return true if a budget for this account represents a positive amount in
-   * the credit side, vs debit side
-   */
-  public static boolean isCreditAccount(Account a) {
-    var n = a.number();
-    return (n >= 2000 && n <= 2999) || (n >= 5000 && n <= 5999);
+  public static int budgetSign(int number) {
+    int sign = 1;
+    if (number >= 2000 && number <= 2999)
+      sign = -1;
+    return sign;
+  }
+
+  public static long budgetSpent(Account a) {
+    int sign = budgetSign(a.number());
+    var spent = sign * a.balance();
+    return spent;
   }
 
   public static long balanceOrUnspentBudget(Account a) {
     if (hasBudget(a)) {
-      int sign = isCreditAccount(a) ? -1 : 1;
+      todo("have enums for account classes (1xxx, 2xxx) with some helper methods");
+      int sign = budgetSign(a.number());
       return a.budget() - sign * a.balance();
     }
     return a.balance();
@@ -537,6 +542,17 @@ public final class Util {
     a = a.toBuilder().remove(i);
     t = t.toBuilder().children(a.array()).build();
     return t;
+  }
+
+  public static boolean alertAccountDoesNotExist(int accountNumber, String message) {
+    if (storage().account(accountNumber) == null) {
+      var msg = "account number is zero";
+      if (accountNumber != 0)
+        msg = "account does not exist";
+      pr("***", msg, "#:" + accountNumber, "; context:", message);
+      return true;
+    }
+    return false;
   }
 
   public static Transaction addChild(Transaction t, long childId) {
