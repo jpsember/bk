@@ -141,7 +141,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       plotInHeaderSlot(str, 1, y);
       str = "Shares " + String.format("%.03f", c.shares());
       plotInHeaderSlot(str, 2, y);
-      str = "C. Gain " + formatDollars(c.capGain());
+      str = "Gain " + formatDollars(c.capGain());
       plotInHeaderSlot(str, 3, y);
     }
   }
