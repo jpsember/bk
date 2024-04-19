@@ -11,11 +11,12 @@ import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.graphics.TextGraphics;
 
+import js.base.BaseObject;
 import js.geometry.IPoint;
 import js.geometry.IRect;
 import js.geometry.MyMath;
 
-public final class Render {
+public final class Render extends BaseObject {
 
   /**
    * This is only valid during prepare() and unprepare() calls
@@ -71,25 +72,23 @@ public final class Render {
   };
 
   public Render drawString(int x, int y, int maxLength, String s) {
+    if (verbose())
+      log("drawString x:", x, " y:", y, " maxLength:", maxLength, " s:", quote(s));
     do {
       var b = clipBounds();
+      if (verbose())
+        log("clipBounds:", INDENT, b);
 
       // Determine which substring is within the window bounds
       if (y < b.y || y >= b.endY())
         break;
-      var x1 = x;
-      var x2 = x + s.length();
-      x1 = MyMath.clamp(x1, b.x, b.endX());
-      x2 = MyMath.clamp(x2, b.x, b.endX());
-      if (x1 >= x2)
-        break;
 
-      int sStart = x1 - x;
-      int sEnd = Math.min(maxLength, x2 - x);
-      if (sEnd <= sStart)
+      var startX = MyMath.clamp(x, b.x, b.endX());
+      var availWidth = Math.min(Math.min(s.length(), maxLength), b.endX() - startX);
+      if (availWidth <= 0)
         break;
       var tg = textGraphics();
-      tg.putString(x1, y, s.substring(sStart, sEnd));
+      tg.putString(startX, y, s.substring(0, availWidth));
     } while (false);
     return this;
   }
@@ -203,7 +202,7 @@ public final class Render {
     case STYLE_INVERSE_AND_MARK:
       t.setForegroundColor(TextColor.ANSI.WHITE_BRIGHT);
       t.setBackgroundColor(TextColor.ANSI.BLUE_BRIGHT);
-     break;
+      break;
     }
     mTextGraphics = t;
     return this;

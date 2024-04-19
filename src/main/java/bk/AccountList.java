@@ -9,7 +9,6 @@ import bk.gen.Account;
 import bk.gen.Alignment;
 import bk.gen.Column;
 import bk.gen.Datatype;
-import js.geometry.IPoint;
 
 public class AccountList extends LedgerWindow implements ChangeListener {
 
@@ -155,27 +154,11 @@ public class AccountList extends LedgerWindow implements ChangeListener {
   private TransactionListener mTransListener;
 
   private void modalExperiment() {
-
-    todo("have utility method to push a tree with a container of a specific size, and a form");
-    
-    FormWindow form;
-
-    var mgr = winMgr();
-    mgr.pushContainerTree();
-
-    // Construct root container
-    var c = mgr.pushContainer();
-    c.setPreferredSize(new IPoint(60, 8));
-
-    form = new AccountRequesterForm("wtf", (f, num) -> {
+    var form = new AccountRequesterForm("Target account", (f, num) -> {
       pr("got account #", num);
       focusManager().pop();
     });
-
-    mgr.thickBorder().pct(100).window(form);
-    mgr.popContainer();
-
-    focusManager().pushAppend(form);
+    winMgr().openTreeWithFocus(60, 12, form);
   }
 
 }

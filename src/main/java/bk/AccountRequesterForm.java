@@ -13,6 +13,7 @@ public class AccountRequesterForm extends FormWindow {
     setSizeChars(12);
     mListener = listener;
 
+    addVertSpace(3);
     var val = new AccountValidator();
     mNumber = validator(val).addField(prompt);
 

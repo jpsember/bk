@@ -477,6 +477,17 @@ public class WinMgr extends BaseObject {
     mInvalidRect = null;
   }
 
+  public void openTreeWithFocus(int width, int height, JWindow window) {
+    pushContainerTree();
+
+    var c = pushContainer();
+    c.setPreferredSize(new IPoint(width, height));
+    thickBorder().pct(100).window(window);
+    popContainer();
+
+    focusManager().pushAppend(window);
+  }
+
   //------------------------------------------------------------------
 
   private WinMgr() {
