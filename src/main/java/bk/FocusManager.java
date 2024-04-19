@@ -218,6 +218,14 @@ public class FocusManager extends BaseObject {
       top.addChild(child);
     }
     mOurTopLevelContainer = ent.oldTopLevelContainer;
+
+    // If the restored top-level container is not in the current window tree, 
+    // pop window trees until it is
+    var mgr = winMgr();
+    while (!mgr.currentTreeContains(mOurTopLevelContainer)) {
+      mgr.popContainerTree();
+    }
+
     set(ent.oldFocusHandler);
   }
 

@@ -196,9 +196,7 @@ class XForm extends FormWindow {
   }
 
   private void okHandler() {
-
-    this.remove();
-    focusManager().pop();
+   focusManager().pop();
   }
 
 }

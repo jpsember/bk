@@ -3,6 +3,7 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
+import java.util.List;
 import java.util.Stack;
 
 import com.googlecode.lanterna.TerminalPosition;
@@ -16,6 +17,7 @@ import com.googlecode.lanterna.terminal.Terminal;
 import js.base.BaseObject;
 import js.file.Files;
 import js.geometry.IPoint;
+import js.geometry.IRect;
 
 public class WinMgr extends BaseObject {
 
@@ -224,10 +226,11 @@ public class WinMgr extends BaseObject {
       // If the screen size has changed, or the desired layout bounds for the current top-level container
       // has changed, invalidate the layout
 
+      mInvalidRect = null;
       {
         if (!currSize.equals(mPrevLayoutScreenSize)) {
           mPrevLayoutScreenSize = currSize;
-          c.setLayoutInvalid();
+          invalidateRect(new IRect(currSize));
         }
 
         var desiredBounds = c.preferredBounds(currSize);
@@ -237,14 +240,7 @@ public class WinMgr extends BaseObject {
         }
       }
 
-      //      
-      //      if (!currSize.equals(mPrevLayoutScreenSize)) {
-      //        mPrevLayoutScreenSize = currSize;
-      //        c.setTotalBounds(new IRect(currSize));
-      //        c.setLayoutInvalid();
-      //      }
-
-      updateView(c);
+      redrawAllTreesIntersectingInvalidRect();
 
       // Make changes visible
       mScreen.refresh();
@@ -299,6 +295,7 @@ public class WinMgr extends BaseObject {
     }
 
     if (!w.paintValid()) {
+      pr("...repainting:", w);
       // We are repainting everything, so make the partial valid as well
       w.setPartialPaintValid(true);
       if (db)
@@ -391,6 +388,16 @@ public class WinMgr extends BaseObject {
 
   private Stack<JContainer> mStack;
 
+  private void invalidateRect(IRect bounds) {
+    if (mInvalidRect == null)
+      mInvalidRect = bounds;
+    else
+      mInvalidRect = IRect.rectContainingPoints(mInvalidRect.corner(0), mInvalidRect.corner(2));
+    pr("invalidateRect:", bounds, "now:", INDENT, mInvalidRect);
+  }
+
+  private IRect mInvalidRect;
+
   // ------------------------------------------------------------------
   // Trees of JContainers
   // ------------------------------------------------------------------
@@ -441,6 +448,37 @@ public class WinMgr extends BaseObject {
 
   private WindowTree mCurrentTree;
 
+  public boolean currentTreeContains(JWindow window) {
+    checkNotNull(window, "currentTreeContains, window is null");
+    var t = topLevelContainer();
+    var x = window;
+    while (true) {
+      if (x == null)
+        return false;
+      if (x == t)
+        return true;
+      x = x.parent();
+    }
+  }
+
+  private void redrawAllTreesIntersectingInvalidRect() {
+    todo("doesn't erase removed WindowTree from screen; when popping tree, add its bounds to the invalid rect");
+    List<WindowTree> cs = arrayList();
+    cs.addAll(mTreeStack);
+    cs.add(mCurrentTree);
+    for (var t : cs) {
+      var c = t.topLevelContainer;
+      if (c.layoutValid() && c.paintValid()) {
+        var b = c.totalBounds();
+        if (mInvalidRect != null && b.intersects(mInvalidRect)) {
+          c.repaint();
+        }
+      }
+      updateView(c);
+    }
+    mInvalidRect = null;
+  }
+
   //------------------------------------------------------------------
 
   private WinMgr() {
@@ -449,4 +487,5 @@ public class WinMgr extends BaseObject {
   static {
     SHARED_INSTANCE = new WinMgr();
   }
+
 }
