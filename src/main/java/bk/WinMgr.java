@@ -226,7 +226,6 @@ public class WinMgr extends BaseObject {
       // If the screen size has changed, or the desired layout bounds for the current top-level container
       // has changed, invalidate the layout
 
-      mInvalidRect = null;
       {
         if (!currSize.equals(mPrevLayoutScreenSize)) {
           mPrevLayoutScreenSize = currSize;
@@ -437,6 +436,8 @@ public class WinMgr extends BaseObject {
    */
   public void popContainerTree() {
     checkState(mCurrentTree != null, "no tree to close");
+    // Add tree container's bounds to invalidation rect
+    invalidateRect(mCurrentTree.topLevelContainer.totalBounds());
     mCurrentTree = null;
     mStack = null;
     if (!mTreeStack.isEmpty()) {
@@ -462,7 +463,8 @@ public class WinMgr extends BaseObject {
   }
 
   private void redrawAllTreesIntersectingInvalidRect() {
-    todo("doesn't erase removed WindowTree from screen; when popping tree, add its bounds to the invalid rect");
+    todo(
+        "doesn't erase removed WindowTree from screen; when popping tree, add its bounds to the invalid rect");
     List<WindowTree> cs = arrayList();
     cs.addAll(mTreeStack);
     cs.add(mCurrentTree);
