@@ -21,10 +21,8 @@ import js.geometry.IRect;
 public class WinMgr extends BaseObject {
 
   public static final WinMgr SHARED_INSTANCE;
-  private static final int S_TYPE_CONTAINER = 1;
 
-  public WinMgr pushContainer(JWindow container) {
-    todo("only containers get pushed onto this stack");
+  public WinMgr pushContainer(JContainer container) {
     checkNotNull(container, "expected container");
 
     // If this is not going to be the top-level window, add it as a child to the current parent.
@@ -35,7 +33,7 @@ public class WinMgr extends BaseObject {
     }
 
     applyParam(container);
-    push(S_TYPE_CONTAINER, container);
+    push(container);
     return this;
   }
 
@@ -47,22 +45,18 @@ public class WinMgr extends BaseObject {
   }
 
   public WinMgr popContainer() {
-    pop(S_TYPE_CONTAINER);
+    pop();
     return this;
   }
 
-  private void push(int type, Object object) {
+  private void push(JContainer container) {
     checkState(mStack.size() < 100, "stack is too large");
-    var elem = new StackElem();
-    elem.type = type;
-    elem.obj = object;
 
     if (mStack.isEmpty()) {
-      checkState(elem.type == S_TYPE_CONTAINER, "top level element is not a container");
-      t().topLevelContainer = elem.object();
+      t().topLevelContainer = container;
     }
 
-    mStack.push(elem);
+    mStack.push(container);
 
   }
 
@@ -103,23 +97,14 @@ public class WinMgr extends BaseObject {
     return this;
   }
 
-  private <T> T pop(int type) {
+  private void pop() {
     if (mStack.isEmpty())
       badState("attempt to pop the outermost container");
-    var x = (T) peek(type);
     mStack.pop();
-    return x;
-  }
-
-  private <T> T peek(int type) {
-    checkState(!mStack.isEmpty(), "stack is empty");
-    var p = mStack.peek();
-    checkState(p.type == type, "expected stack top to contain", type, "but got", p.type);
-    return (T) p.obj;
   }
 
   private JContainer container() {
-    return peek(S_TYPE_CONTAINER);
+    return mStack.peek();
   }
 
   /**
@@ -408,20 +393,11 @@ public class WinMgr extends BaseObject {
   private Stack<WindowTree> mTreeStack;
 
   private static class WindowTree {
-    Stack<StackElem> mStack = new Stack();
+    Stack<JContainer> mStack = new Stack();
     JContainer topLevelContainer;
   }
 
-  private Stack<StackElem> mStack;
-
-  private static class StackElem {
-    int type;
-    Object obj;
-
-    public <T> T object() {
-      return (T) obj;
-    }
-  }
+  private Stack<JContainer> mStack;
 
   private WinMgr() {
   }
