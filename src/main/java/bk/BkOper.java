@@ -107,6 +107,7 @@ public class BkOper extends AppOper
         mgr.chars(1).window(h);
       }
 
+      mgr.popContainer();
       mgr.doneConstruction();
       mgr.mainLoop();
     } catch (Throwable t) {

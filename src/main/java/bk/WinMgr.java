@@ -14,7 +14,6 @@ import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 
 import js.base.BaseObject;
-import js.base.Pair;
 import js.file.Files;
 import js.geometry.IPoint;
 import js.geometry.IRect;
@@ -24,10 +23,8 @@ public class WinMgr extends BaseObject {
   public static final WinMgr SHARED_INSTANCE;
   private static final int S_TYPE_CONTAINER = 1;
 
-  private WinMgr() {
-  }
-
   public WinMgr pushContainer(JWindow container) {
+    todo("only containers get pushed onto this stack");
     checkNotNull(container, "expected container");
 
     // If this is not going to be the top-level window, add it as a child to the current parent.
@@ -56,7 +53,17 @@ public class WinMgr extends BaseObject {
 
   private void push(int type, Object object) {
     checkState(mStack.size() < 100, "stack is too large");
-    mStack.push(pair(type, object));
+    var elem = new StackElem();
+    elem.type = type;
+    elem.obj = object;
+
+    if (mStack.isEmpty()) {
+      checkState(elem.type == S_TYPE_CONTAINER, "top level element is not a container");
+      t().topLevelContainer = elem.object();
+    }
+
+    mStack.push(elem);
+
   }
 
   public WinMgr horz() {
@@ -97,7 +104,7 @@ public class WinMgr extends BaseObject {
   }
 
   private <T> T pop(int type) {
-    if (mStack.size() <= 1)
+    if (mStack.isEmpty())
       badState("attempt to pop the outermost container");
     var x = (T) peek(type);
     mStack.pop();
@@ -107,8 +114,8 @@ public class WinMgr extends BaseObject {
   private <T> T peek(int type) {
     checkState(!mStack.isEmpty(), "stack is empty");
     var p = mStack.peek();
-    checkState(p.first == type, "expected stack top to contain", type, "but got", p.first);
-    return (T) p.second;
+    checkState(p.type == type, "expected stack top to contain", type, "but got", p.type);
+    return (T) p.obj;
   }
 
   private JContainer container() {
@@ -149,11 +156,11 @@ public class WinMgr extends BaseObject {
   }
 
   public JContainer topLevelContainer() {
-    checkState(mStack.size() == 1, "unexpected stack size:", mStack.size());
-    return peek(S_TYPE_CONTAINER);
+    return t().topLevelContainer;
+    //    checkState(mStack.size() == 1, "unexpected stack size:", mStack.size());
+    //    return peek(S_TYPE_CONTAINER);
   }
 
-  private Stack<Pair<Integer, Object>> mStack = new Stack();
   private boolean mHorzFlag;
   private int mBorderType;
   private int mSizeExpr; // 0: unknown > 1: number of chars < 1: -percentage
@@ -161,7 +168,7 @@ public class WinMgr extends BaseObject {
 
   public void doneConstruction() {
     // Ensure that only the root container remains on the stack
-    if (mStack.size() != 1 || mStack.peek().first != S_TYPE_CONTAINER)
+    if (mStack.size() != 0)
       badState("window stack size is unexpected:", mStack.size(),
           "or doesn't have top-level container at bottom");
   }
@@ -258,10 +265,6 @@ public class WinMgr extends BaseObject {
 
   private boolean mQuitFlag;
 
-  static {
-    SHARED_INSTANCE = new WinMgr();
-  }
-
   private static IPoint toIpoint(TerminalSize s) {
     return IPoint.with(s.getColumns(), s.getRows());
   }
@@ -331,6 +334,11 @@ public class WinMgr extends BaseObject {
   // ------------------------------------------------------------------
 
   public void open() {
+    checkState(mTreeStack == null);
+    mTreeStack = new Stack<>();
+
+    openTree();
+
     try {
       var f = new DefaultTerminalFactory();
       // f.setUnixTerminalCtrlCBehaviour(CtrlCBehaviour.TRAP);
@@ -343,10 +351,28 @@ public class WinMgr extends BaseObject {
     }
   }
 
+  private WindowTree mTree;
+
+  private void openTree() {
+    if (mTree != null) {
+      mTree.mStack = mStack;
+      mStack = null;
+    }
+    var t = new WindowTree();
+    mStack = t.mStack;
+    mTreeStack.push(t);
+  }
+
+  private void closeTree() {
+    checkState(!mTreeStack.isEmpty(), "tree stack is empty");
+    mTreeStack.pop();
+  }
+
   public void close() {
     if (mScreen == null)
       return;
     Files.close(mScreen);
+    closeTree();
     // There seems to be a problem with restoring the cursor position; it positions the cursor at the end of the last line.
     // Probably because our logging doesn't print a linefeed until necessary.
     pr();
@@ -379,4 +405,32 @@ public class WinMgr extends BaseObject {
     return false;
   }
 
+  private Stack<WindowTree> mTreeStack;
+
+  private static class WindowTree {
+    Stack<StackElem> mStack = new Stack();
+    JContainer topLevelContainer;
+  }
+
+  private Stack<StackElem> mStack;
+
+  private static class StackElem {
+    int type;
+    Object obj;
+
+    public <T> T object() {
+      return (T) obj;
+    }
+  }
+
+  private WinMgr() {
+  }
+
+  private WindowTree t() {
+    return mTreeStack.lastElement();
+  }
+
+  static {
+    SHARED_INSTANCE = new WinMgr();
+  }
 }
