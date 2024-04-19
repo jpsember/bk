@@ -391,7 +391,6 @@ public class WinMgr extends BaseObject {
       mInvalidRect = bounds;
     else
       mInvalidRect = IRect.rectContainingPoints(mInvalidRect.corner(0), mInvalidRect.corner(2));
-    pr("invalidateRect:", bounds, "now:", INDENT, mInvalidRect);
   }
 
   private IRect mInvalidRect;
