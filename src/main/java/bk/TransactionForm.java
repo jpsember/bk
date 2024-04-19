@@ -154,6 +154,7 @@ public class TransactionForm extends FormWindow implements HintListener {
 
   @Override
   public void hintChanged(String text) {
+    //alertVerbose();
     if (mType != TYPE_ADD)
       return;
     var h = mDescHelper;
@@ -161,6 +162,10 @@ public class TransactionForm extends FormWindow implements HintListener {
     log("hintChanged, transaction for", quote(text), ":", INDENT, t);
     if (t == null)
       return;
+
+    log("amt he:", mAmount.isHumanEdited());
+    log("mDr he:", mDr.isHumanEdited());
+    log("mCr he:", mCr.isHumanEdited());
 
     // If any of the auto fields has been human edited, don't change any of them
     if (mAmount.isHumanEdited() || mDr.isHumanEdited() || mCr.isHumanEdited())
@@ -171,8 +176,10 @@ public class TransactionForm extends FormWindow implements HintListener {
     // Else, do nothing (at least one account number must match).
     //
     if (!isGeneralLedger()) {
-      if (t.debit() != mAccountNumber && t.credit() != mAccountNumber)
-        return;
+      if (t.debit() != mAccountNumber && t.credit() != mAccountNumber) {
+        if (!alert("neither account matches current account; but ignoring"))
+          return;
+      }
     }
 
     setToSuggestion(mAmount, t.amount());
