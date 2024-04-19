@@ -93,10 +93,6 @@ public class AccountList extends LedgerWindow implements ChangeListener {
 
     switch (k.toString()) {
 
-    case ":x":
-      modalExperiment();
-      break;
-
     case ":Q":
       winMgr().quit();
       break;
@@ -152,13 +148,5 @@ public class AccountList extends LedgerWindow implements ChangeListener {
 
   private AccountListListener mListener;
   private TransactionListener mTransListener;
-
-  private void modalExperiment() {
-    var form = new AccountRequesterForm("Target account", (f, num) -> {
-      pr("got account #", num);
-      focusManager().pop();
-    });
-    winMgr().openTreeWithFocus(60, 12, form);
-  }
 
 }

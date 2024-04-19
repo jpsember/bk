@@ -423,8 +423,9 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
         var form = new AccountRequesterForm("Target account", (f, num) -> {
           pr("ok; moving marked to", num);
           focusManager().pop();
-          moveMarked(num);
+          moveMarked(num, f.addSummaryTransaction());
         });
+        form.prepare();
         winMgr().openTreeWithFocus(60, 12, form);
       }
       break;
@@ -437,11 +438,15 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     mCurrentTrans = getCurrentRow();
   }
 
-  private void moveMarked(int targetAccountNumber) {
-    alertVerbose();
+  private void moveMarked(int targetAccountNumber, boolean generateSummaryTransaction) {
+    // alertVerbose();
     log("moveMarked from:", mAccountNumber, "to:", targetAccountNumber);
     if (targetAccountNumber == mAccountNumber)
       return;
+
+    long summaryBalance = 0;
+    long newestMovedDate = 0;
+    
     var u = UndoManager.SHARED_INSTANCE;
     var tids = getAllMarkedTransactions();
     log("marked trans:", tids);
@@ -453,16 +458,36 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
         log("...dr or cr matches target already");
         continue;
       }
+      newestMovedDate = Math.max(newestMovedDate,t.date());
       var b = t.toBuilder();
-      if (b.debit() == mAccountNumber)
+      if (b.debit() == mAccountNumber) {
         b.debit(targetAccountNumber);
-      else if (b.credit() == mAccountNumber)
+        summaryBalance -= t.amount();
+      } else if (b.credit() == mAccountNumber) {
         b.credit(targetAccountNumber);
-      else
+        summaryBalance += t.amount();
+      } else
         badState("can't find account number:", mAccountNumber, "in:", INDENT, t);
       log("...adding/replacing:", INDENT, b);
       storage().addOrReplace(b);
       changeManager().registerModifiedTransactions(b);
+    }
+    
+    if (generateSummaryTransaction && summaryBalance != 0) {
+      var tr = Transaction.newBuilder();
+      tr.timestamp(storage().uniqueTimestamp());
+      tr.date(newestMovedDate);
+      if (summaryBalance > 0) {
+        tr.amount(summaryBalance);
+        tr.credit(mAccountNumber);
+        tr.debit(targetAccountNumber);
+      } else {
+        tr.amount(-summaryBalance);
+        tr.debit(mAccountNumber);
+        tr.credit(targetAccountNumber);
+      }
+      tr.description("Moved transactions");
+      storage().addOrReplace(tr);
     }
     u.end();
     clearAllMarks();

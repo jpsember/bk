@@ -1,6 +1,7 @@
 package bk;
 
 import static bk.Util.*;
+import static js.base.Tools.*;
 
 public class AccountRequesterForm extends FormWindow {
 
@@ -9,18 +10,28 @@ public class AccountRequesterForm extends FormWindow {
   }
 
   public AccountRequesterForm(String prompt, Listener listener) {
-    setSizeChars(12);
+    mPrompt = prompt;
     mListener = listener;
+  }
+
+  public AccountRequesterForm prepare() {
+    checkState(!mPrepared);
+
+    setSizeChars(12);
 
     addVertSpace(3);
 
-    mNumber = validator(new AccountValidator()).fieldWidth(CHARS_ACCOUNT_NUMBER_AND_NAME).addField(prompt)
+    mNumber = validator(new AccountValidator()).fieldWidth(CHARS_ACCOUNT_NUMBER_AND_NAME).addField(mPrompt)
         .helper(new AccountIdHelper());
-
+    mAddSummaryTransaction = validator(new YesNoValidator()).value(true).addField("Gen summary tr");
     addButton("Ok", () -> okHandler());
     addVertSpace(1);
     addMessageLine();
+    mPrepared = true;
+    return this;
   }
+
+  private boolean mPrepared;
 
   private void okHandler() {
 
@@ -43,7 +54,13 @@ public class AccountRequesterForm extends FormWindow {
     mListener.processAccount(this, accNumber);
   }
 
+  public boolean addSummaryTransaction() {
+    return mAddSummaryTransaction.validResult();
+  }
+
   private WidgetWindow mNumber;
+  private WidgetWindow mAddSummaryTransaction;
   private Listener mListener;
+  private String mPrompt;
 
 }
