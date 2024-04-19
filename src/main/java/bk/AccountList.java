@@ -9,6 +9,7 @@ import bk.gen.Account;
 import bk.gen.Alignment;
 import bk.gen.Column;
 import bk.gen.Datatype;
+import js.geometry.IPoint;
 
 public class AccountList extends LedgerWindow implements ChangeListener {
 
@@ -93,6 +94,10 @@ public class AccountList extends LedgerWindow implements ChangeListener {
 
     switch (k.toString()) {
 
+    case ":x":
+      modalExperiment();
+      break;
+
     case ":Q":
       winMgr().quit();
       break;
@@ -148,5 +153,52 @@ public class AccountList extends LedgerWindow implements ChangeListener {
 
   private AccountListListener mListener;
   private TransactionListener mTransListener;
+
+  private void modalExperiment() {
+
+    FormWindow form;
+
+    var mgr = winMgr();
+    mgr.pushContainerTree();
+
+    // Construct root container
+    var c = mgr.pushContainer();
+    c.setPreferredSize(new IPoint(25, 8));
+    // Add a small header
+    {
+      var h = new MessageWindow();
+      Util.sHeader = h;
+      h.setMessageAt(MessageWindow.CENTER, "modal window");
+      mgr.chars(1).window(h);
+    }
+
+    form = new XForm();
+    mgr.thickBorder();
+    mgr.pct(100).window(form);
+    mgr.popContainer();
+
+    focusManager().pushAppend(form);
+  }
+
+}
+
+class XForm extends FormWindow {
+
+  public XForm() {
+    //alertVerbose();
+    addButton("Ok", () -> okHandler());
+    addButton("Foo", () -> nothing());
+    addButton("Bar", () -> nothing());
+  }
+
+  private void nothing() {
+    pr("doing nothing");
+  }
+
+  private void okHandler() {
+
+    this.remove();
+    focusManager().pop();
+  }
 
 }

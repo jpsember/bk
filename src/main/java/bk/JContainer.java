@@ -25,7 +25,7 @@ public class JContainer extends JWindow {
 
   @Override
   public void layout() {
-    final boolean db = false;
+    // alertVerbose();
 
     var problem = false;
 
@@ -34,15 +34,15 @@ public class JContainer extends JWindow {
 
     // Calculate bounds of children
 
-    if (db)
-      pr(VERT_SP, "layout:", name(), " for children:", children().size());
+    if (verbose())
+      log(VERT_SP, "layout:", name(), " for children:", children().size());
 
     // True if we need to exchange x<->y and w<->h so we can always deal with x being the dynamic dimension
     boolean swap = !mHorzFlag;
 
     var boundsWithinScreen = calcContentBounds();
-    if (db)
-      pr("contentBounds:", boundsWithinScreen);
+    log("contentBounds:", boundsWithinScreen);
+    checkNotNull(boundsWithinScreen, "no boundsWithinScreen");
 
     // The size of the container (normalized so windows are stacked horizontally)
 
@@ -67,15 +67,13 @@ public class JContainer extends JWindow {
 
     var charsDynamicTotal = Math.max(0, normSize.x - charsSum);
 
-    if (db)
-      pr("charsSum:", charsSum, "pctSum:", pctSum, "charsDynamic:", charsDynamicTotal);
+    log("charsSum:", charsSum, "pctSum:", pctSum, "charsDynamic:", charsDynamicTotal);
 
     var staticCharsAllotted = 0;
     int dynamicCharsAllotted = 0;
 
     for (JWindow c : children()) {
-      if (db)
-        pr(VERT_SP, "layout next child");
+      log(VERT_SP, "layout next child");
       var sizeExpr = c.getSizeExpr();
 
       int chars;
@@ -88,26 +86,21 @@ public class JContainer extends JWindow {
         chars = (int) Math.round(target);
         chars = MyMath.clamp(chars, 0, charsDynamicTotal - dynamicCharsAllotted);
         dynamicCharsAllotted += chars;
-        if (db)
-          pr("...pct:", -sizeExpr, "dynamicTot:", charsDynamicTotal, "target:", target);
+        log("...pct:", -sizeExpr, "dynamicTot:", charsDynamicTotal, "target:", target);
       }
-      if (db)
-        pr("sizeExpr:", sizeExpr, "chars:", chars);
-      if (db)
-        pr("charsDynamicTotal:", charsDynamicTotal, "clamped chars:", chars);
-      if (db && chars == 0) {
+      log("sizeExpr:", sizeExpr, "chars:", chars);
+      log("charsDynamicTotal:", charsDynamicTotal, "clamped chars:", chars);
+      if (verbose() && chars == 0) {
         alert("problem fitting window");
       }
 
       var ourNormSize = new IPoint(chars, normSize.y);
       var ourNormBounds = IRect.withLocAndSize(normNextPosition, ourNormSize);
-      if (db)
-        pr("ourNormSize:", ourNormSize, "ourNormBounds:", ourNormBounds);
+      log("ourNormSize:", ourNormSize, "ourNormBounds:", ourNormBounds);
 
       var ourBounds = swapIf(ourNormBounds, swap);
       c.setTotalBounds(ourBounds);
-      if (db)
-        pr("...child bounds:", ourBounds);
+      log("...child bounds:", ourBounds);
       normNextPosition = normNextPosition.sumWith(ourNormSize.x, 0);
     }
     if (problem)
@@ -115,5 +108,20 @@ public class JContainer extends JWindow {
   }
 
   boolean mHorzFlag;
+  private IPoint mPreferredSize;
+
+  public IRect preferredBounds(IPoint screenSize) {
+    var size = mPreferredSize;
+    if (size == null)
+      size = screenSize;
+    int w = Math.min(screenSize.x, size.x);
+    int h = Math.min(screenSize.y, size.y);
+    var b = new IRect((screenSize.x - w) / 2, (screenSize.y - h) / 2, w, h);
+    return b;
+  }
+
+  public void setPreferredSize(IPoint size) {
+    mPreferredSize = size;
+  }
 
 }

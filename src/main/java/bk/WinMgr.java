@@ -16,7 +16,6 @@ import com.googlecode.lanterna.terminal.Terminal;
 import js.base.BaseObject;
 import js.file.Files;
 import js.geometry.IPoint;
-import js.geometry.IRect;
 
 public class WinMgr extends BaseObject {
 
@@ -37,11 +36,12 @@ public class WinMgr extends BaseObject {
     return this;
   }
 
-  public WinMgr pushContainer() {
+  public JContainer pushContainer() {
     var container = new JContainer();
     container.mHorzFlag = mHorzFlag;
     mHorzFlag = false;
-    return pushContainer(container);
+    pushContainer(container);
+    return container;
   }
 
   public WinMgr popContainer() {
@@ -220,11 +220,29 @@ public class WinMgr extends BaseObject {
       // Update size of terminal
       mScreen.doResizeIfNecessary();
       var currSize = toIpoint(mScreen.getTerminalSize());
-      if (!currSize.equals(mPrevLayoutScreenSize)) {
-        mPrevLayoutScreenSize = currSize;
-        c.setTotalBounds(new IRect(currSize));
-        c.setLayoutInvalid();
+
+      // If the screen size has changed, or the desired layout bounds for the current top-level container
+      // has changed, invalidate the layout
+
+      {
+        if (!currSize.equals(mPrevLayoutScreenSize)) {
+          mPrevLayoutScreenSize = currSize;
+          c.setLayoutInvalid();
+        }
+
+        var desiredBounds = c.preferredBounds(currSize);
+        if (!desiredBounds.equals(c.totalBounds())) {
+          c.setTotalBounds(desiredBounds);
+          c.setLayoutInvalid();
+        }
       }
+
+      //      
+      //      if (!currSize.equals(mPrevLayoutScreenSize)) {
+      //        mPrevLayoutScreenSize = currSize;
+      //        c.setTotalBounds(new IRect(currSize));
+      //        c.setLayoutInvalid();
+      //      }
 
       updateView(c);
 
@@ -261,7 +279,7 @@ public class WinMgr extends BaseObject {
    * Recursively processes all child views in this manner as well.
    */
   private void updateView(JWindow w) {
-    final boolean db = false; //&& mark("logging is on");
+    final boolean db = false;// && mark("logging is on");
 
     if (db) {
       if (!w.layoutValid() || !w.paintValid())
@@ -320,7 +338,7 @@ public class WinMgr extends BaseObject {
     checkState(mTreeStack == null);
     mTreeStack = new Stack<>();
 
-    openTree();
+    pushContainerTree();
 
     try {
       var f = new DefaultTerminalFactory();
@@ -334,40 +352,11 @@ public class WinMgr extends BaseObject {
     }
   }
 
-  private void openTree() {
-
-    // If there's an existing tree, save to stack
-    if (mCurrentTree != null) {
-      mTreeStack.push(mCurrentTree);
-
-      mCurrentTree = null;
-      mStack = null;
-    }
-
-    // Construct a new tree
-    var t = new WindowTree();
-
-    // Copy some fields to the state vars
-    mCurrentTree = t;
-    mStack = t.containerStack;
-  }
-
-  private void closeTree() {
-    checkState(mCurrentTree != null, "no tree to close");
-    mCurrentTree = null;
-    mStack = null;
-    if (!mTreeStack.isEmpty()) {
-      var t = mTreeStack.pop();
-      mCurrentTree = t;
-      mStack = t.containerStack;
-    }
-  }
-
   public void close() {
     if (mScreen == null)
       return;
     Files.close(mScreen);
-    closeTree();
+    popContainerTree();
     // There seems to be a problem with restoring the cursor position; it positions the cursor at the end of the last line.
     // Probably because our logging doesn't print a linefeed until necessary.
     pr();
@@ -400,19 +389,62 @@ public class WinMgr extends BaseObject {
     return false;
   }
 
-  private Stack<WindowTree> mTreeStack;
+  private Stack<JContainer> mStack;
+
+  // ------------------------------------------------------------------
+  // Trees of JContainers
+  // ------------------------------------------------------------------
 
   private static class WindowTree {
     Stack<JContainer> containerStack = new Stack();
     JContainer topLevelContainer;
   }
 
-  private Stack<JContainer> mStack;
+  private Stack<WindowTree> mTreeStack;
 
-  private WinMgr() {
+  /**
+   * Push current container tree onto a stack (if there is one), construct a new
+   * (empty) container tree, and make it the current one
+   */
+  public void pushContainerTree() {
+
+    // If there's an existing tree, save to stack
+    if (mCurrentTree != null) {
+      mTreeStack.push(mCurrentTree);
+
+      mCurrentTree = null;
+      mStack = null;
+    }
+
+    // Construct a new tree
+    var t = new WindowTree();
+
+    // Copy some fields to the state vars
+    mCurrentTree = t;
+    mStack = t.containerStack;
+  }
+
+  /**
+   * Discard current container tree, and if there is a previous one in the
+   * stack, pop and make it the current one
+   */
+  public void popContainerTree() {
+    checkState(mCurrentTree != null, "no tree to close");
+    mCurrentTree = null;
+    mStack = null;
+    if (!mTreeStack.isEmpty()) {
+      var t = mTreeStack.pop();
+      mCurrentTree = t;
+      mStack = t.containerStack;
+    }
   }
 
   private WindowTree mCurrentTree;
+
+  //------------------------------------------------------------------
+
+  private WinMgr() {
+  }
 
   static {
     SHARED_INSTANCE = new WinMgr();

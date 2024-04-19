@@ -78,7 +78,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       plotString(s, clip.x, y, Alignment.LEFT, CHARS_ACCOUNT_NUMBER_AND_NAME);
       switch (mHeaderType) {
       case BUDGET: {
-        int budgetSign = budgetSign(a.number());
+        //int budgetSign = budgetSign(a.number());
         long normSpent = budgetSpent(a);
         resetSlotWidth();
         var strBudget = labelledAmount("Budget", a.budget());
