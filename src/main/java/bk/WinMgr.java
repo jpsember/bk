@@ -294,7 +294,6 @@ public class WinMgr extends BaseObject {
     }
 
     if (!w.paintValid()) {
-      pr("...repainting:", w);
       // We are repainting everything, so make the partial valid as well
       w.setPartialPaintValid(true);
       if (db)
@@ -463,8 +462,6 @@ public class WinMgr extends BaseObject {
   }
 
   private void redrawAllTreesIntersectingInvalidRect() {
-    todo(
-        "doesn't erase removed WindowTree from screen; when popping tree, add its bounds to the invalid rect");
     List<WindowTree> cs = arrayList();
     cs.addAll(mTreeStack);
     cs.add(mCurrentTree);
