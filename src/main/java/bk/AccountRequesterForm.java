@@ -1,5 +1,7 @@
 package bk;
 
+import static bk.Util.*;
+
 public class AccountRequesterForm extends FormWindow {
 
   public interface Listener {
@@ -7,15 +9,13 @@ public class AccountRequesterForm extends FormWindow {
   }
 
   public AccountRequesterForm(String prompt, Listener listener) {
-    //alertVerbose();
-
-    //setPreferredSize(new IPoint(40, 8));
     setSizeChars(12);
     mListener = listener;
 
     addVertSpace(3);
-    var val = new AccountValidator();
-    mNumber = validator(val).addField(prompt);
+
+    mNumber = validator(new AccountValidator()).fieldWidth(CHARS_ACCOUNT_NUMBER_AND_NAME).addField(prompt)
+        .helper(new AccountIdHelper());
 
     addButton("Ok", () -> okHandler());
     addVertSpace(1);
@@ -38,6 +38,8 @@ public class AccountRequesterForm extends FormWindow {
       setMessage(problem);
       return;
     }
+    // If user specified an account that doesn't exist, create it
+    createMissingAccount(accNumber, mNumber.validationResult().extraString());
     mListener.processAccount(this, accNumber);
   }
 

@@ -418,12 +418,54 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       }
       break;
 
+    case ":M":
+      if (mAccountNumber != 0 && !getAllMarkedTransactions().isEmpty()) {
+        var form = new AccountRequesterForm("Target account", (f, num) -> {
+          pr("ok; moving marked to", num);
+          focusManager().pop();
+          moveMarked(num);
+        });
+        winMgr().openTreeWithFocus(60, 12, form);
+      }
+      break;
+
     case KeyEvent.UNMARK_ALL:
       clearAllMarks();
       repaint();
       break;
     }
     mCurrentTrans = getCurrentRow();
+  }
+
+  private void moveMarked(int targetAccountNumber) {
+    alertVerbose();
+    log("moveMarked from:", mAccountNumber, "to:", targetAccountNumber);
+    if (targetAccountNumber == mAccountNumber)
+      return;
+    var u = UndoManager.SHARED_INSTANCE;
+    var tids = getAllMarkedTransactions();
+    log("marked trans:", tids);
+    u.begin("Move Transactions");
+    for (var id : tids) {
+      var t = storage().transaction(id);
+      log("candidate:", INDENT, t);
+      if (t.debit() == targetAccountNumber || t.credit() == targetAccountNumber) {
+        log("...dr or cr matches target already");
+        continue;
+      }
+      var b = t.toBuilder();
+      if (b.debit() == mAccountNumber)
+        b.debit(targetAccountNumber);
+      else if (b.credit() == mAccountNumber)
+        b.credit(targetAccountNumber);
+      else
+        badState("can't find account number:", mAccountNumber, "in:", INDENT, t);
+      log("...adding/replacing:", INDENT, b);
+      storage().addOrReplace(b);
+      changeManager().registerModifiedTransactions(b);
+    }
+    u.end();
+    clearAllMarks();
   }
 
   @Override

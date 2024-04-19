@@ -332,13 +332,17 @@ public final class Util {
     for (int pass = 0; pass < 2; pass++) {
       int n = pass == 0 ? t.debit() : t.credit();
       String optName = pass == 0 ? optNameDr : optNameCr;
-      if (account(n) == null) {
-        var a = Account.newBuilder().number(n);
-        a.name(optName);
-        setMessageDuration(30);
-        setFooterMessage("Created account:", a.name());
-        storage().addOrReplace(a);
-      }
+      createMissingAccount(n, optName);
+    }
+  }
+
+  public static void createMissingAccount(int n, String optName) {
+    if (account(n) == null) {
+      var a = Account.newBuilder().number(n);
+      a.name(optName);
+      setMessageDuration(30);
+      setFooterMessage("Created account:", a.name());
+      storage().addOrReplace(a);
     }
   }
 
@@ -738,6 +742,13 @@ public final class Util {
       char c = "=+-".charAt(si.action().ordinal() - 2);
       return (Character.toString(c) + sf + " " + si.notes()).trim();
     }
+  }
+
+  public static List<Long> getAllMarkedTransactions() {
+    List<Long> result = arrayList();
+    for (var x : sMarkedTransactionSet)
+      result.add(x);
+    return result;
   }
 
   public static Set<Long> sMarkedTransactionSet = hashSet();
