@@ -141,11 +141,6 @@ public final class Util {
       return "?" + epochSeconds + "?";
     }
     checkArgument(validDate(epochSeconds), "invalid date:", epochSeconds);
-    //    final long years20 = 31_536_000 * 20;
-    //    long min = sEpochSecondsToday - years20;
-    //    long max = sEpochSecondsToday + years20;
-    //    if (epochSeconds < min || epochSeconds > max)
-    //      pr("epoch seconds:", epochSeconds, "is out of range of", min, max);
     var inst = Instant.ofEpochSecond(epochSeconds).atZone(sLocalTimeZoneId);
     return sDateFormatter.format(inst);
   }
@@ -200,9 +195,12 @@ public final class Util {
   private static final List<String> sMonthAbbrev = split("jan feb mar apr may jun jul aug sep oct nov dec",
       ' ');
 
+  public static LocalDate epochSecondsToLocalDate(long epochSeconds) {
+    return Instant.ofEpochSecond(epochSeconds).atZone(sLocalTimeZoneId).toLocalDate();
+  }
+
   public static String epochSecondsToDateString(long epochSeconds) {
-    LocalDate date = Instant.ofEpochSecond(epochSeconds).atZone(sLocalTimeZoneId).toLocalDate();
-    return sDateFormatter.format(date);
+    return sDateFormatter.format(epochSecondsToLocalDate(epochSeconds));
   }
 
   static {

@@ -94,6 +94,9 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
         resetSlotWidth();
         plotShareInfo("All", y, mShareCalcAll);
         plotShareInfo("To cursor", y + 1, mShareCalcToCursor);
+        if (mCurrentYear != 0)
+          plotInHeaderSlot(
+              "C. Gain in " + mCurrentYear + " " + formatDollars(mShareCalcCurrentYear.capGain()), 3, y + 2);
       }
         break;
       case NORMAL: {
@@ -172,6 +175,17 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   private void calcShareStuff() {
     mShareCalcToCursor = ShareCalc.newBuilder();
     mShareCalcAll = ShareCalc.newBuilder();
+    mShareCalcCurrentYear = ShareCalc.newBuilder();
+    mCurrentYear = 0;
+    double capGainPrevYears = 0;
+    {
+      Transaction t = getCurrentRow();
+      if (t != null) {
+        var d = epochSecondsToLocalDate(t.date());
+        mCurrentYear = d.getYear();
+        pr("currentRow:", getCurrentRow());
+      }
+    }
 
     int index = INIT_INDEX;
     for (var t : mDisplayedTransactions) {
@@ -180,7 +194,14 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       if (index <= currentRowIndex())
         updateShare(t, mShareCalcToCursor);
       updateShare(t, mShareCalcAll);
+      var year = epochSecondsToLocalDate(t.date()).getYear();
+      if (year <= mCurrentYear) {
+        updateShare(t, mShareCalcCurrentYear);
+      }
+      if (year < mCurrentYear)
+        capGainPrevYears = mShareCalcCurrentYear.capGain();
     }
+    mShareCalcCurrentYear.capGain(mShareCalcCurrentYear.capGain() - capGainPrevYears);
   }
 
   private void updateShare(Transaction t, ShareCalc.Builder c) {
@@ -446,7 +467,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
     long summaryBalance = 0;
     long newestMovedDate = 0;
-    
+
     var u = UndoManager.SHARED_INSTANCE;
     var tids = getAllMarkedTransactions();
     log("marked trans:", tids);
@@ -458,7 +479,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
         log("...dr or cr matches target already");
         continue;
       }
-      newestMovedDate = Math.max(newestMovedDate,t.date());
+      newestMovedDate = Math.max(newestMovedDate, t.date());
       var b = t.toBuilder();
       if (b.debit() == mAccountNumber) {
         b.debit(targetAccountNumber);
@@ -472,7 +493,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       storage().addOrReplace(b);
       changeManager().registerModifiedTransactions(b);
     }
-    
+
     if (generateSummaryTransaction && summaryBalance != 0) {
       var tr = Transaction.newBuilder();
       tr.timestamp(storage().uniqueTimestamp());
@@ -510,7 +531,6 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   private int mSlotWidth;
 
   // For calculating share quantities, cost base, capital gains
-  //
-  private ShareCalc.Builder mShareCalcToCursor, mShareCalcAll;
-
+  private ShareCalc.Builder mShareCalcToCursor, mShareCalcAll, mShareCalcCurrentYear;
+  private int mCurrentYear;
 }
