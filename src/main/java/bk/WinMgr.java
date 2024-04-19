@@ -53,7 +53,7 @@ public class WinMgr extends BaseObject {
     checkState(mStack.size() < 100, "stack is too large");
 
     if (mStack.isEmpty()) {
-      t().topLevelContainer = container;
+      mCurrentTree.topLevelContainer = container;
     }
 
     mStack.push(container);
@@ -141,9 +141,7 @@ public class WinMgr extends BaseObject {
   }
 
   public JContainer topLevelContainer() {
-    return t().topLevelContainer;
-    //    checkState(mStack.size() == 1, "unexpected stack size:", mStack.size());
-    //    return peek(S_TYPE_CONTAINER);
+    return mCurrentTree.topLevelContainer;
   }
 
   private boolean mHorzFlag;
@@ -336,21 +334,33 @@ public class WinMgr extends BaseObject {
     }
   }
 
-  private WindowTree mTree;
-
   private void openTree() {
-    if (mTree != null) {
-      mTree.mStack = mStack;
+
+    // If there's an existing tree, save to stack
+    if (mCurrentTree != null) {
+      mTreeStack.push(mCurrentTree);
+
+      mCurrentTree = null;
       mStack = null;
     }
+
+    // Construct a new tree
     var t = new WindowTree();
-    mStack = t.mStack;
-    mTreeStack.push(t);
+
+    // Copy some fields to the state vars
+    mCurrentTree = t;
+    mStack = t.containerStack;
   }
 
   private void closeTree() {
-    checkState(!mTreeStack.isEmpty(), "tree stack is empty");
-    mTreeStack.pop();
+    checkState(mCurrentTree != null, "no tree to close");
+    mCurrentTree = null;
+    mStack = null;
+    if (!mTreeStack.isEmpty()) {
+      var t = mTreeStack.pop();
+      mCurrentTree = t;
+      mStack = t.containerStack;
+    }
   }
 
   public void close() {
@@ -393,7 +403,7 @@ public class WinMgr extends BaseObject {
   private Stack<WindowTree> mTreeStack;
 
   private static class WindowTree {
-    Stack<JContainer> mStack = new Stack();
+    Stack<JContainer> containerStack = new Stack();
     JContainer topLevelContainer;
   }
 
@@ -402,9 +412,7 @@ public class WinMgr extends BaseObject {
   private WinMgr() {
   }
 
-  private WindowTree t() {
-    return mTreeStack.lastElement();
-  }
+  private WindowTree mCurrentTree;
 
   static {
     SHARED_INSTANCE = new WinMgr();
