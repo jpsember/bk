@@ -156,6 +156,8 @@ public class AccountList extends LedgerWindow implements ChangeListener {
 
   private void modalExperiment() {
 
+    todo("have utility method to push a tree with a container of a specific size, and a form");
+    
     FormWindow form;
 
     var mgr = winMgr();
@@ -163,40 +165,17 @@ public class AccountList extends LedgerWindow implements ChangeListener {
 
     // Construct root container
     var c = mgr.pushContainer();
-    c.setPreferredSize(new IPoint(25, 8));
-    // Add a small header
-    {
-      var h = new MessageWindow();
-      Util.sHeader = h;
-      h.setMessageAt(MessageWindow.CENTER, "modal window");
-      mgr.chars(1).window(h);
-    }
+    c.setPreferredSize(new IPoint(60, 8));
 
-    form = new XForm();
-    mgr.thickBorder();
-    mgr.pct(100).window(form);
+    form = new AccountRequesterForm("wtf", (f, num) -> {
+      pr("got account #", num);
+      focusManager().pop();
+    });
+
+    mgr.thickBorder().pct(100).window(form);
     mgr.popContainer();
 
     focusManager().pushAppend(form);
-  }
-
-}
-
-class XForm extends FormWindow {
-
-  public XForm() {
-    //alertVerbose();
-    addButton("Ok", () -> okHandler());
-    addButton("Foo", () -> nothing());
-    addButton("Bar", () -> nothing());
-  }
-
-  private void nothing() {
-    pr("doing nothing");
-  }
-
-  private void okHandler() {
-   focusManager().pop();
   }
 
 }
