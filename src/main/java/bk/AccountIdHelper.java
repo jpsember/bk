@@ -41,6 +41,10 @@ public class AccountIdHelper extends WidgetHelper implements ChangeListener {
   public void dataChanged(List<Integer> modifiedAccountNumbers, List<Long> modifiedTransactionTimestamps) {
     for (var aa : modifiedAccountNumbers) {
       var a = storage().account(aa);
+      if (a == null) {
+        alert("dataChanged handler, account number doesn't exist:", aa);
+        continue;
+      }
       addAccountInfo(tri(), a);
     }
   }

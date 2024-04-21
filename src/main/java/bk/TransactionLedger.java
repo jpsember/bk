@@ -460,7 +460,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   }
 
   private void moveMarked(int targetAccountNumber, boolean generateSummaryTransaction) {
-    // alertVerbose();
+    alertVerbose();
     log("moveMarked from:", mAccountNumber, "to:", targetAccountNumber);
     if (targetAccountNumber == mAccountNumber)
       return;

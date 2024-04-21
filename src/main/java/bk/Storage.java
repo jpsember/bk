@@ -12,7 +12,6 @@ import bk.gen.Account;
 import bk.gen.Database;
 import bk.gen.Transaction;
 import js.base.BaseObject;
-import js.file.BackupManager;
 import js.file.Files;
 import js.json.JSMap;
 
@@ -39,9 +38,6 @@ public class Storage extends BaseObject {
     if (!mModified)
       return;
     var f = file();
-    if (f.exists()) {
-      bkup().makeBackup(f);
-    }
     File tmp = new File(Files.parent(f), "_temporary_.json");
     Files.S.writeWithPrettyIf(tmp, mDatabase, false && alert("!writing pretty"));
     Files.S.deleteFile(f);
@@ -222,15 +218,6 @@ public class Storage extends BaseObject {
   }
 
   private long mUniqueTimestamp;
-
-  private BackupManager bkup() {
-    if (mBackups == null) {
-      mBackups = new BackupManager(Files.S, Files.parent(file())).withMaxBackups(2);
-    }
-    return mBackups;
-  }
-
-  private BackupManager mBackups;
   private Database.Builder mDatabase;
   private File mFile;
   private boolean mModified;

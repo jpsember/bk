@@ -32,3 +32,5 @@ database.json
 project_config
 
 bk_log.txt
+bk-args.json
+jeff_books.*
