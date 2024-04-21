@@ -10,5 +10,10 @@ fields {
   File log_file = "bk_log.txt";
 
   // Convert printouts from .txt to .pdf?
+  //
   bool print_pdf;
+
+  // If true, does aggressive modifications of other transaction fields
+  // in response to a description hint
+  bool apply_hint_to_transaction;
 }

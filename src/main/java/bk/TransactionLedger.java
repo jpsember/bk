@@ -95,8 +95,8 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
         plotShareInfo("All", y, mShareCalcAll);
         plotShareInfo("To cursor", y + 1, mShareCalcToCursor);
         if (mCurrentYear != 0)
-          plotInHeaderSlot(
-              mCurrentYear+" Gain " + formatDollars(mShareCalcCurrentYear.capGain()), 3, y + 2);
+          plotInHeaderSlot(mCurrentYear + " Gain " + formatDollars(mShareCalcCurrentYear.capGain()), 3,
+              y + 2);
       }
         break;
       case NORMAL: {
@@ -460,7 +460,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   }
 
   private void moveMarked(int targetAccountNumber, boolean generateSummaryTransaction) {
-    alertVerbose();
+    //alertVerbose();
     log("moveMarked from:", mAccountNumber, "to:", targetAccountNumber);
     if (targetAccountNumber == mAccountNumber)
       return;
@@ -470,6 +470,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
     var u = UndoManager.SHARED_INSTANCE;
     var tids = getAllMarkedTransactions();
+    todo("verify that we can't mark a transaction that is a child");
     log("marked trans:", tids);
     u.begin("Move Transactions");
     for (var id : tids) {
@@ -480,18 +481,28 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
         continue;
       }
       newestMovedDate = Math.max(newestMovedDate, t.date());
-      var b = t.toBuilder();
-      if (b.debit() == mAccountNumber) {
-        b.debit(targetAccountNumber);
+
+      var bn = t.toBuilder();
+
+      bn.timestamp(storage().uniqueTimestamp());
+      bn.parent(0).children(null);
+
+      //      var b = t.toBuilder();
+      if (t.debit() == mAccountNumber) {
+        bn.debit(targetAccountNumber);
         summaryBalance -= t.amount();
-      } else if (b.credit() == mAccountNumber) {
-        b.credit(targetAccountNumber);
+      } else if (t.credit() == mAccountNumber) {
+        bn.credit(targetAccountNumber);
         summaryBalance += t.amount();
       } else
         badState("can't find account number:", mAccountNumber, "in:", INDENT, t);
-      log("...adding/replacing:", INDENT, b);
-      storage().addOrReplace(b);
-      changeManager().registerModifiedTransactions(b);
+      log("...adding/replacing:", INDENT, bn);
+
+      // I think we need to delete any existing one and add new ones...?
+
+      storage().deleteTransaction(t.timestamp());
+      var tNew = storage().addOrReplace(bn);
+      changeManager().registerModifiedTransactions(t, tNew);
     }
 
     if (generateSummaryTransaction && summaryBalance != 0) {

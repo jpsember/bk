@@ -128,6 +128,7 @@ public class TransactionForm extends FormWindow implements HintListener {
       changeManager().registerModifiedTransactions(edited);
       u.end();
     } else {
+      todo("This code is duplicated in the TransactionLedger 'move' operation");
       u.begin("Edit Transaction");
       var orig = mOrig;
       tr.timestamp(orig.timestamp());
@@ -161,6 +162,9 @@ public class TransactionForm extends FormWindow implements HintListener {
     var t = h.transactionForDescription(text);
     log("hintChanged, transaction for", quote(text), ":", INDENT, t);
     if (t == null)
+      return;
+
+    if (!bkConfig().applyHintToTransaction())
       return;
 
     log("amt he:", mAmount.isHumanEdited());

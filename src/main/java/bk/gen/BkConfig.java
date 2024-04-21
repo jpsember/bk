@@ -22,6 +22,10 @@ public class BkConfig implements AbstractData {
     return mPrintPdf;
   }
 
+  public boolean applyHintToTransaction() {
+    return mApplyHintToTransaction;
+  }
+
   @Override
   public Builder toBuilder() {
     return new Builder(this);
@@ -31,6 +35,7 @@ public class BkConfig implements AbstractData {
   protected static final String _1 = "database";
   protected static final String _2 = "log_file";
   protected static final String _3 = "print_pdf";
+  protected static final String _4 = "apply_hint_to_transaction";
 
   @Override
   public String toString() {
@@ -44,6 +49,7 @@ public class BkConfig implements AbstractData {
     m.putUnsafe(_1, mDatabase.toString());
     m.putUnsafe(_2, mLogFile.toString());
     m.putUnsafe(_3, mPrintPdf);
+    m.putUnsafe(_4, mApplyHintToTransaction);
     return m;
   }
 
@@ -74,6 +80,7 @@ public class BkConfig implements AbstractData {
       }
     }
     mPrintPdf = m.opt(_3, false);
+    mApplyHintToTransaction = m.opt(_4, false);
   }
 
   public static Builder newBuilder() {
@@ -97,6 +104,8 @@ public class BkConfig implements AbstractData {
       return false;
     if (!(mPrintPdf == other.mPrintPdf))
       return false;
+    if (!(mApplyHintToTransaction == other.mApplyHintToTransaction))
+      return false;
     return true;
   }
 
@@ -109,6 +118,7 @@ public class BkConfig implements AbstractData {
       r = r * 37 + mDatabase.hashCode();
       r = r * 37 + mLogFile.hashCode();
       r = r * 37 + (mPrintPdf ? 1 : 0);
+      r = r * 37 + (mApplyHintToTransaction ? 1 : 0);
       m__hashcode = r;
     }
     return r;
@@ -118,6 +128,7 @@ public class BkConfig implements AbstractData {
   protected File mDatabase;
   protected File mLogFile;
   protected boolean mPrintPdf;
+  protected boolean mApplyHintToTransaction;
   protected int m__hashcode;
 
   public static final class Builder extends BkConfig {
@@ -127,6 +138,7 @@ public class BkConfig implements AbstractData {
       mDatabase = m.mDatabase;
       mLogFile = m.mLogFile;
       mPrintPdf = m.mPrintPdf;
+      mApplyHintToTransaction = m.mApplyHintToTransaction;
     }
 
     @Override
@@ -147,6 +159,7 @@ public class BkConfig implements AbstractData {
       r.mDatabase = mDatabase;
       r.mLogFile = mLogFile;
       r.mPrintPdf = mPrintPdf;
+      r.mApplyHintToTransaction = mApplyHintToTransaction;
       return r;
     }
 
@@ -167,6 +180,11 @@ public class BkConfig implements AbstractData {
 
     public Builder printPdf(boolean x) {
       mPrintPdf = x;
+      return this;
+    }
+
+    public Builder applyHintToTransaction(boolean x) {
+      mApplyHintToTransaction = x;
       return this;
     }
 

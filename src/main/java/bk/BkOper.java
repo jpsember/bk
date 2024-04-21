@@ -39,14 +39,16 @@ public class BkOper extends AppOper
 
   @Override
   public BkConfig config() {
-    if (mConfig == null)
+    if (mConfig == null) {
       mConfig = (BkConfig) super.config();
+    }
     return mConfig;
   }
 
   @Override
   public void perform() {
 
+    setUtilConfig(config());
     {
       var f = Files.assertNonEmpty(config().database());
       f = Files.addExpectedExtension(f, Files.EXT_JSON);

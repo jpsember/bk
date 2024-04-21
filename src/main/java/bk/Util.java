@@ -16,6 +16,7 @@ import java.util.Random;
 import java.util.Set;
 
 import bk.gen.Account;
+import bk.gen.BkConfig;
 import bk.gen.ShareAction;
 import bk.gen.ShareInfo;
 import bk.gen.Transaction;
@@ -757,4 +758,13 @@ public final class Util {
   public static final int CHARS_TRANSACTION_DESCRIPTION = 30;
   public static final int CHARS_ACCOUNT_NUMBER_AND_NAME = CHARS_ACCOUNT_NAME + 5;
 
+  private static BkConfig sConfig;
+
+  public static void setUtilConfig(BkConfig config) {
+    sConfig = config.build();
+  }
+
+  public static BkConfig bkConfig() {
+    return sConfig;
+  }
 }
