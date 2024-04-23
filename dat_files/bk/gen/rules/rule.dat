@@ -1,6 +1,16 @@
 fields {
+
+  // Account numbers that this rule should apply to
   *int accounts;
-  *string conditions;
-  *JSMap actions; // Make this a dat later
+
+  enum ActionName action;
+
+  // For action: transfer
+  //
+  double percent;
+
+  // Number of account to transfer to
+  //
+  int target_account;
 }
 

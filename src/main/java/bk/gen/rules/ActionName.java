@@ -2,8 +2,8 @@ package bk.gen.rules;
 
 public enum ActionName {
 
-  GENERATE;
+  TRANSFER;
 
-  public static final ActionName DEFAULT_INSTANCE = GENERATE;
+  public static final ActionName DEFAULT_INSTANCE = TRANSFER;
 
 }

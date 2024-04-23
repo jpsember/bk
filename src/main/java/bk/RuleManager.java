@@ -12,14 +12,13 @@ import bk.gen.rules.Rules;
 import js.base.BaseObject;
 import js.data.LongArray;
 import js.file.Files;
-import js.json.JSMap;
 
 public class RuleManager extends BaseObject {
 
   public static final RuleManager SHARED_INSTANCE = new RuleManager();
 
   private RuleManager() {
-      alertVerbose();
+    //alertVerbose();
   }
 
   public void deleteAllGeneratedTransactions() {
@@ -101,22 +100,14 @@ public class RuleManager extends BaseObject {
   }
 
   private void applyRule(Rule rule) {
-    if (!rule.conditions().isEmpty())
-      alert("ignoring rule conditions for now:", INDENT, rule);
-
-    for (var actionMap : rule.actions()) {
-      String actionName = actionMap.opt("action", "transfer");
-
-      switch (actionName) {
-      default:
-        alert("unsupported action:", actionMap);
-        break;
-      case "transfer":
-        applyTransferRule(actionMap);
-        break;
-      }
+    switch (rule.action()) {
+    case TRANSFER:
+      performTransfer(rule);
+      break;
+    default:
+      badArg("Unsupported rule:", rule);
+      break;
     }
-
   }
 
   private void disableRules() {
@@ -124,19 +115,23 @@ public class RuleManager extends BaseObject {
       alert("disabling rules due to problems");
       mDisabled = true;
     }
-
   }
 
-  private void applyTransferRule(JSMap actionMap) {
+  private void performTransfer(Rule rule) {
 
     var parent = mParent;
-    int otherAccountNum = actionMap.getInt("account");
+
+    int otherAccountNum = rule.targetAccount();
+
+    if (otherAccountNum == 0)
+      badArg("missing target_account:", INDENT, rule);
+
     if (alertAccountDoesNotExist(otherAccountNum, "RuleManager:applyTransferRule")) {
       disableRules();
       return;
     }
 
-    var amount = determineTransactionAmount(parent, actionMap, "amount");
+    var amount = determineTransactionAmount(parent, rule);
 
     int dr, cr;
     dr = cr = otherAccountNum;
@@ -183,37 +178,24 @@ public class RuleManager extends BaseObject {
     return null;
   }
 
-  private long determineTransactionAmount(Transaction parentTransaction, JSMap map, String key) {
-    Object val = map.optUnsafe(key);
-    if (val == null) {
-      throw badArg("missing key:", key, "in map:", INDENT, map);
+  private long determineTransactionAmount(Transaction parentTransaction, Rule rule) {
+    double pct = rule.percent();
+    if (pct == 0) {
+      badArg("percentage is zero (or missing):", INDENT, rule);
     }
-    Long amountInCents = null;
-    if (val instanceof String) {
-      var s = (String) val;
-      // fucking regexes are stupidly complicated, abandoning them
-      if (s.endsWith("%")) {
-        mTransferPercent = Double.parseDouble(s.substring(0, s.length() - 1));
-        mTransferPercentDesc = s;
-        amountInCents = Math.round(parentTransaction.amount() * (mTransferPercent / 100));
-      } else {
-        badArg("for now, expected percentage, e.g. '33.333%'");
-        amountInCents = Math.round(Double.parseDouble(s) * 100); // x 100 cents per dollar 
-      }
-    }
-    if (amountInCents == null)
-      badArg("can't figure out transaction amount, key:", key, INDENT, map);
+    mTransferPercent = pct;
+    mTransferPercentDesc = chomp(String.format("%.2f", pct), ".00") + "%";
+    var amountInCents = Math.round(parentTransaction.amount() * (mTransferPercent / 100));
     return amountInCents;
   }
 
-  private static final String EXPECTED_VERSION = "1.0";
+  private static final String EXPECTED_VERSION = "2.0";
 
   private Rules rules() {
     if (mRules == null) {
       var r = Files.parseAbstractDataOpt(Rules.DEFAULT_INSTANCE, file());
       r = updateRules(r);
       mRules = r;
-      
       log("read rules:", INDENT, mRules);
       // Reformat them, and save (with backup) if it has changed
       var str = mRules.toString();
@@ -236,7 +218,7 @@ public class RuleManager extends BaseObject {
       return r;
 
     var b = r.toBuilder();
-    if (!(version.equals("") && EXPECTED_VERSION == "1.0")) {
+    if (!(version.equals("") && EXPECTED_VERSION == "2.0")) {
       badState("Rules have an unsupported version:", version);
     }
     b.version(EXPECTED_VERSION);

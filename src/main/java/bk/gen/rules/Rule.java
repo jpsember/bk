@@ -1,10 +1,8 @@
 package bk.gen.rules;
 
 import java.util.Arrays;
-import java.util.List;
 import js.data.AbstractData;
 import js.data.DataUtil;
-import js.json.JSList;
 import js.json.JSMap;
 
 public class Rule implements AbstractData {
@@ -13,12 +11,16 @@ public class Rule implements AbstractData {
     return mAccounts;
   }
 
-  public List<String> conditions() {
-    return mConditions;
+  public ActionName action() {
+    return mAction;
   }
 
-  public List<JSMap> actions() {
-    return mActions;
+  public double percent() {
+    return mPercent;
+  }
+
+  public int targetAccount() {
+    return mTargetAccount;
   }
 
   @Override
@@ -27,8 +29,9 @@ public class Rule implements AbstractData {
   }
 
   protected static final String _0 = "accounts";
-  protected static final String _1 = "conditions";
-  protected static final String _2 = "actions";
+  protected static final String _1 = "action";
+  protected static final String _2 = "percent";
+  protected static final String _3 = "target_account";
 
   @Override
   public String toString() {
@@ -39,18 +42,9 @@ public class Rule implements AbstractData {
   public JSMap toJson() {
     JSMap m = new JSMap();
     m.putUnsafe(_0, DataUtil.encodeBase64Maybe(mAccounts));
-    {
-      JSList j = new JSList();
-      for (String x : mConditions)
-        j.add(x);
-      m.put(_1, j);
-    }
-    {
-      JSList j = new JSList();
-      for (JSMap x : mActions)
-        j.add(x);
-      m.put(_2, j);
-    }
+    m.putUnsafe(_1, mAction.toString().toLowerCase());
+    m.putUnsafe(_2, mPercent);
+    m.putUnsafe(_3, mTargetAccount);
     return m;
   }
 
@@ -72,8 +66,12 @@ public class Rule implements AbstractData {
         mAccounts = DataUtil.parseIntsFromArrayOrBase64(x);
       }
     }
-    mConditions = DataUtil.parseListOfObjects(m.optJSList(_1), false);
-    mActions = DataUtil.parseListOfObjects(m.optJSList(_2), false);
+    {
+      String x = m.opt(_1, "");
+      mAction = x.isEmpty() ? ActionName.DEFAULT_INSTANCE : ActionName.valueOf(x.toUpperCase());
+    }
+    mPercent = m.opt(_2, 0.0);
+    mTargetAccount = m.opt(_3, 0);
   }
 
   public static Builder newBuilder() {
@@ -91,9 +89,11 @@ public class Rule implements AbstractData {
       return false;
     if (!(Arrays.equals(mAccounts, other.mAccounts)))
       return false;
-    if (!(mConditions.equals(other.mConditions)))
+    if (!(mAction.equals(other.mAction)))
       return false;
-    if (!(mActions.equals(other.mActions)))
+    if (!(mPercent == other.mPercent))
+      return false;
+    if (!(mTargetAccount == other.mTargetAccount))
       return false;
     return true;
   }
@@ -104,28 +104,27 @@ public class Rule implements AbstractData {
     if (r == 0) {
       r = 1;
       r = r * 37 + Arrays.hashCode(mAccounts);
-      for (String x : mConditions)
-        if (x != null)
-          r = r * 37 + x.hashCode();
-      for (JSMap x : mActions)
-        if (x != null)
-          r = r * 37 + x.hashCode();
+      r = r * 37 + mAction.ordinal();
+      r = r * 37 + (int) mPercent;
+      r = r * 37 + mTargetAccount;
       m__hashcode = r;
     }
     return r;
   }
 
   protected int[] mAccounts;
-  protected List<String> mConditions;
-  protected List<JSMap> mActions;
+  protected ActionName mAction;
+  protected double mPercent;
+  protected int mTargetAccount;
   protected int m__hashcode;
 
   public static final class Builder extends Rule {
 
     private Builder(Rule m) {
       mAccounts = m.mAccounts;
-      mConditions = DataUtil.mutableCopyOf(m.mConditions);
-      mActions = DataUtil.mutableCopyOf(m.mActions);
+      mAction = m.mAction;
+      mPercent = m.mPercent;
+      mTargetAccount = m.mTargetAccount;
     }
 
     @Override
@@ -143,8 +142,9 @@ public class Rule implements AbstractData {
     public Rule build() {
       Rule r = new Rule();
       r.mAccounts = mAccounts;
-      r.mConditions = DataUtil.immutableCopyOf(mConditions);
-      r.mActions = DataUtil.immutableCopyOf(mActions);
+      r.mAction = mAction;
+      r.mPercent = mPercent;
+      r.mTargetAccount = mTargetAccount;
       return r;
     }
 
@@ -153,13 +153,18 @@ public class Rule implements AbstractData {
       return this;
     }
 
-    public Builder conditions(List<String> x) {
-      mConditions = DataUtil.mutableCopyOf((x == null) ? DataUtil.emptyList() : x);
+    public Builder action(ActionName x) {
+      mAction = (x == null) ? ActionName.DEFAULT_INSTANCE : x;
       return this;
     }
 
-    public Builder actions(List<JSMap> x) {
-      mActions = DataUtil.mutableCopyOf((x == null) ? DataUtil.emptyList() : x);
+    public Builder percent(double x) {
+      mPercent = x;
+      return this;
+    }
+
+    public Builder targetAccount(int x) {
+      mTargetAccount = x;
       return this;
     }
 
@@ -169,8 +174,7 @@ public class Rule implements AbstractData {
 
   private Rule() {
     mAccounts = DataUtil.EMPTY_INT_ARRAY;
-    mConditions = DataUtil.emptyList();
-    mActions = DataUtil.emptyList();
+    mAction = ActionName.DEFAULT_INSTANCE;
   }
 
 }

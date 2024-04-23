@@ -47,7 +47,6 @@ public class BkOper extends AppOper
 
   @Override
   public void perform() {
-
     logger(new Logger(config().logFile()));
 
     setUtilConfig(config());
