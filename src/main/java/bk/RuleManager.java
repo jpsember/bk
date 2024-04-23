@@ -19,7 +19,7 @@ public class RuleManager extends BaseObject {
   public static final RuleManager SHARED_INSTANCE = new RuleManager();
 
   private RuleManager() {
-    // alertVerbose();
+      alertVerbose();
   }
 
   public void deleteAllGeneratedTransactions() {
@@ -206,9 +206,14 @@ public class RuleManager extends BaseObject {
     return amountInCents;
   }
 
+  private static final String EXPECTED_VERSION = "1.0";
+
   private Rules rules() {
     if (mRules == null) {
-      mRules = Files.parseAbstractDataOpt(Rules.DEFAULT_INSTANCE, file());
+      var r = Files.parseAbstractDataOpt(Rules.DEFAULT_INSTANCE, file());
+      r = updateRules(r);
+      mRules = r;
+      
       log("read rules:", INDENT, mRules);
       // Reformat them, and save (with backup) if it has changed
       var str = mRules.toString();
@@ -223,6 +228,20 @@ public class RuleManager extends BaseObject {
       }
     }
     return mRules;
+  }
+
+  private Rules updateRules(Rules r) {
+    var version = r.version();
+    if (version.equals(EXPECTED_VERSION))
+      return r;
+
+    var b = r.toBuilder();
+    if (!(version.equals("") && EXPECTED_VERSION == "1.0")) {
+      badState("Rules have an unsupported version:", version);
+    }
+    b.version(EXPECTED_VERSION);
+    r = b.build();
+    return r;
   }
 
   private File file() {

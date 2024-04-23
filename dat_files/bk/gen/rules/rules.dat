@@ -1,4 +1,4 @@
 fields {
   map string Rule rules;
-
+  string version;
 }

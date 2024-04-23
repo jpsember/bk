@@ -12,12 +12,17 @@ public class Rules implements AbstractData {
     return mRules;
   }
 
+  public String version() {
+    return mVersion;
+  }
+
   @Override
   public Builder toBuilder() {
     return new Builder(this);
   }
 
   protected static final String _0 = "rules";
+  protected static final String _1 = "version";
 
   @Override
   public String toString() {
@@ -33,6 +38,7 @@ public class Rules implements AbstractData {
         j.put(e.getKey(), e.getValue().toJson());
       m.put(_0, j);
     }
+    m.putUnsafe(_1, mVersion);
     return m;
   }
 
@@ -59,6 +65,7 @@ public class Rules implements AbstractData {
         }
       }
     }
+    mVersion = m.opt(_1, "");
   }
 
   public static Builder newBuilder() {
@@ -76,6 +83,8 @@ public class Rules implements AbstractData {
       return false;
     if (!(mRules.equals(other.mRules)))
       return false;
+    if (!(mVersion.equals(other.mVersion)))
+      return false;
     return true;
   }
 
@@ -85,18 +94,21 @@ public class Rules implements AbstractData {
     if (r == 0) {
       r = 1;
       r = r * 37 + mRules.hashCode();
+      r = r * 37 + mVersion.hashCode();
       m__hashcode = r;
     }
     return r;
   }
 
   protected Map<String, Rule> mRules;
+  protected String mVersion;
   protected int m__hashcode;
 
   public static final class Builder extends Rules {
 
     private Builder(Rules m) {
       mRules = DataUtil.mutableCopyOf(m.mRules);
+      mVersion = m.mVersion;
     }
 
     @Override
@@ -114,11 +126,17 @@ public class Rules implements AbstractData {
     public Rules build() {
       Rules r = new Rules();
       r.mRules = DataUtil.immutableCopyOf(mRules);
+      r.mVersion = mVersion;
       return r;
     }
 
     public Builder rules(Map<String, Rule> x) {
       mRules = DataUtil.mutableCopyOf((x == null) ? DataUtil.emptyMap() : x);
+      return this;
+    }
+
+    public Builder version(String x) {
+      mVersion = (x == null) ? "" : x;
       return this;
     }
 
@@ -128,6 +146,7 @@ public class Rules implements AbstractData {
 
   private Rules() {
     mRules = DataUtil.emptyMap();
+    mVersion = "";
   }
 
 }

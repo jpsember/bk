@@ -48,6 +48,8 @@ public class BkOper extends AppOper
   @Override
   public void perform() {
 
+    logger(new Logger(config().logFile()));
+
     setUtilConfig(config());
     {
       var f = Files.assertNonEmpty(config().database());
@@ -61,8 +63,6 @@ public class BkOper extends AppOper
     }
 
     var mgr = winMgr();
-
-    logger(new Logger(config().logFile()));
 
     try {
       mgr.open();
