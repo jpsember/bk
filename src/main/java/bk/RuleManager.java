@@ -123,10 +123,8 @@ public class RuleManager extends BaseObject {
 
     int otherAccountNum = rule.targetAccount();
 
-    if (otherAccountNum == 0)
-      badArg("missing target_account:", INDENT, rule);
-
     if (alertAccountDoesNotExist(otherAccountNum, "RuleManager:applyTransferRule")) {
+      alert("Rule:", INDENT, rule);
       disableRules();
       return;
     }
@@ -141,7 +139,11 @@ public class RuleManager extends BaseObject {
     else
       dr = mTriggerAccountNumber;
 
-    checkState(cr != dr, "account numbers are the same:", cr);
+    if (cr == dr) {
+      alert("Transfer DR, CR account numbers are equal:", cr, "; Rule:", INDENT, rule);
+      disableRules();
+      return;
+    }
 
     // If there is already a generated transaction in the child list matching this one, do nothing
     var existing = findChildTransaction(dr, cr, amount);

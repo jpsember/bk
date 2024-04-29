@@ -1,7 +1,7 @@
 {   "rules" : { "sample" : {       "accounts" : [ 5100 ],
                                      "action" : "transfer",
-                                    "percent" : 0.0,
-                             "target_account" : 0
+                                    "percent" : 30.0,
+                             "target_account" : 5120
                            } },
   "version" : "2.0"
 }
