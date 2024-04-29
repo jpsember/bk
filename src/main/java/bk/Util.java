@@ -745,8 +745,15 @@ public final class Util {
 
   public static List<Long> getAllMarkedTransactions() {
     List<Long> result = arrayList();
-    for (var x : sMarkedTransactionSet)
+    for (var x : sMarkedTransactionSet) {
+
+      // Make sure transaction still exists.  If it has been deleted, it won't
+      var tr = storage().transaction(x);
+      if (tr == null)
+        continue;
+
       result.add(x);
+    }
     return result;
   }
 
