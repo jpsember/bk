@@ -1,3 +1,4 @@
 enum {
   transfer,
+  monthly_summary,
 }

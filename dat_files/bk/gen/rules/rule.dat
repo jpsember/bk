@@ -9,8 +9,15 @@ fields {
   //
   double percent;
 
-  // Number of account to transfer to
-  //
+  int source_account;
   int target_account;
-}
+
+  // Transfer:
+  //  transfers from accounts to target_account
+
+  // Monthly summary:
+  //  generates transaction of monthly sum of all the 'accounts',
+  //  with dr/cr of source_account, target_account
+
+ }
 
