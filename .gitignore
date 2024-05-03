@@ -30,6 +30,7 @@ target
 
 database.json
 project_config
+tvl.*
 
 bk_log.txt
 bk-args.json

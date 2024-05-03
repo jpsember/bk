@@ -6,7 +6,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
@@ -101,7 +100,6 @@ public final class Util {
 
   private static final ZoneId sLocalTimeZoneId;
   private static final List<DateTimeFormatter> sDateParsers;
-  private static final ZoneOffset sLocalTimeZoneOffset;
 
   private static final long sEpochSecondsToday;
   private static final DateTimeFormatter sDateFormatter;
@@ -202,10 +200,6 @@ public final class Util {
     return Instant.ofEpochSecond(epochSeconds).atZone(sLocalTimeZoneId).toLocalDate();
   }
 
-  public static long localDateToEpochSeconds(LocalDate localDate) {
-    return localDate.atStartOfDay().toEpochSecond(sLocalTimeZoneOffset);
-  }
-
   public static String epochSecondsToDateString(long epochSeconds) {
     return sDateFormatter.format(epochSecondsToLocalDate(epochSeconds));
   }
@@ -215,9 +209,6 @@ public final class Util {
     sLocalTimeZoneId = ZoneId.systemDefault();
     var now = LocalDate.now().atStartOfDay();
     sEpochSecondsToday = (int) now.atZone(sLocalTimeZoneId).toEpochSecond();
-
-    ZoneId systemZone = ZoneId.systemDefault(); // my timezone
-    sLocalTimeZoneOffset = systemZone.getRules().getOffset(now);
 
     {
       List<DateTimeFormatter> p = arrayList();
@@ -439,9 +430,7 @@ public final class Util {
       return 0;
     if (t.credit() == relativeToAccount)
       return 1;
-    alert("expected transaction to involve account #", relativeToAccount, INDENT, t);
     return -1;
-    //    throw badArg("expected transaction to involve account #", relativeToAccount, INDENT, t);
   }
 
   public static Account otherAccount(Transaction t, int accountNumber) {

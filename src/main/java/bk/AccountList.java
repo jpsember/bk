@@ -108,7 +108,6 @@ public class AccountList extends LedgerWindow implements ChangeListener {
       break;
 
     case ":R":
-      pr("applying rules to all trans");
       RuleManager.SHARED_INSTANCE.applyRulesToAllTransactions();
       break;
 

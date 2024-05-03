@@ -4,7 +4,6 @@ import static bk.Util.*;
 import static js.base.Tools.*;
 
 import java.io.File;
-import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -172,19 +171,12 @@ public class RuleManager extends BaseObject {
     for (int sourceAccountNum : accts) {
       var trs = storage().readTransactionsForAccount(sourceAccountNum);
       for (var t : trs) {
-        // Determine month containing this transaction
-        var ldate = epochSecondsToLocalDate(t.date());
-        var firstOfMonth = ldate.with(TemporalAdjusters.firstDayOfMonth());
-        long epochSec = localDateToEpochSeconds(firstOfMonth);
-
-        if (alert("debug") && !monthAmountMap.containsKey(epochSec)) {
-          pr("trans:", INDENT, t);
-          pr("local date:", ldate);
-          pr("first of month:", firstOfMonth);
-          pr("epochSec:", epochSec);
-          pr("formatted:", formatDate(epochSec));
-        }
-
+        // Determine start of month containing this transaction
+        var s = formatDate(t.date());
+        // Trim off the day within month
+        s = s.substring(0, s.length() - 2);
+        s = s + "01";
+        var epochSec = dateToEpochSeconds(s);
         Long currency = monthAmountMap.getOrDefault(epochSec, 0L);
         int sign = (t.debit() == sourceAccountNum) ? 1 : -1;
         currency += sign * t.amount();
