@@ -19,6 +19,10 @@ public class Rule implements AbstractData {
     return mPercent;
   }
 
+  public int sourceAccount() {
+    return mSourceAccount;
+  }
+
   public int targetAccount() {
     return mTargetAccount;
   }
@@ -31,7 +35,8 @@ public class Rule implements AbstractData {
   protected static final String _0 = "accounts";
   protected static final String _1 = "action";
   protected static final String _2 = "percent";
-  protected static final String _3 = "target_account";
+  protected static final String _3 = "source_account";
+  protected static final String _4 = "target_account";
 
   @Override
   public String toString() {
@@ -44,7 +49,8 @@ public class Rule implements AbstractData {
     m.putUnsafe(_0, DataUtil.encodeBase64Maybe(mAccounts));
     m.putUnsafe(_1, mAction.toString().toLowerCase());
     m.putUnsafe(_2, mPercent);
-    m.putUnsafe(_3, mTargetAccount);
+    m.putUnsafe(_3, mSourceAccount);
+    m.putUnsafe(_4, mTargetAccount);
     return m;
   }
 
@@ -71,7 +77,8 @@ public class Rule implements AbstractData {
       mAction = x.isEmpty() ? ActionName.DEFAULT_INSTANCE : ActionName.valueOf(x.toUpperCase());
     }
     mPercent = m.opt(_2, 0.0);
-    mTargetAccount = m.opt(_3, 0);
+    mSourceAccount = m.opt(_3, 0);
+    mTargetAccount = m.opt(_4, 0);
   }
 
   public static Builder newBuilder() {
@@ -93,6 +100,8 @@ public class Rule implements AbstractData {
       return false;
     if (!(mPercent == other.mPercent))
       return false;
+    if (!(mSourceAccount == other.mSourceAccount))
+      return false;
     if (!(mTargetAccount == other.mTargetAccount))
       return false;
     return true;
@@ -106,6 +115,7 @@ public class Rule implements AbstractData {
       r = r * 37 + Arrays.hashCode(mAccounts);
       r = r * 37 + mAction.ordinal();
       r = r * 37 + (int) mPercent;
+      r = r * 37 + mSourceAccount;
       r = r * 37 + mTargetAccount;
       m__hashcode = r;
     }
@@ -115,6 +125,7 @@ public class Rule implements AbstractData {
   protected int[] mAccounts;
   protected ActionName mAction;
   protected double mPercent;
+  protected int mSourceAccount;
   protected int mTargetAccount;
   protected int m__hashcode;
 
@@ -124,6 +135,7 @@ public class Rule implements AbstractData {
       mAccounts = m.mAccounts;
       mAction = m.mAction;
       mPercent = m.mPercent;
+      mSourceAccount = m.mSourceAccount;
       mTargetAccount = m.mTargetAccount;
     }
 
@@ -144,6 +156,7 @@ public class Rule implements AbstractData {
       r.mAccounts = mAccounts;
       r.mAction = mAction;
       r.mPercent = mPercent;
+      r.mSourceAccount = mSourceAccount;
       r.mTargetAccount = mTargetAccount;
       return r;
     }
@@ -160,6 +173,11 @@ public class Rule implements AbstractData {
 
     public Builder percent(double x) {
       mPercent = x;
+      return this;
+    }
+
+    public Builder sourceAccount(int x) {
+      mSourceAccount = x;
       return this;
     }
 

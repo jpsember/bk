@@ -59,8 +59,9 @@ public class TransactionForm extends FormWindow implements HintListener {
   }
 
   private void okHandler() {
-    var tr = Transaction.newBuilder();
     String problem = "This field is invalid.";
+    Transaction.Builder tr = null;
+
     do {
 
       if (!isGeneralLedger()) {
@@ -92,7 +93,7 @@ public class TransactionForm extends FormWindow implements HintListener {
       if (problem != null)
         break;
 
-      tr.timestamp(storage().uniqueTimestamp());
+      tr = newTransactionBuilder();
       tr.date(mDate.validResult());
       tr.amount(mAmount.validResult());
       tr.debit(mDr.validResult());
@@ -114,6 +115,8 @@ public class TransactionForm extends FormWindow implements HintListener {
       setMessage(problem);
       return;
     }
+
+    checkState(tr != null);
 
     var u = UndoManager.SHARED_INSTANCE;
 

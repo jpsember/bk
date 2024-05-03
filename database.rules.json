@@ -1,7 +1,15 @@
-{   "rules" : { "sample" : {       "accounts" : [ 5100 ],
-                                     "action" : "transfer",
-                                    "percent" : 30.0,
-                             "target_account" : 5120
-                           } },
+{   "rules" : { "asset_monthlies" : {       "accounts" : [ -1000 ],
+                                              "action" : "monthly_summary",
+                                             "percent" : 0.0,
+                                      "source_account" : 5900,
+                                      "target_account" : 5910
+                                    },
+                         "sample" : {       "accounts" : [ 5100 ],
+                                              "action" : "transfer",
+                                             "percent" : 30.0,
+                                      "source_account" : 0,
+                                      "target_account" : 5120
+                                    }
+              },
   "version" : "2.0"
 }

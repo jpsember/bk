@@ -506,8 +506,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     }
 
     if (generateSummaryTransaction && summaryBalance != 0) {
-      var tr = Transaction.newBuilder();
-      tr.timestamp(storage().uniqueTimestamp());
+      var tr = newTransactionBuilder();
       tr.date(newestMovedDate);
       if (summaryBalance > 0) {
         tr.amount(summaryBalance);
