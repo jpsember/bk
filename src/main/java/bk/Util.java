@@ -763,34 +763,24 @@ public final class Util {
     return hasBudget(accountMustExist(accountNumber));
   }
 
-  private static int budgetSign(int number) {
-    int sign = 1;
-    if (number >= 2000 && number <= 2999)
-      sign = -1;
-    return sign;
-  }
+  public static long spentBudget(Account a) {
+    checkArgument(hasBudget(a));
 
-  public static long budgetSpent(Account a) {
-    int sign = budgetSign(a.number());
-    var spent = sign * a.balance();
-    return spent;
+    // Determine the sign of what a 'spent' amount looks like in an account of this class.
+    // For assets (1xxx), spent amounts are credits against the account, so the sign is -.
+    // This is true for payables (2xxx) as well, for historical reasons(?)
+
+    int sign = 1;
+    todo("have enums for account classes (1xxx, 2xxx) with some helper methods");
+    var number = a.number();
+    if (number >= 1000 && number <= 2999)
+      sign = -1;
+
+    return sign * a.balance();
   }
 
   public static long unspentBudget(Account a) {
-    checkArgument(hasBudget(a));
-    todo("have enums for account classes (1xxx, 2xxx) with some helper methods");
-    int sign = budgetSign(a.number());
-    return a.budget() - sign * a.balance();
-  }
-
-  @Deprecated
-  public static long balanceOrUnspentBudget(Account a) {
-    if (hasBudget(a)) {
-      todo("have enums for account classes (1xxx, 2xxx) with some helper methods");
-      int sign = budgetSign(a.number());
-      return a.budget() - sign * a.balance();
-    }
-    return a.balance();
+    return a.budget() - spentBudget(a);
   }
 
   //------------------------------------------------------------------
