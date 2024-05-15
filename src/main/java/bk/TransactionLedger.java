@@ -16,21 +16,9 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
   public TransactionLedger(int accountNumberOrZero, TransactionListener listener) {
     changeManager().addListener(this);
-    addColumns();
     mListener = listener;
     // Be careful not to store the actual Account reference, since it may change unexpectedly!
     mAccountNumber = accountNumberOrZero;
-
-    mHeaderType = HEADER_TYPE.GENERAL;
-    if (mAccountNumber != 0) {
-      mHeaderType = HEADER_TYPE.NORMAL;
-      var a = account(mAccountNumber);
-      if (hasBudget(a))
-        mHeaderType = HEADER_TYPE.BUDGET;
-      else if (a.stock())
-        mHeaderType = HEADER_TYPE.STOCK;
-    }
-
     setHeaderHeight(6);
     setFooterHeight(3);
     rebuild();
@@ -318,9 +306,6 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   }
 
   private void addColumns() {
-    if (mColumnsAdded)
-      return;
-
     boolean alt = mHeaderType == HEADER_TYPE.STOCK;
     var add = alt ? 4 : 0;
     spaceSeparators();
@@ -333,10 +318,26 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
         .width(CHARS_ACCOUNT_NUMBER_AND_NAME - add));
     addColumn(Column.newBuilder().name("Description").datatype(Datatype.TEXT)
         .width(CHARS_TRANSACTION_DESCRIPTION + add));
-    mColumnsAdded = true;
   }
 
   public void rebuild() {
+
+    {
+      mHeaderType = HEADER_TYPE.GENERAL;
+      if (mAccountNumber != 0) {
+        mHeaderType = HEADER_TYPE.NORMAL;
+        var a = account(mAccountNumber);
+        if (hasBudget(a))
+          mHeaderType = HEADER_TYPE.BUDGET;
+        else if (a.stock())
+          mHeaderType = HEADER_TYPE.STOCK;
+      }
+    }
+
+    mark("we need to be able to throw out any existing columns");
+    reset();
+    addColumns();
+
     var currentTrans = getCurrentRow();
     clearEntries();
 
@@ -427,6 +428,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       if (t != null && mAccountNumber != 0) {
         var otherNum = otherAccount(t, mAccountNumber).number();
         mAccountNumber = otherNum;
+        mark("must change header information, issue #73");
         rebuild();
       }
       break;
@@ -530,7 +532,6 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
   private TransactionListener mListener;
   private int mAccountNumber;
-  private boolean mColumnsAdded;
   private Transaction mCurrentTrans;
   private long mMarkedBalance;
   private int mMarkedCount;
