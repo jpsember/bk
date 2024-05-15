@@ -498,36 +498,6 @@ public final class Util {
     return t.parent() != 0;
   }
 
-  public static boolean hasBudget(Account a) {
-    return a.budget() != 0;
-  }
-
-  public static boolean hasBudget(int accountNumber) {
-    return hasBudget(accountMustExist(accountNumber));
-  }
-
-  public static int budgetSign(int number) {
-    int sign = 1;
-    if (number >= 2000 && number <= 2999)
-      sign = -1;
-    return sign;
-  }
-
-  public static long budgetSpent(Account a) {
-    int sign = budgetSign(a.number());
-    var spent = sign * a.balance();
-    return spent;
-  }
-
-  public static long balanceOrUnspentBudget(Account a) {
-    if (hasBudget(a)) {
-      todo("have enums for account classes (1xxx, 2xxx) with some helper methods");
-      int sign = budgetSign(a.number());
-      return a.budget() - sign * a.balance();
-    }
-    return a.balance();
-  }
-
   public static int indexOfChild(Transaction t, long childId) {
     var a = LongArray.with(t.children());
     return a.indexOf(childId);
@@ -780,5 +750,49 @@ public final class Util {
     tr.timestamp(storage().uniqueTimestamp());
     return tr;
   }
+
+  // ------------------------------------------------------------------
+  // Budgets
+  // ------------------------------------------------------------------
+
+  public static boolean hasBudget(Account a) {
+    return a.budget() != 0;
+  }
+
+  public static boolean hasBudget(int accountNumber) {
+    return hasBudget(accountMustExist(accountNumber));
+  }
+
+  private static int budgetSign(int number) {
+    int sign = 1;
+    if (number >= 2000 && number <= 2999)
+      sign = -1;
+    return sign;
+  }
+
+  public static long budgetSpent(Account a) {
+    int sign = budgetSign(a.number());
+    var spent = sign * a.balance();
+    return spent;
+  }
+
+  public static long unspentBudget(Account a) {
+    checkArgument(hasBudget(a));
+    todo("have enums for account classes (1xxx, 2xxx) with some helper methods");
+    int sign = budgetSign(a.number());
+    return a.budget() - sign * a.balance();
+  }
+
+  @Deprecated
+  public static long balanceOrUnspentBudget(Account a) {
+    if (hasBudget(a)) {
+      todo("have enums for account classes (1xxx, 2xxx) with some helper methods");
+      int sign = budgetSign(a.number());
+      return a.budget() - sign * a.balance();
+    }
+    return a.balance();
+  }
+
+  //------------------------------------------------------------------
 
 }

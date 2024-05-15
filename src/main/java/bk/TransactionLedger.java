@@ -25,7 +25,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     if (mAccountNumber != 0) {
       mHeaderType = HEADER_TYPE.NORMAL;
       var a = account(mAccountNumber);
-      if (a.budget() != 0)
+      if (hasBudget(a))
         mHeaderType = HEADER_TYPE.BUDGET;
       else if (a.stock())
         mHeaderType = HEADER_TYPE.STOCK;
@@ -78,7 +78,6 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       plotString(s, clip.x, y, Alignment.LEFT, CHARS_ACCOUNT_NUMBER_AND_NAME);
       switch (mHeaderType) {
       case BUDGET: {
-        //int budgetSign = budgetSign(a.number());
         long normSpent = budgetSpent(a);
         resetSlotWidth();
         var strBudget = labelledAmount("Budget", a.budget());

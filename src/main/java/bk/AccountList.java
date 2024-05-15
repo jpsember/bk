@@ -64,9 +64,15 @@ public class AccountList extends LedgerWindow implements ChangeListener {
       addHint(a.name());
 
       add(new AccountNameField(a.number(), storage().accountName(a.number())));
-      add(new CurrencyField(balanceOrUnspentBudget(a)));
+      long amount;
+      if (hasBudget(a))
+        amount = unspentBudget(a);
+      else
+        amount = a.balance();
+      add(new CurrencyField(amount));
       closeEntry(a);
     }
+
     setCurrentRow(mCurrentAccount);
     repaint();
   }
