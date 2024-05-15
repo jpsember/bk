@@ -66,9 +66,6 @@ public class BkOper extends AppOper
     try {
       mgr.open();
       mAccounts = new AccountList(this, this);
-      mAllTransactionsLedger = new TransactionLedger(0, this);
-      sAccountsView = mAccounts;
-      sTransactionsView = mAllTransactionsLedger;
 
       // Construct root container
       mgr.pushContainer();
@@ -199,16 +196,12 @@ public class BkOper extends AppOper
   public void editedTransaction(TransactionForm form, Transaction t) {
     form.remove();
     if (t != null) {
-      var v = mAllTransactionsLedger;
-      v.rebuild();
-      v.setCurrentRow(t);
-      v.repaint();
+      todo("!the global transactions ledger no longer exists, but if there's a nonglobal one open, update it?");
     }
     focusManager().pop();
   }
 
   private BkConfig mConfig;
   private AccountList mAccounts;
-  private TransactionLedger mAllTransactionsLedger;
 
 }

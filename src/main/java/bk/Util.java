@@ -391,15 +391,6 @@ public final class Util {
     return false;
   }
 
-  public static void rebuild(TransactionLedger ledger) {
-    if (ledger == null)
-      return;
-    ledger.rebuild();
-  }
-
-  public static JWindow sTransactionsView;
-  public static JWindow sAccountsView;
-
   public static final int ACCOUNT_NAME_MAX_LENGTH = 30;
 
   public static int accountNumber(Transaction t, int index) {
