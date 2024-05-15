@@ -195,9 +195,6 @@ public class BkOper extends AppOper
   @Override
   public void editedTransaction(TransactionForm form, Transaction t) {
     form.remove();
-    if (t != null) {
-      todo("!the global transactions ledger no longer exists, but if there's a nonglobal one open, update it?");
-    }
     focusManager().pop();
   }
 
