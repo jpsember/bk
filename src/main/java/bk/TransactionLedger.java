@@ -428,7 +428,10 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       if (t != null && mAccountNumber != 0) {
         var otherNum = otherAccount(t, mAccountNumber).number();
         mAccountNumber = otherNum;
-        rebuild();
+        focusManager().pop();
+        focusManager().pushAppend(new TransactionLedger(otherNum, mListener));
+        // We've sort of abandoned this instance, so don't do anything more with it
+        return;
       }
       break;
 
