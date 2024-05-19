@@ -37,22 +37,22 @@ public class PrintManager extends BaseObject {
     var ts = storage().readTransactionsForAccount(a.number());
     ts.sort(TRANSACTION_COMPARATOR);
 
-    setMaxLength(CHARS_DATE).addCol("date");
+    setMaxLength(CHARS_DATE).addCol("Date");
 
-    right().setMaxLength(CHARS_CURRENCY).addCol("debit amt");
-    right().setMaxLength(CHARS_CURRENCY).addCol("credit amt");
+    right().setMaxLength(CHARS_CURRENCY).addCol("Debit");
+    right().setMaxLength(CHARS_CURRENCY).addCol("Credit");
     if (mExpanded) {
-      setMaxLength(CHARS_ACCOUNT_NUMBER_AND_NAME).stretchPct(30).shrinkPct(20).addCol("other name");
+      setMaxLength(CHARS_ACCOUNT_NUMBER_AND_NAME).stretchPct(30).shrinkPct(20).addCol("Account");
     } else {
-      setMaxLength(CHARS_ACCOUNT_NAME).stretchPct(30).shrinkPct(25).addCol("other name");
+      setMaxLength(CHARS_ACCOUNT_NAME).stretchPct(30).shrinkPct(25).addCol("Account");
     }
-    right().setMaxLength(CHARS_CURRENCY).addCol("balance");
+    right().setMaxLength(CHARS_CURRENCY).addCol("Balance");
     var SMALL_DESCR_LEN = 24;
 
     if (mExpanded)
-      setMaxLength(CHARS_TRANSACTION_DESCRIPTION).stretchPct(100).shrinkPct(50).addCol("description");
+      setMaxLength(CHARS_TRANSACTION_DESCRIPTION).stretchPct(100).shrinkPct(50).addCol("Memo");
     else
-      setMaxLength(SMALL_DESCR_LEN).shrinkPct(0).stretchPct(0).addCol("footnote");
+      setMaxLength(SMALL_DESCR_LEN).shrinkPct(0).stretchPct(0).addCol("Memo");
 
     var date = formatDate(epochSecondsToday());
 
@@ -100,10 +100,13 @@ public class PrintManager extends BaseObject {
       s.append(a.name());
       s.append(justify(date, mLineLength - s.length(), Alignment.RIGHT));
       cr();
+
       dashes(mLineLength);
       cr();
     }
-
+    renderColumnHeadings();
+    dashes(mLineLength);
+    cr();
     renderColumns();
 
     dashes(mLineLength);
@@ -266,6 +269,24 @@ public class PrintManager extends BaseObject {
     }
 
     return this;
+  }
+
+  private void renderColumnHeadings() {
+    var sb = mBuffer;
+    sb.setLength(0);
+    int j = INIT_INDEX;
+    for (var pc : mPrintCols) {
+      j++;
+      var name = pc.name();
+      if (name.startsWith("!"))
+        name = "";
+      if (j != 0)
+        sb.append(COL_SEP_STRING);
+      name = trimToWidth(name, pc.mLengthRequired);
+      name = justify(name, pc.mLengthRequired, pc.mAlignment);
+      sb.append(name);
+    }
+    cr();
   }
 
   private String justify(String str, int maxLength, Alignment align) {
