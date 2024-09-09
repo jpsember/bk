@@ -7,7 +7,9 @@ fields {
   File database = "database.json";
 
   // Where to write the logs (if empty, doesn't write logs anywhere)
-  File log_file = "bk_log.txt";
+  // ...exceptions get dumped to the log file, which can be very confusing,
+  // as no on-screen indication of a problem occurs
+  File log_file;
 
   // Convert printouts from .txt to .pdf?
   //

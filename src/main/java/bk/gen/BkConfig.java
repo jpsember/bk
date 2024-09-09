@@ -2,6 +2,7 @@ package bk.gen;
 
 import java.io.File;
 import js.data.AbstractData;
+import js.file.Files;
 import js.json.JSMap;
 
 public class BkConfig implements AbstractData {
@@ -73,7 +74,7 @@ public class BkConfig implements AbstractData {
       }
     }
     {
-      mLogFile = _D2;
+      mLogFile = Files.DEFAULT;
       String x = m.opt(_2, (String) null);
       if (x != null) {
         mLogFile = new File(x);
@@ -174,7 +175,7 @@ public class BkConfig implements AbstractData {
     }
 
     public Builder logFile(File x) {
-      mLogFile = (x == null) ? _D2 : x;
+      mLogFile = (x == null) ? Files.DEFAULT : x;
       return this;
     }
 
@@ -191,13 +192,12 @@ public class BkConfig implements AbstractData {
   }
 
   private static final File _D1 = new File("database.json");
-  private static final File _D2 = new File("bk_log.txt");
 
   public static final BkConfig DEFAULT_INSTANCE = new BkConfig();
 
   private BkConfig() {
     mDatabase = _D1;
-    mLogFile = _D2;
+    mLogFile = Files.DEFAULT;
   }
 
 }
