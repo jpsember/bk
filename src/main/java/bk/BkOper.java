@@ -154,12 +154,12 @@ public class BkOper extends AppOper
   @Override
   public void editedAccount(AccountForm form, Account account) {
     form.remove();
-    if (account == null)
-      return;
-    var v = mAccounts;
-    v.rebuild();
-    v.setCurrentRow(account);
-    v.repaint();
+    if (account != null) {
+      var v = mAccounts;
+      v.rebuild();
+      v.setCurrentRow(account);
+      v.repaint();
+    }
     focusManager().pop();
   }
 
