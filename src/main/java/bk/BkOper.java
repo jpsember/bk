@@ -154,8 +154,6 @@ public class BkOper extends AppOper
   @Override
   public void editedAccount(AccountForm form, Account account) {
     form.remove();
-    if (alert("reverting code to produce error") && account == null)
-      return;
     if (account != null) {
       var v = mAccounts;
       v.rebuild();
