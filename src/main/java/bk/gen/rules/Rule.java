@@ -27,6 +27,22 @@ public class Rule implements AbstractData {
     return mTargetAccount;
   }
 
+  public String dateMin() {
+    return mDateMin;
+  }
+
+  public String dateMax() {
+    return mDateMax;
+  }
+
+  public long parsedDateMin() {
+    return mParsedDateMin;
+  }
+
+  public long parsedDateMax() {
+    return mParsedDateMax;
+  }
+
   @Override
   public Builder toBuilder() {
     return new Builder(this);
@@ -37,6 +53,10 @@ public class Rule implements AbstractData {
   protected static final String _2 = "percent";
   protected static final String _3 = "source_account";
   protected static final String _4 = "target_account";
+  protected static final String _5 = "date_min";
+  protected static final String _6 = "date_max";
+  protected static final String _7 = "parsed_date_min";
+  protected static final String _8 = "parsed_date_max";
 
   @Override
   public String toString() {
@@ -51,6 +71,10 @@ public class Rule implements AbstractData {
     m.putUnsafe(_2, mPercent);
     m.putUnsafe(_3, mSourceAccount);
     m.putUnsafe(_4, mTargetAccount);
+    m.putUnsafe(_5, mDateMin);
+    m.putUnsafe(_6, mDateMax);
+    m.putUnsafe(_7, mParsedDateMin);
+    m.putUnsafe(_8, mParsedDateMax);
     return m;
   }
 
@@ -79,6 +103,10 @@ public class Rule implements AbstractData {
     mPercent = m.opt(_2, 0.0);
     mSourceAccount = m.opt(_3, 0);
     mTargetAccount = m.opt(_4, 0);
+    mDateMin = m.opt(_5, "");
+    mDateMax = m.opt(_6, "");
+    mParsedDateMin = m.opt(_7, 0L);
+    mParsedDateMax = m.opt(_8, 0L);
   }
 
   public static Builder newBuilder() {
@@ -104,6 +132,14 @@ public class Rule implements AbstractData {
       return false;
     if (!(mTargetAccount == other.mTargetAccount))
       return false;
+    if (!(mDateMin.equals(other.mDateMin)))
+      return false;
+    if (!(mDateMax.equals(other.mDateMax)))
+      return false;
+    if (!(mParsedDateMin == other.mParsedDateMin))
+      return false;
+    if (!(mParsedDateMax == other.mParsedDateMax))
+      return false;
     return true;
   }
 
@@ -117,6 +153,10 @@ public class Rule implements AbstractData {
       r = r * 37 + (int) mPercent;
       r = r * 37 + mSourceAccount;
       r = r * 37 + mTargetAccount;
+      r = r * 37 + mDateMin.hashCode();
+      r = r * 37 + mDateMax.hashCode();
+      r = r * 37 + (int)mParsedDateMin;
+      r = r * 37 + (int)mParsedDateMax;
       m__hashcode = r;
     }
     return r;
@@ -127,6 +167,10 @@ public class Rule implements AbstractData {
   protected double mPercent;
   protected int mSourceAccount;
   protected int mTargetAccount;
+  protected String mDateMin;
+  protected String mDateMax;
+  protected long mParsedDateMin;
+  protected long mParsedDateMax;
   protected int m__hashcode;
 
   public static final class Builder extends Rule {
@@ -137,6 +181,10 @@ public class Rule implements AbstractData {
       mPercent = m.mPercent;
       mSourceAccount = m.mSourceAccount;
       mTargetAccount = m.mTargetAccount;
+      mDateMin = m.mDateMin;
+      mDateMax = m.mDateMax;
+      mParsedDateMin = m.mParsedDateMin;
+      mParsedDateMax = m.mParsedDateMax;
     }
 
     @Override
@@ -158,6 +206,10 @@ public class Rule implements AbstractData {
       r.mPercent = mPercent;
       r.mSourceAccount = mSourceAccount;
       r.mTargetAccount = mTargetAccount;
+      r.mDateMin = mDateMin;
+      r.mDateMax = mDateMax;
+      r.mParsedDateMin = mParsedDateMin;
+      r.mParsedDateMax = mParsedDateMax;
       return r;
     }
 
@@ -186,6 +238,26 @@ public class Rule implements AbstractData {
       return this;
     }
 
+    public Builder dateMin(String x) {
+      mDateMin = (x == null) ? "" : x;
+      return this;
+    }
+
+    public Builder dateMax(String x) {
+      mDateMax = (x == null) ? "" : x;
+      return this;
+    }
+
+    public Builder parsedDateMin(long x) {
+      mParsedDateMin = x;
+      return this;
+    }
+
+    public Builder parsedDateMax(long x) {
+      mParsedDateMax = x;
+      return this;
+    }
+
   }
 
   public static final Rule DEFAULT_INSTANCE = new Rule();
@@ -193,6 +265,8 @@ public class Rule implements AbstractData {
   private Rule() {
     mAccounts = DataUtil.EMPTY_INT_ARRAY;
     mAction = ActionName.DEFAULT_INSTANCE;
+    mDateMin = "";
+    mDateMax = "";
   }
 
 }

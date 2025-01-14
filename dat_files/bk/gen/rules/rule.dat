@@ -12,6 +12,12 @@ fields {
   int source_account;
   int target_account;
 
+  string date_min;  // if nonzero, minimum date for transaction to apply
+  string date_max;  // if nonzero, maximum date for transaction to apply
+
+  long parsed_date_min;
+  long parsed_date_max;
+
   // Transfer:
   //  transfers from accounts to target_account
 

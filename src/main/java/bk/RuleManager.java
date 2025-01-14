@@ -106,6 +106,10 @@ public class RuleManager extends BaseObject {
   private void applyRules() {
     for (var entry : rules().rules().entrySet()) {
       var rule = entry.getValue();
+
+      if (!withinDateRange(mParent, rule))
+        continue;
+
       if (rule.action() != ActionName.TRANSFER)
         continue;
       if (intWithinArray(rule.accounts(), mParent.debit())) {
@@ -116,6 +120,14 @@ public class RuleManager extends BaseObject {
         continue;
       applyRule(rule);
     }
+  }
+
+  private boolean withinDateRange(Transaction t, Rule rule) {
+    if (rule.parsedDateMin() > 0 && t.date() < rule.parsedDateMin())
+      return false;
+    if (rule.parsedDateMax() > 0 && t.date() > rule.parsedDateMax())
+      return false;
+    return true;
   }
 
   private void applyRule(Rule rule) {
@@ -306,6 +318,8 @@ public class RuleManager extends BaseObject {
     if (mRules == null) {
       var r = Files.parseAbstractDataOpt(Rules.DEFAULT_INSTANCE, file());
       r = updateRules(r);
+      r = parseDates(r);
+      pr("parsed rules:", INDENT, r);
       mRules = r;
       log("read rules:", INDENT, mRules);
       // Reformat them, and save (with backup) if it has changed
@@ -335,6 +349,30 @@ public class RuleManager extends BaseObject {
     b.version(EXPECTED_VERSION);
     r = b.build();
     return r;
+  }
+
+  private Rules parseDates(Rules r0) {
+    Rules.Builder b = r0.toBuilder();
+    Map<String, Rule> newMap = hashMap();
+    for (var ent : b.rules().entrySet()) {
+      var rb = ent.getValue().toBuilder();
+      var t0 = parseDate(rb.dateMin());
+      var t1 = parseDate(rb.dateMax());
+      rb.parsedDateMin(t0);
+      rb.parsedDateMax(t1);
+      newMap.put(ent.getKey(), rb.build());
+    }
+
+    b.rules(newMap);
+    return b.build();
+  }
+
+  private long parseDate(String dateExpr) {
+    if (nullOrEmpty(dateExpr))
+      return 0;
+    var res = DATE_VALIDATOR.validate(dateExpr);
+    long sec = res.typedValue();
+    return sec;
   }
 
   private File file() {

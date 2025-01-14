@@ -1,3 +1,33 @@
-{   "rules" : {  },
+{   "rules" : {            "w6th exp" : {        "accounts" : [ 5030,5040,5050 ],
+                                                   "action" : "transfer",
+                                                 "date_max" : "",
+                                                 "date_min" : "",
+                                          "parsed_date_max" : 0,
+                                          "parsed_date_min" : 0,
+                                                  "percent" : 66.7,
+                                           "source_account" : 0,
+                                           "target_account" : 5900
+                                        },
+                "w6th utilities_flat" : {        "accounts" : [ 5010,5020 ],
+                                                   "action" : "transfer",
+                                                 "date_max" : "",
+                                                 "date_min" : "2025/02/01",
+                                          "parsed_date_max" : 0,
+                                          "parsed_date_min" : 1738396800,
+                                                  "percent" : 25.0,
+                                           "source_account" : 0,
+                                           "target_account" : 1009
+                                        },
+                "w6th utilities_main" : {        "accounts" : [ 5010,5020 ],
+                                                   "action" : "transfer",
+                                                 "date_max" : "",
+                                                 "date_min" : "",
+                                          "parsed_date_max" : 0,
+                                          "parsed_date_min" : 0,
+                                                  "percent" : 75.0,
+                                           "source_account" : 0,
+                                           "target_account" : 1008
+                                        }
+              },
   "version" : "2.0"
 }
