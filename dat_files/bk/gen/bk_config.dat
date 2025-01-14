@@ -18,4 +18,6 @@ fields {
   // If true, does aggressive modifications of other transaction fields
   // in response to a description hint
   bool apply_hint_to_transaction;
+
+  bool generate_test_data;
 }

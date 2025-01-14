@@ -336,7 +336,6 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     mColumnsAdded = true;
   }
 
-  @Deprecated
   public void rebuild() {
     var currentTrans = getCurrentRow();
     clearEntries();
@@ -429,7 +428,11 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
         var otherNum = otherAccount(t, mAccountNumber).number();
         mAccountNumber = otherNum;
         focusManager().pop();
-        focusManager().pushAppend(new TransactionLedger(otherNum, mListener));
+        var ledger = new TransactionLedger(otherNum, mListener);
+        focusManager().pushAppend(ledger);
+        todo("Issue #77: place cursor at this transaction");
+        pr("scroll to:", INDENT, t);
+        ledger.setCurrentRow(t);
         // We've sort of abandoned this instance, so don't do anything more with it
         return;
       }

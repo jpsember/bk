@@ -28,6 +28,80 @@ public class Storage extends BaseObject {
     log("read", accounts().size(), "accounts and", transactions().size(), "transactions");
     scanForProblems();
     verifyAccountBalances();
+
+    if (bkConfig().generateTestData())
+      generateTestData();
+
+  }
+
+  private void generateTestData() {
+    do {
+      if (!alert("generating test data"))
+        break;
+      if (!file().toString().contains("example/database.json")) {
+        pr("...database doesn't start with 'example/database.json'");
+        break;
+      }
+
+      final int MOCK_ACCOUNTS_START = 3900;
+
+      if (false && alert("deleting all mock accounts")) {
+        for (var i = MOCK_ACCOUNTS_START; i < 3999; i++) {
+          var ac = account(i);
+          if (ac == null)
+            continue;
+          deleteAccount(ac.number());
+        }
+      }
+
+      int[] acctIds = new int[50];
+      for (int i = 0; i < acctIds.length; i++) {
+        var a = Account.newBuilder();
+        a.number(MOCK_ACCOUNTS_START + i);
+        a.name(randomText(20, false));
+        acctIds[i] = a.number();
+        if (account(a.number()) != null)
+          continue;
+        addOrReplace(a);
+      }
+
+      var ts = System.currentTimeMillis() - 7200000;
+
+      for (var aid : acctIds) {
+
+        var tr = readTransactionsForAccount(aid);
+        if (!tr.isEmpty())
+          continue;
+
+        int ntr = random().nextInt(100) + 8;
+
+        pr("generating", ntr, "transactions for account", aid);
+        for (int i = 0; i < ntr; i++) {
+          int bid = 0;
+          while (true) {
+            bid = acctIds[random().nextInt(acctIds.length)];
+            if (bid == aid)
+              continue;
+            break;
+          }
+          var t = Transaction.newBuilder();
+          t.amount(random().nextInt(10000));
+          t.date(ts / 1000);
+          t.timestamp(ts);
+          t.description(randomText(30, false));
+          t.debit(aid).credit(aid);
+          if (random().nextBoolean()) {
+            t.debit(bid);
+          } else {
+            t.credit(bid);
+          }
+          addOrReplace(t);
+          ts += 1000;
+        }
+      }
+
+      flush();
+    } while (false);
   }
 
   private void setModified() {
