@@ -426,17 +426,37 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     case KeyEvent.JUMP:
       if (t != null && mAccountNumber != 0) {
         var otherNum = otherAccount(t, mAccountNumber).number();
+        var sourceNum = mAccountNumber;
+        pr("jump to:", otherNum, INDENT, t);
         mAccountNumber = otherNum;
         focusManager().pop();
         var ledger = new TransactionLedger(otherNum, mListener);
         focusManager().pushAppend(ledger);
         todo("Issue #77: place cursor at this transaction");
-        pr("scroll to:", INDENT, t);
+       // pr("scroll to:", INDENT, t);
         ledger.setCurrentRow(t);
+        pushJump(sourceNum, t);
         // We've sort of abandoned this instance, so don't do anything more with it
         return;
       }
       break;
+
+    case KeyEvent.JUMP_BACK: {
+      if (sJumpStack.isEmpty())
+        break;
+      var ent = pop(sJumpStack);
+
+      var otherNum = ent.nSourceAccountNumber;
+      pr("jump back from:", otherNum, INDENT, ent.mTransaction);
+
+      mAccountNumber = otherNum;
+      focusManager().pop();
+      var ledger = new TransactionLedger(otherNum, mListener);
+      focusManager().pushAppend(ledger);
+      ledger.setCurrentRow(ent.mTransaction);
+      // We've sort of abandoned this instance, so don't do anything more with it
+      return;
+    }
 
     case KeyEvent.MARK:
       if (t != null) {
@@ -534,6 +554,43 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
   public void dataChanged(List<Integer> accountIds, List<Long> transactionIds) {
     rebuild();
   }
+
+  private void pushJump(int accountNumber, Transaction t) {
+    var ent = new JumpEnt();
+    ent.nSourceAccountNumber = accountNumber;
+    ent.mTransaction = t;
+    push(sJumpStack, ent);
+  }
+
+  //  private Transaction popJump() {
+  //    Transaction ret = null;
+  //    do {
+  //      if (sJumpStack.isEmpty())
+  //        break;
+  //      var ent = pop(sJumpStack);
+  //
+  //      var otherNum = ent.mAccountNumber;
+  //
+  //      mAccountNumber = otherNum;
+  //      focusManager().pop();
+  //      var ledger = new TransactionLedger(otherNum, mListener);
+  //      focusManager().pushAppend(ledger);
+  ////      todo("Issue #77: place cursor at this transaction");
+  //      //pr("scroll to:", INDENT, t);
+  //      ledger.setCurrentRow(t);
+  //      // We've sort of abandoned this instance, so don't do anything more with it
+  //      return;
+  //
+  //    } while (false);
+  //    return ret;
+  //  }
+
+  private static class JumpEnt {
+    int nSourceAccountNumber;
+    Transaction mTransaction;
+  }
+
+  private static List<JumpEnt> sJumpStack = arrayList();
 
   private TransactionListener mListener;
   private int mAccountNumber;
