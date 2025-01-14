@@ -65,10 +65,10 @@ public class Storage extends BaseObject {
         addOrReplace(a);
       }
 
-      var ts = System.currentTimeMillis() - 7200000;
-
+      var ts2 = System.currentTimeMillis() - 7200000;
+      int k = 0;
       for (var aid : acctIds) {
-
+        var ts = ts2 + (k++);
         var tr = readTransactionsForAccount(aid);
         if (!tr.isEmpty())
           continue;
@@ -96,7 +96,7 @@ public class Storage extends BaseObject {
             t.credit(bid);
           }
           addOrReplace(t);
-          ts += 1000;
+          ts += 3600*24*1000;
         }
       }
 
