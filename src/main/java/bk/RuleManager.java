@@ -319,7 +319,6 @@ public class RuleManager extends BaseObject {
       var r = Files.parseAbstractDataOpt(Rules.DEFAULT_INSTANCE, file());
       r = updateRules(r);
       r = parseDates(r);
-      pr("parsed rules:", INDENT, r);
       mRules = r;
       log("read rules:", INDENT, mRules);
       // Reformat them, and save (with backup) if it has changed

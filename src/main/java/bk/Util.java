@@ -41,6 +41,12 @@ public final class Util {
   public static final int STYLE_INVERSE_AND_MARK = 3;
   public static final int STYLE_TOTAL = 4;
 
+  public static final int ACCT_ASSET = 1000;
+  public static final int ACCT_LIABILITY = 2000;
+  public static final int ACCT_EQUITY = 3000;
+  public static final int ACCT_INCOME = 4000;
+  public static final int ACCT_EXPENSE = 5000;
+
   public final static void loadUtil() {
   }
 
@@ -92,8 +98,8 @@ public final class Util {
     if (random().nextInt(8) < 1)
       amount = random().nextInt(3000000);
     t.amount(amount);
-    t.debit(random().nextInt(5000) + 1000);
-    t.credit(random().nextInt(5000) + 1000);
+    t.debit(random().nextInt(ACCT_EXPENSE) + 1000);
+    t.credit(random().nextInt(ACCT_EXPENSE) + 1000);
     t.description(randomText(30, false));
     return t.build();
   }
@@ -766,9 +772,8 @@ public final class Util {
     // This is true for payables (2xxx) as well, for historical reasons(?)
 
     int sign = 1;
-    todo("have enums for account classes (1xxx, 2xxx) with some helper methods");
     var number = a.number();
-    if (number >= 1000 && number <= 2999)
+    if (number >= ACCT_ASSET && number < ACCT_EQUITY)
       sign = -1;
 
     return sign * a.balance();
