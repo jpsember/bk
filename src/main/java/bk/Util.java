@@ -356,6 +356,10 @@ public final class Util {
     return sStorage;
   }
 
+  public static boolean accountExists(int number) {
+    return account(number) != null;
+  }
+
   public static Account account(int number) {
     return storage().account(number);
   }
@@ -775,6 +779,5 @@ public final class Util {
   }
 
   //------------------------------------------------------------------
-
 
 }

@@ -59,11 +59,10 @@ public class AccountForm extends FormWindow {
       ac.name(mName.validResult());
       ac.budget(mBudget.validResult());
       ac.stock(mStock.validResult());
-      
+
       switch (mType) {
       case TYPE_ADD: {
-        var existing = account(ac.number());
-        if (existing != null) {
+        if (accountExists(ac.number())) {
           problem = "This account number is taken!";
           break outer;
         }

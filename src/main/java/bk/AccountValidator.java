@@ -40,7 +40,7 @@ public class AccountValidator extends BaseObject implements Validator {
 
       Integer intRes = i;
       String s;
-      if (mForNewAccountFlag && account(i) != null) {
+      if (mForNewAccountFlag && accountExists(i)) {
         s = numberStr + " !!! Already exists";
         intRes = null;
       } else {

@@ -24,7 +24,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     mHeaderType = HEADER_TYPE.GENERAL;
     if (mAccountNumber != 0) {
       mHeaderType = HEADER_TYPE.NORMAL;
-      var a = account(mAccountNumber);
+      var a = accountMustExist(mAccountNumber);
       if (hasBudget(a))
         mHeaderType = HEADER_TYPE.BUDGET;
       else if (a.stock())
@@ -38,7 +38,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
   @Override
   public boolean focusPossible() {
-    return mAccountNumber == 0 || account(mAccountNumber) != null;
+    return mAccountNumber == 0 || accountExists(mAccountNumber);
   }
 
   @Override
@@ -441,8 +441,10 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
         break;
       var ent = pop(sJumpStack);
       var otherNum = ent.nSourceAccountNumber;
+      if (!accountExists(otherNum)) {
+        break;
+      }
       invalidate();
-
       focusManager().pop();
       var ledger = new TransactionLedger(otherNum, mListener);
       focusManager().pushAppend(ledger);

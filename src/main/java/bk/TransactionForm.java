@@ -147,7 +147,7 @@ public class TransactionForm extends FormWindow implements HintListener {
   private String checkNameMissingForNew(WidgetWindow w) {
     var v = w.validationResult();
     int number = v.typedValue();
-    if (account(number) == null) {
+    if (!accountExists(number)) {
       if (v.extraString().isEmpty()) {
         focusManager().set(w);
         return "No such account! Specify a name to create a new one, e.g. '" + number + " xyz'";
