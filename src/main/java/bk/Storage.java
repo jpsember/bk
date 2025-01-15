@@ -96,7 +96,7 @@ public class Storage extends BaseObject {
             t.credit(bid);
           }
           addOrReplace(t);
-          ts += 3600*24*1000;
+          ts += 3600 * 24 * 1000;
         }
       }
 
@@ -127,6 +127,13 @@ public class Storage extends BaseObject {
 
   public File file() {
     return mFile;
+  }
+
+  public File rulesFile() {
+    if (mRulesFile == null) {
+      mRulesFile = new File(Files.removeExtension(file()) + ".rules.json");
+    }
+    return mRulesFile;
   }
 
   private Map<Integer, Account> accounts() {
@@ -294,6 +301,7 @@ public class Storage extends BaseObject {
   private long mUniqueTimestamp;
   private Database.Builder mDatabase;
   private File mFile;
+  private File mRulesFile;
   private boolean mModified;
 
   // ------------------------------------------------------------------

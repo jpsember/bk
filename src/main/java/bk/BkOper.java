@@ -3,6 +3,9 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
+import java.io.File;
+import java.util.List;
+
 import bk.gen.Account;
 import bk.gen.BkConfig;
 import bk.gen.Transaction;
@@ -59,6 +62,15 @@ public class BkOper extends AppOper
       }
       storage().read(f);
       RuleManager.SHARED_INSTANCE.applyRulesToAllTransactions();
+    }
+
+    if (nonEmpty(config().closeAccounts())) {
+      try {
+        closeAccounts(config().closeAccounts());
+      } catch (Throwable t) {
+        setError(t);
+      }
+      return;
     }
 
     var mgr = winMgr();
@@ -201,4 +213,38 @@ public class BkOper extends AppOper
   private BkConfig mConfig;
   private AccountList mAccounts;
 
+  private static final boolean DBK = alert("debugging backup operation");
+
+  // ------------------------------------------------------------------
+  // Close accounts
+  // ------------------------------------------------------------------
+  private void closeAccounts(String dateExpr) {
+
+    var dbName = Files.basename(storage().file());
+
+    var res = DATE_VALIDATOR.validate(dateExpr);
+    var lastDateSec = res.typedValue();
+    pr("close accounts;", lastDateSec, dateExpr);
+    var x = DATE_VALIDATOR.encode(lastDateSec).replace('/', '_');
+    pr("encoded:", x);
+
+    // Make a backup of the database and rules
+    {
+      var backupDir = new File("backup_close_" + dbName + "_" + x);
+
+      if (DBK)
+        files().deleteDirectory(backupDir, "backup_close");
+
+      Files.assertDoesNotExist(backupDir, "create backup directory");
+      files().mkdirs(backupDir);
+
+      List<File> src = arrayList();
+      src.add(storage().file());
+      src.add(storage().rulesFile());
+      for (var f : src) {
+        var target = new File(backupDir, f.getName());
+        files().copyFile(f, target, true);
+      }
+    }
+  }
 }

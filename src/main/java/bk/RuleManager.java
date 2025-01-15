@@ -375,16 +375,9 @@ public class RuleManager extends BaseObject {
   }
 
   private File file() {
-    if (mFile == null) {
-      var sf = storage().file();
-      mFile = new File(Files.removeExtension(sf) + ".rules.json");
-      if (verbose())
-        log("set file to:", INDENT, Files.infoMap(mFile));
-    }
-    return mFile;
+    return storage().rulesFile();
   }
 
-  private File mFile;
   private Rules mRules;
   private Transaction mParent;
   private int mTriggerAccountNumber;

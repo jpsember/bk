@@ -20,4 +20,6 @@ fields {
   bool apply_hint_to_transaction;
 
   bool generate_test_data;
+
+  string close_accounts;  // close accounts for this as the last date, eg. "2024/12/31"
 }

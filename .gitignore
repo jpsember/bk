@@ -35,3 +35,5 @@ tvl.*
 bk_log.txt
 bk-args.json
 jeff_books.*
+
+backup_close_*

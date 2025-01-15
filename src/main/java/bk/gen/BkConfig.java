@@ -31,6 +31,10 @@ public class BkConfig implements AbstractData {
     return mGenerateTestData;
   }
 
+  public String closeAccounts() {
+    return mCloseAccounts;
+  }
+
   @Override
   public Builder toBuilder() {
     return new Builder(this);
@@ -42,6 +46,7 @@ public class BkConfig implements AbstractData {
   protected static final String _3 = "print_pdf";
   protected static final String _4 = "apply_hint_to_transaction";
   protected static final String _5 = "generate_test_data";
+  protected static final String _6 = "close_accounts";
 
   @Override
   public String toString() {
@@ -57,6 +62,7 @@ public class BkConfig implements AbstractData {
     m.putUnsafe(_3, mPrintPdf);
     m.putUnsafe(_4, mApplyHintToTransaction);
     m.putUnsafe(_5, mGenerateTestData);
+    m.putUnsafe(_6, mCloseAccounts);
     return m;
   }
 
@@ -89,6 +95,7 @@ public class BkConfig implements AbstractData {
     mPrintPdf = m.opt(_3, false);
     mApplyHintToTransaction = m.opt(_4, false);
     mGenerateTestData = m.opt(_5, false);
+    mCloseAccounts = m.opt(_6, "");
   }
 
   public static Builder newBuilder() {
@@ -116,6 +123,8 @@ public class BkConfig implements AbstractData {
       return false;
     if (!(mGenerateTestData == other.mGenerateTestData))
       return false;
+    if (!(mCloseAccounts.equals(other.mCloseAccounts)))
+      return false;
     return true;
   }
 
@@ -130,6 +139,7 @@ public class BkConfig implements AbstractData {
       r = r * 37 + (mPrintPdf ? 1 : 0);
       r = r * 37 + (mApplyHintToTransaction ? 1 : 0);
       r = r * 37 + (mGenerateTestData ? 1 : 0);
+      r = r * 37 + mCloseAccounts.hashCode();
       m__hashcode = r;
     }
     return r;
@@ -141,6 +151,7 @@ public class BkConfig implements AbstractData {
   protected boolean mPrintPdf;
   protected boolean mApplyHintToTransaction;
   protected boolean mGenerateTestData;
+  protected String mCloseAccounts;
   protected int m__hashcode;
 
   public static final class Builder extends BkConfig {
@@ -152,6 +163,7 @@ public class BkConfig implements AbstractData {
       mPrintPdf = m.mPrintPdf;
       mApplyHintToTransaction = m.mApplyHintToTransaction;
       mGenerateTestData = m.mGenerateTestData;
+      mCloseAccounts = m.mCloseAccounts;
     }
 
     @Override
@@ -174,6 +186,7 @@ public class BkConfig implements AbstractData {
       r.mPrintPdf = mPrintPdf;
       r.mApplyHintToTransaction = mApplyHintToTransaction;
       r.mGenerateTestData = mGenerateTestData;
+      r.mCloseAccounts = mCloseAccounts;
       return r;
     }
 
@@ -207,6 +220,11 @@ public class BkConfig implements AbstractData {
       return this;
     }
 
+    public Builder closeAccounts(String x) {
+      mCloseAccounts = (x == null) ? "" : x;
+      return this;
+    }
+
   }
 
   private static final File _D1 = new File("database.json");
@@ -216,6 +234,7 @@ public class BkConfig implements AbstractData {
   private BkConfig() {
     mDatabase = _D1;
     mLogFile = Files.DEFAULT;
+    mCloseAccounts = "";
   }
 
 }
