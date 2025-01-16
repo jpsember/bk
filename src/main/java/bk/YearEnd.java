@@ -5,6 +5,7 @@ import static js.base.Tools.*;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 import bk.gen.Account;
 import bk.gen.Transaction;
@@ -89,8 +90,28 @@ public class YearEnd extends BaseObject {
       zeroAccount(account(ACCT_INCOME_SUMMARY), ACCT_EQUITY);
     }
 
+    // Construct list of transactions occurring after closing date, to be added to the new database
+    List<Transaction> pushed = arrayList();
+    for (var t : storage().readAllTransactions()) {
+      // Don't include generated transactions
+      if (t.parent() != 0L)
+        continue;
+      if (t.date() <= mClosingDate)
+        continue;
+      pushed.add(t);
+    }
+
+    // Remove these pushed transactions from the (old year's) database
+    for (var t : pushed) {
+      storage().deleteTransaction(t);
+    }
+
+    // Construct a new database
+    // ...not done yet...
     // Persist any changes
     storage().flush();
+
+    // 
   }
 
   private Files files() {
@@ -100,16 +121,8 @@ public class YearEnd extends BaseObject {
   /**
    * Add up transactions through closing date, and generate a transaction to
    * close the balance to zero as of that date.
-   * 
-   * Returns list of transactions that are past the closing date
-   * 
-   * @param sourceAccount
-   * @param targetAccount
-   * @return
    */
-  private List<Transaction> zeroAccount(Account sourceAccount, int targetAccount) {
-
-    List<Transaction> pushedTrans = arrayList();
+  private void zeroAccount(Account sourceAccount, int targetAccount) {
 
     // Calculate balance through closing date
     long balanceAsOfCloseDate = 0;
@@ -121,16 +134,12 @@ public class YearEnd extends BaseObject {
             balanceAsOfCloseDate += t.amount();
           else
             balanceAsOfCloseDate -= t.amount();
-        } else {
-          // add transaction to list to be pushed to next year.
-          // Don't do this if it's a generated transaction...
-          if (t.parent() == 0L)
-            pushedTrans.add(t);
         }
       }
     }
 
     if (balanceAsOfCloseDate != 0) {
+      mOpeningBalances.put(sourceAccount.number(), balanceAsOfCloseDate);
       var tr = Transaction.newBuilder();
       tr.timestamp(mClosingTimestamp);
       mClosingTimestamp++;
@@ -148,10 +157,10 @@ public class YearEnd extends BaseObject {
       pr("...adding transaction:", tr);
       storage().addOrReplace(tr);
     }
-    return pushedTrans;
   }
 
   private long mClosingDate;
   private long mClosingTimestamp;
+  private Map<Integer, Long> mOpeningBalances = hashMap();
 
 }
