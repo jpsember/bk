@@ -1,5 +1,6 @@
 package bk;
 
+import static bk.Util.*;
 import static js.base.Tools.*;
 
 import java.time.Instant;
@@ -46,6 +47,8 @@ public final class Util {
   public static final int ACCT_EQUITY = 3000;
   public static final int ACCT_INCOME = 4000;
   public static final int ACCT_EXPENSE = 5000;
+
+  public static final int ACCT_INCOME_SUMMARY = ACCT_INCOME + 999;
 
   public final static void loadUtil() {
   }

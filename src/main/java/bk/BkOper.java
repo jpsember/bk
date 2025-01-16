@@ -9,6 +9,7 @@ import java.util.List;
 import bk.gen.Account;
 import bk.gen.BkConfig;
 import bk.gen.Transaction;
+import bk.gen.UndoState;
 import js.app.AppOper;
 import js.app.HelpFormatter;
 import js.base.BasePrinter;
@@ -223,10 +224,20 @@ public class BkOper extends AppOper
     var dbName = Files.basename(storage().file());
 
     var res = DATE_VALIDATOR.validate(dateExpr);
-    var lastDateSec = res.typedValue();
+    long lastDateSec = res.typedValue();
     pr("close accounts;", lastDateSec, dateExpr);
     var x = DATE_VALIDATOR.encode(lastDateSec).replace('/', '_');
     pr("encoded:", x);
+
+ 
+    // Verify that there's not already an income summary account
+    var incSumAcct = account(ACCT_INCOME_SUMMARY);
+    if (incSumAcct != null) {
+      if (DBK) {
+        storage().deleteAccount(ACCT_INCOME_SUMMARY);
+      } else
+        badState("Account already exists:", INDENT, incSumAcct);
+    }
 
     // Make a backup of the database and rules
     {
@@ -246,5 +257,70 @@ public class BkOper extends AppOper
         files().copyFile(f, target, true);
       }
     }
+
+    
+    RuleManager.SHARED_INSTANCE.pushDisable(true);
+    
+    // Create an income summary account
+
+    long timestamp = System.currentTimeMillis();
+
+//    UndoManager.SHARED_INSTANCE.pushState(UndoState.INACTIVE);
+    {
+      incSumAcct = Account.newBuilder().name("Income Summary").number(ACCT_INCOME_SUMMARY);
+      storage().addOrReplace(incSumAcct);
+      for (var a : storage().readAllAccounts()) {
+        if (a.balance() == 0)
+          continue;
+        pr("examining:", INDENT, a);
+
+        // Process revenues
+        if (a.number() >= ACCT_INCOME && a.number() < ACCT_INCOME + 1000
+            && a.number() != incSumAcct.number()) {
+          var tr = Transaction.newBuilder();
+
+          tr.timestamp(timestamp);
+          timestamp++;
+          tr.date(lastDateSec);
+
+          tr.debit(incSumAcct.number()).credit(incSumAcct.number());
+          if (a.balance() > 0) {
+            tr.amount(a.balance());
+            tr.credit(a.number());
+          } else {
+            tr.amount(-a.balance());
+            tr.debit(a.number());
+          }
+          pr("...adding transaction:", tr);
+          storage().addOrReplace(tr);
+        }
+
+        // Process revenues
+        if (a.number() >= ACCT_EXPENSE && a.number() < ACCT_EXPENSE + 1000) {
+          var tr = Transaction.newBuilder();
+
+          tr.timestamp(timestamp);
+          timestamp++;
+          tr.date(lastDateSec);
+
+          tr.debit(incSumAcct.number()).credit(incSumAcct.number());
+          if (a.balance() > 0) {
+            tr.amount(a.balance());
+            tr.credit(a.number());
+          } else {
+            tr.amount(-a.balance());
+            tr.debit(a.number());
+          }
+          pr("...adding transaction:", tr);
+          storage().addOrReplace(tr);
+        }
+
+      }
+      storage().flush();
+    }
+//    UndoManager.SHARED_INSTANCE.popState();
+    
+    RuleManager.SHARED_INSTANCE.popDisable();
+    
   }
 }

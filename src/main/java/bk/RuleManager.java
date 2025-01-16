@@ -59,11 +59,17 @@ public class RuleManager extends BaseObject {
   }
 
   public Transaction applyRules(Transaction t) {
+    pr("...apply rules to; disabled:", mDisabled, INDENT, t);
     if (mDisabled)
       return t;
     // If this is a generated transaction, don't apply any rules
     if (t.parent() != 0)
       return t;
+
+    // If this transaction involves year end closing, don't apply any rules
+    if (isClosingAcct(t.debit()) || isClosingAcct(t.credit()))
+      return t;
+
     checkState(t.children().length == 0, "attempt to apply rules to a transaction that already has children");
 
     mParent = t;
@@ -89,6 +95,10 @@ public class RuleManager extends BaseObject {
       t = b.build();
     }
     return t;
+  }
+
+  private boolean isClosingAcct(int anum) {
+    return anum == ACCT_EQUITY || anum == ACCT_INCOME_SUMMARY;
   }
 
   private static final boolean intWithinArray(int[] array, int value) {
@@ -131,6 +141,7 @@ public class RuleManager extends BaseObject {
   }
 
   private void applyRule(Rule rule) {
+    pr("............. applying rule:", INDENT, rule);
     switch (rule.action()) {
     case TRANSFER:
       performTransfer(rule);
@@ -377,6 +388,17 @@ public class RuleManager extends BaseObject {
   private File file() {
     return storage().rulesFile();
   }
+
+  public void pushDisable(boolean d) {
+    push(mDisStack, mDisabled);
+    mDisabled = d;
+  }
+
+  public void popDisable() {
+    mDisabled = pop(mDisStack);
+  }
+
+  private List<Boolean> mDisStack = arrayList();
 
   private Rules mRules;
   private Transaction mParent;

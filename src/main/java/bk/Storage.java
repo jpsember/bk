@@ -31,7 +31,6 @@ public class Storage extends BaseObject {
 
     if (bkConfig().generateTestData())
       generateTestData();
-
   }
 
   private void generateTestData() {
@@ -45,7 +44,7 @@ public class Storage extends BaseObject {
 
       final int MOCK_ACCOUNTS_START = 3900;
 
-      if (false && alert("deleting all mock accounts")) {
+      if (true && alert("deleting all mock accounts")) {
         for (var i = MOCK_ACCOUNTS_START; i < 3999; i++) {
           var ac = account(i);
           if (ac == null)
@@ -55,6 +54,9 @@ public class Storage extends BaseObject {
       }
 
       int[] acctIds = new int[50];
+      if (alert("not adding any"))
+        acctIds = new int[0];
+
       for (int i = 0; i < acctIds.length; i++) {
         var a = Account.newBuilder();
         a.number(MOCK_ACCOUNTS_START + i);
