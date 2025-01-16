@@ -298,18 +298,34 @@ public class BkOper extends AppOper
   }
 
   private void zeroAccount(Account a, int targetAccount) {
+    // Calculate balance through closing date
+    long balanceAsOfCloseDate = 0;
+    {
+      var trs = storage().readTransactionsForAccount(a.number());
+      for (var t : trs) {
+        if (t.date() <= mClosingDate) {
+          if (t.debit() == a.number())
+            balanceAsOfCloseDate += t.amount();
+          else
+            balanceAsOfCloseDate -= t.amount();
+        }
+      }
+    }
+    if (balanceAsOfCloseDate == 0)
+      return;
+
     var tr = Transaction.newBuilder();
 
     tr.timestamp(mClosingTimestamp);
     mClosingTimestamp++;
     tr.date(mClosingDate);
 
-    if (a.balance() > 0) {
-      tr.amount(a.balance());
+    if (balanceAsOfCloseDate > 0) {
+      tr.amount(balanceAsOfCloseDate);
       tr.debit(targetAccount);
       tr.credit(a.number());
     } else {
-      tr.amount(-a.balance());
+      tr.amount(-balanceAsOfCloseDate);
       tr.debit(a.number());
       tr.credit(targetAccount);
     }
