@@ -131,9 +131,13 @@ public class Storage extends BaseObject {
     return mFile;
   }
 
+  public static File rulesFile(File databaseFile) {
+    return new File(Files.removeExtension(databaseFile) + ".rules.json");
+  }
+
   public File rulesFile() {
     if (mRulesFile == null) {
-      mRulesFile = new File(Files.removeExtension(file()) + ".rules.json");
+      mRulesFile = rulesFile(file());
     }
     return mRulesFile;
   }

@@ -364,6 +364,10 @@ public final class Util {
     return sStorage;
   }
 
+  public static void discardStorage() {
+    sStorage = null;
+  }
+  
   public static boolean accountExists(int number) {
     return account(number) != null;
   }

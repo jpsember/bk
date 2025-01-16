@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import bk.gen.Account;
+import bk.gen.Database;
 import bk.gen.Transaction;
 import js.base.BaseObject;
 import js.file.Files;
@@ -90,6 +91,26 @@ public class YearEnd extends BaseObject {
       zeroAccount(account(ACCT_INCOME_SUMMARY), ACCT_EQUITY);
     }
 
+    // Determine opening balances for ASSETS, LIABILITIES, EQUITY accounts
+    for (var a : storage().readAllAccounts()) {
+      var at = a.number() - (a.number() % 1000);
+
+      if (at == ACCT_ASSET || at == ACCT_LIABILITY || at == ACCT_EQUITY) {
+        var tr = storage().readTransactionsForAccount(a.number());
+        long bal = 0;
+        for (var t : tr) {
+          if (t.date() <= mClosingDate) {
+            bal += Util.signedAmount(t, a.number());
+          }
+        }
+        if (bal != 0) {
+          mOpeningBalances.put(a.number(), bal);
+        }
+      }
+    }
+
+    log("opening balances:", INDENT, mOpeningBalances);
+
     // Construct list of transactions occurring after closing date, to be added to the new database
     List<Transaction> pushed = arrayList();
     for (var t : storage().readAllTransactions()) {
@@ -106,12 +127,39 @@ public class YearEnd extends BaseObject {
       storage().deleteTransaction(t);
     }
 
+    var allAcounts = storage().readAllAccounts();
+
     // Construct a new database
     // ...not done yet...
+
     // Persist any changes
     storage().flush();
 
-    // 
+    // Determine filename for previous year's database
+    {
+      var f = storage().file();
+      var s = Files.removeExtension(f.toString()) + "_" + x.substring(0, 4) + "." + Files.EXT_JSON;
+      var fPrev = new File(s);
+      var fPrevRules = Storage.rulesFile(fPrev);
+
+      if (DBK) {
+        files().deletePeacefully(fPrev);
+        files().deletePeacefully(fPrevRules);
+      }
+
+      Files.assertDoesNotExist(fPrev, "previous year database");
+      Files.assertDoesNotExist(fPrevRules, "previous year rules");
+      files().moveFile(f, fPrev);
+      files().copyFile(storage().rulesFile(), fPrevRules);
+    }
+
+    // Discard the existing storage object, and replace with an empty one
+    var f = storage().file();
+    discardStorage();
+    files().write(f, Database.newBuilder());
+    storage().read(f);
+
+    todo("write accounts, overflow trans");
   }
 
   private Files files() {
@@ -139,7 +187,7 @@ public class YearEnd extends BaseObject {
     }
 
     if (balanceAsOfCloseDate != 0) {
-      mOpeningBalances.put(sourceAccount.number(), balanceAsOfCloseDate);
+      // mOpeningBalances.put(sourceAccount.number(), balanceAsOfCloseDate);
       var tr = Transaction.newBuilder();
       tr.timestamp(mClosingTimestamp);
       mClosingTimestamp++;
