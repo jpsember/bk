@@ -234,18 +234,22 @@ public class BkOper extends AppOper
     // Verify that there's not already an income summary account
     {
       var zincSumAcct = account(ACCT_INCOME_SUMMARY);
-      if (zincSumAcct != null) {
-        if (DBK) {
-          storage().deleteAccount(ACCT_INCOME_SUMMARY);
-        } else
-          badState("Account already exists:", INDENT, zincSumAcct);
-      }
+      if (zincSumAcct != null)
+        badState("Account already exists:", INDENT, zincSumAcct);
     }
 
     // Make a backup of the database and rules
-    {
-      var backupDir = new File("backup_close_" + dbName + "_" + x);
 
+    var backupDir = new File("backup_close_" + dbName + "_" + x);
+
+    boolean makeBackup = true;
+
+    // Debug mode : If there's already a backup directory, DON'T make a backup; assume the old one is still valid
+    if (DBK && backupDir.exists()) {
+      makeBackup = false;
+    }
+
+    if (makeBackup) {
       if (DBK)
         files().deleteDirectory(backupDir, "backup_close");
 
