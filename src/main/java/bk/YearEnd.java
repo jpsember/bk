@@ -20,12 +20,16 @@ public class YearEnd extends BaseObject {
   public void close(long closeTimestampSeconds) {
     alertVerbose();
 
-    mClosingDate = closeTimestampSeconds;
-    mClosingTimestamp = System.currentTimeMillis();
+    mUniqueTransactionTimestamp = System.currentTimeMillis();
 
-    var dbName = Files.basename(storage().file());
+    mClosingDate = closeTimestampSeconds;
+    mOpeningDate = closeTimestampSeconds + 24 * 3600;
+    var openDateExpr = DATE_VALIDATOR.encode(mOpeningDate);
     var closeDateExpr = DATE_VALIDATOR.encode(mClosingDate);
-    log("close accounts;", mClosingDate, "expr:", closeDateExpr);
+
+    log("close accounts; seconds:", mClosingDate, "close:", closeDateExpr, "open:", openDateExpr);
+    checkState(!openDateExpr.equals(closeDateExpr), "close sec:", closeTimestampSeconds, "open:",
+        mOpeningDate, "expr:", openDateExpr);
     var x = closeDateExpr.replace('/', '_');
     log("encoded:", x);
 
@@ -37,7 +41,7 @@ public class YearEnd extends BaseObject {
     }
 
     // Make a backup of the database and rules
-
+    var dbName = Files.basename(storage().file());
     var backupDir = new File("backup_close_" + dbName + "_" + x);
 
     boolean makeBackup = true;
@@ -159,7 +163,42 @@ public class YearEnd extends BaseObject {
     files().write(f, Database.newBuilder());
     storage().read(f);
 
-    todo("write accounts, overflow trans");
+    for (var a : allAcounts) {
+      // Don't write income summary
+      if (a.number() == ACCT_INCOME_SUMMARY)
+        continue;
+      a = a.toBuilder().balance(0);
+      storage().addOrReplace(a);
+    }
+
+    for (var ent : mOpeningBalances.entrySet()) {
+      int anum = ent.getKey();
+      if (anum == ACCT_EQUITY)
+        continue;
+      var tr = Transaction.newBuilder();
+      tr.timestamp(mUniqueTransactionTimestamp++);
+      tr.date(mOpeningDate);
+      long bal = ent.getValue();
+      if (bal > 0) {
+        tr.amount(bal);
+        tr.debit(anum);
+        tr.credit(ACCT_EQUITY);
+      } else {
+        tr.amount(-bal);
+        tr.debit(ACCT_EQUITY);
+        tr.credit(anum);
+      }
+      tr.description("Open");
+      log("adding opening trans:", INDENT, tr);
+      storage().addOrReplace(tr);
+    }
+
+    for (var tr : pushed) {
+      tr = tr.toBuilder().children(null);
+      log("adding push trans:", INDENT, tr);
+      storage().addOrReplace(tr);
+    }
+    storage().flush();
   }
 
   private Files files() {
@@ -189,8 +228,7 @@ public class YearEnd extends BaseObject {
     if (balanceAsOfCloseDate != 0) {
       // mOpeningBalances.put(sourceAccount.number(), balanceAsOfCloseDate);
       var tr = Transaction.newBuilder();
-      tr.timestamp(mClosingTimestamp);
-      mClosingTimestamp++;
+      tr.timestamp(mUniqueTransactionTimestamp++);
       tr.date(mClosingDate);
 
       if (balanceAsOfCloseDate > 0) {
@@ -208,7 +246,8 @@ public class YearEnd extends BaseObject {
   }
 
   private long mClosingDate;
-  private long mClosingTimestamp;
+  private long mUniqueTransactionTimestamp;
+  private long mOpeningDate;
   private Map<Integer, Long> mOpeningBalances = hashMap();
 
 }
