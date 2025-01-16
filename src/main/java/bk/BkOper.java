@@ -261,8 +261,6 @@ public class BkOper extends AppOper
       }
     }
 
-    RuleManager.SHARED_INSTANCE.pushDisable(true);
-
     // Create an income summary account
 
     {
@@ -286,8 +284,6 @@ public class BkOper extends AppOper
       }
       storage().flush();
     }
-
-    RuleManager.SHARED_INSTANCE.popDisable();
 
   }
 

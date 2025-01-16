@@ -389,19 +389,6 @@ public class RuleManager extends BaseObject {
     return storage().rulesFile();
   }
 
-  @Deprecated
-  public void pushDisable(boolean d) {
-    push(mDisStack, mDisabled);
-    mDisabled = d;
-  }
-
-  @Deprecated
-  public void popDisable() {
-    mDisabled = pop(mDisStack);
-  }
-
-  private List<Boolean> mDisStack = arrayList();
-
   private Rules mRules;
   private Transaction mParent;
   private int mTriggerAccountNumber;
