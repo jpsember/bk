@@ -23,6 +23,8 @@ public class YearEnd extends BaseObject {
 
     backupExistingDatabase();
 
+    mRetainedEarningsAccount = createRetainedEarningsAccountIfNec();
+
     closeAccountsToIncomeSummary();
 
     // Determine opening balances for ASSETS, LIABILITIES, EQUITY accounts
@@ -102,9 +104,10 @@ public class YearEnd extends BaseObject {
       storage().addOrReplace(a);
     }
 
+    int retEarn = mRetainedEarningsAccount;
     for (var ent : mOpeningBalances.entrySet()) {
       int anum = ent.getKey();
-      if (anum == ACCT_EQUITY)
+      if (anum == retEarn)
         continue;
       var tr = newTransaction();
       tr.date(mOpeningDate);
@@ -112,10 +115,10 @@ public class YearEnd extends BaseObject {
       if (bal > 0) {
         tr.amount(bal);
         tr.debit(anum);
-        tr.credit(ACCT_EQUITY);
+        tr.credit(retEarn);
       } else {
         tr.amount(-bal);
-        tr.debit(ACCT_EQUITY);
+        tr.debit(retEarn);
         tr.credit(anum);
       }
       tr.description("Open");
@@ -178,9 +181,6 @@ public class YearEnd extends BaseObject {
 
   private void closeAccountsToIncomeSummary() {
 
-    var equityAccount = account(ACCT_EQUITY);
-    checkState(equityAccount != null, "No equity account found:", ACCT_EQUITY);
-
     // Create an income summary account
 
     // Verify that there's not already an income summary account
@@ -207,7 +207,18 @@ public class YearEnd extends BaseObject {
     }
 
     // Close income summary account to equity
-    zeroAccount(account(ACCT_INCOME_SUMMARY), ACCT_EQUITY);
+    zeroAccount(account(ACCT_INCOME_SUMMARY), mRetainedEarningsAccount);
+  }
+
+  private int createRetainedEarningsAccountIfNec() {
+    var num = ACCT_EQUITY;
+
+    var a = account(num);
+    if (a == null) {
+      a = Account.newBuilder().number(num).name("Retained Earnings");
+      storage().addOrReplace(a);
+    }
+    return a.number();
   }
 
   /**
@@ -253,6 +264,7 @@ public class YearEnd extends BaseObject {
     return tr;
   }
 
+  private int mRetainedEarningsAccount;
   private long mClosingDate;
   private long mUniqueTransactionTimestamp = System.currentTimeMillis();
   private long mOpeningDate;
