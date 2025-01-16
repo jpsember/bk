@@ -20,84 +20,15 @@ public class YearEnd extends BaseObject {
   public void close(long closeTimestampSeconds) {
     alertVerbose();
 
-    mUniqueTransactionTimestamp = System.currentTimeMillis();
+    calculateTimeDateExpressions(closeTimestampSeconds);
 
-    mClosingDate = closeTimestampSeconds;
-    mOpeningDate = closeTimestampSeconds + 24 * 3600;
-    var openDateExpr = DATE_VALIDATOR.encode(mOpeningDate);
-    var closeDateExpr = DATE_VALIDATOR.encode(mClosingDate);
+    backupExistingDatabase();
 
-    log("close accounts; seconds:", mClosingDate, "close:", closeDateExpr, "open:", openDateExpr);
-    checkState(!openDateExpr.equals(closeDateExpr), "close sec:", closeTimestampSeconds, "open:",
-        mOpeningDate, "expr:", openDateExpr);
-    var x = closeDateExpr.replace('/', '_');
-    log("encoded:", x);
-
-    // Verify that there's not already an income summary account
-    {
-      var zincSumAcct = account(ACCT_INCOME_SUMMARY);
-      if (zincSumAcct != null)
-        badState("Account already exists:", INDENT, zincSumAcct);
-    }
-
-    // Make a backup of the database and rules
-    var dbName = Files.basename(storage().file());
-    var backupDir = new File("backup_close_" + dbName + "_" + x);
-
-    boolean makeBackup = true;
-
-    // Debug mode : If there's already a backup directory, DON'T make a backup; assume the old one is still valid
-    if (DBK && backupDir.exists()) {
-      makeBackup = false;
-    }
-
-    if (makeBackup) {
-      if (DBK)
-        files().deleteDirectory(backupDir, "backup_close");
-
-      Files.assertDoesNotExist(backupDir, "create backup directory");
-      files().mkdirs(backupDir);
-
-      List<File> src = arrayList();
-      src.add(storage().file());
-      src.add(storage().rulesFile());
-      for (var f : src) {
-        var target = new File(backupDir, f.getName());
-        files().copyFile(f, target, true);
-      }
-    }
-
-    // Create an income summary account
-
-    {
-      var incomeSummaryAccount = Account.newBuilder().name("Income Summary").number(ACCT_INCOME_SUMMARY);
-      storage().addOrReplace(incomeSummaryAccount);
-      for (var a : storage().readAllAccounts()) {
-        if (a.balance() == 0)
-          continue;
-
-        // Process revenues
-        if (a.number() >= ACCT_INCOME && a.number() < ACCT_INCOME + 1000
-            && a.number() != incomeSummaryAccount.number()) {
-          zeroAccount(a, ACCT_INCOME_SUMMARY);
-        }
-
-        // Process expenses
-        if (a.number() >= ACCT_EXPENSE && a.number() < ACCT_EXPENSE + 1000) {
-          zeroAccount(a, ACCT_INCOME_SUMMARY);
-        }
-
-      }
-    }
-
-    // Close income summary account to equity
-    {
-      zeroAccount(account(ACCT_INCOME_SUMMARY), ACCT_EQUITY);
-    }
+    closeAccountsToIncomeSummary();
 
     // Determine opening balances for ASSETS, LIABILITIES, EQUITY accounts
     for (var a : storage().readAllAccounts()) {
-      var at = a.number() - (a.number() % 1000);
+      var at = accountClass(a.number());
 
       if (at == ACCT_ASSET || at == ACCT_LIABILITY || at == ACCT_EQUITY) {
         var tr = storage().readTransactionsForAccount(a.number());
@@ -142,7 +73,8 @@ public class YearEnd extends BaseObject {
     // Determine filename for previous year's database
     {
       var f = storage().file();
-      var s = Files.removeExtension(f.toString()) + "_" + x.substring(0, 4) + "." + Files.EXT_JSON;
+      var s = Files.removeExtension(f.toString()) + "_" + mCloseDateFilenameExpr.substring(0, 4) + "."
+          + Files.EXT_JSON;
       var fPrev = new File(s);
       var fPrevRules = Storage.rulesFile(fPrev);
 
@@ -175,8 +107,7 @@ public class YearEnd extends BaseObject {
       int anum = ent.getKey();
       if (anum == ACCT_EQUITY)
         continue;
-      var tr = Transaction.newBuilder();
-      tr.timestamp(mUniqueTransactionTimestamp++);
+      var tr = newTransaction();
       tr.date(mOpeningDate);
       long bal = ent.getValue();
       if (bal > 0) {
@@ -205,6 +136,81 @@ public class YearEnd extends BaseObject {
     return Files.S;
   }
 
+  private void calculateTimeDateExpressions(long closeTimestampSeconds) {
+    mClosingDate = closeTimestampSeconds;
+    mOpeningDate = closeTimestampSeconds + 24 * 3600;
+    var openDateExpr = DATE_VALIDATOR.encode(mOpeningDate);
+    var closeDateExpr = DATE_VALIDATOR.encode(mClosingDate);
+
+    log("close accounts; seconds:", mClosingDate, "close:", closeDateExpr, "open:", openDateExpr);
+    checkState(!openDateExpr.equals(closeDateExpr), "close sec:", closeTimestampSeconds, "open:",
+        mOpeningDate, "expr:", openDateExpr);
+    mCloseDateFilenameExpr = closeDateExpr.replace('/', '_');
+  }
+
+  /**
+   * Make a backup of the database and rule files
+   */
+  private void backupExistingDatabase() {
+
+    var dbName = Files.basename(storage().file());
+    var backupDir = new File("backup_close_" + dbName + "_" + mCloseDateFilenameExpr);
+
+    // Debug mode : If there's already a backup directory, DON'T make a backup; assume the old one is still valid
+    if (DBK && backupDir.exists())
+      return;
+
+    Files.assertDoesNotExist(backupDir, "create backup directory");
+    files().mkdirs(backupDir);
+
+    List<File> src = arrayList();
+    src.add(storage().file());
+    src.add(storage().rulesFile());
+    for (var f : src) {
+      var target = new File(backupDir, f.getName());
+      files().copyFile(f, target, true);
+    }
+  }
+
+  /**
+   * Transfer balances from revenue and expense accounts to an income summary
+   * account, then transfer that account's balance to the equity account
+   */
+
+  private void closeAccountsToIncomeSummary() {
+
+    var equityAccount = account(ACCT_EQUITY);
+    checkState(equityAccount != null, "No equity account found:", ACCT_EQUITY);
+
+    // Create an income summary account
+
+    // Verify that there's not already an income summary account
+    var incomeSummaryAccount = account(ACCT_INCOME_SUMMARY);
+    if (incomeSummaryAccount != null)
+      badState("Account already exists:", INDENT, incomeSummaryAccount);
+
+    incomeSummaryAccount = Account.newBuilder().name("Income Summary").number(ACCT_INCOME_SUMMARY);
+    storage().addOrReplace(incomeSummaryAccount);
+
+    for (var a : storage().readAllAccounts()) {
+      if (a.balance() == 0)
+        continue;
+
+      var ac = accountClass(a.number());
+
+      // Process revenues
+      if (ac == ACCT_INCOME && a.number() != incomeSummaryAccount.number())
+        zeroAccount(a, ACCT_INCOME_SUMMARY);
+
+      // Process expenses
+      if (ac == ACCT_EXPENSE)
+        zeroAccount(a, ACCT_INCOME_SUMMARY);
+    }
+
+    // Close income summary account to equity
+    zeroAccount(account(ACCT_INCOME_SUMMARY), ACCT_EQUITY);
+  }
+
   /**
    * Add up transactions through closing date, and generate a transaction to
    * close the balance to zero as of that date.
@@ -226,9 +232,7 @@ public class YearEnd extends BaseObject {
     }
 
     if (balanceAsOfCloseDate != 0) {
-      // mOpeningBalances.put(sourceAccount.number(), balanceAsOfCloseDate);
-      var tr = Transaction.newBuilder();
-      tr.timestamp(mUniqueTransactionTimestamp++);
+      var tr = newTransaction();
       tr.date(mClosingDate);
 
       if (balanceAsOfCloseDate > 0) {
@@ -240,14 +244,19 @@ public class YearEnd extends BaseObject {
         tr.debit(sourceAccount.number());
         tr.credit(targetAccount);
       }
-      pr("...adding transaction:", tr);
       storage().addOrReplace(tr);
     }
   }
 
+  private Transaction.Builder newTransaction() {
+    var tr = Transaction.newBuilder();
+    tr.timestamp(mUniqueTransactionTimestamp++);
+    return tr;
+  }
+
   private long mClosingDate;
-  private long mUniqueTransactionTimestamp;
+  private long mUniqueTransactionTimestamp = System.currentTimeMillis();
   private long mOpeningDate;
   private Map<Integer, Long> mOpeningBalances = hashMap();
-
+  private String mCloseDateFilenameExpr;
 }

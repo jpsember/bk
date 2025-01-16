@@ -367,7 +367,7 @@ public final class Util {
   public static void discardStorage() {
     sStorage = null;
   }
-  
+
   public static boolean accountExists(int number) {
     return account(number) != null;
   }
@@ -787,6 +787,10 @@ public final class Util {
 
   public static long unspentBudget(Account a) {
     return a.budget() - spentBudget(a);
+  }
+
+  public static int accountClass(int accountNumber) {
+    return accountNumber - accountNumber % 1000;
   }
 
   //------------------------------------------------------------------
