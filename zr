@@ -1,1 +1,8 @@
-cp backup_close_database_2024_12_31/database.json example
+cp _SKIP_pre_close_backup.json example/database.json
+
+BKUP=backup_close_database_2024_12_31
+
+if [ -d "$BKUP" ]; then rm -Rf $BKUP; fi
+
+rm -Rf example/database_2024.*
+

@@ -15,10 +15,9 @@ import js.file.Files;
 
 public class YearEnd extends BaseObject {
 
-  private static final boolean DBK = alert("debugging backup operation");
+  private static final boolean DBK = false && alert("debugging backup operation");
 
   public void close(long closeTimestampSeconds) {
-    alertVerbose();
 
     calculateTimeDateExpressions(closeTimestampSeconds);
 
