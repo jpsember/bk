@@ -9,7 +9,6 @@ import java.util.List;
 import bk.gen.Account;
 import bk.gen.BkConfig;
 import bk.gen.Transaction;
-import bk.gen.UndoState;
 import js.app.AppOper;
 import js.app.HelpFormatter;
 import js.base.BasePrinter;
@@ -221,22 +220,26 @@ public class BkOper extends AppOper
   // ------------------------------------------------------------------
   private void closeAccounts(String dateExpr) {
 
+    mClosingTimestamp = System.currentTimeMillis();
+
     var dbName = Files.basename(storage().file());
 
     var res = DATE_VALIDATOR.validate(dateExpr);
-    long lastDateSec = res.typedValue();
-    pr("close accounts;", lastDateSec, dateExpr);
-    var x = DATE_VALIDATOR.encode(lastDateSec).replace('/', '_');
+    mClosingDate = res.typedValue();
+
+    pr("close accounts;", mClosingDate, dateExpr);
+    var x = DATE_VALIDATOR.encode(mClosingDate).replace('/', '_');
     pr("encoded:", x);
 
- 
     // Verify that there's not already an income summary account
-    var incSumAcct = account(ACCT_INCOME_SUMMARY);
-    if (incSumAcct != null) {
-      if (DBK) {
-        storage().deleteAccount(ACCT_INCOME_SUMMARY);
-      } else
-        badState("Account already exists:", INDENT, incSumAcct);
+    {
+      var zincSumAcct = account(ACCT_INCOME_SUMMARY);
+      if (zincSumAcct != null) {
+        if (DBK) {
+          storage().deleteAccount(ACCT_INCOME_SUMMARY);
+        } else
+          badState("Account already exists:", INDENT, zincSumAcct);
+      }
     }
 
     // Make a backup of the database and rules
@@ -258,69 +261,60 @@ public class BkOper extends AppOper
       }
     }
 
-    
     RuleManager.SHARED_INSTANCE.pushDisable(true);
-    
+
     // Create an income summary account
 
-    long timestamp = System.currentTimeMillis();
-
-//    UndoManager.SHARED_INSTANCE.pushState(UndoState.INACTIVE);
     {
-      incSumAcct = Account.newBuilder().name("Income Summary").number(ACCT_INCOME_SUMMARY);
-      storage().addOrReplace(incSumAcct);
+      var incomeSummaryAccount = Account.newBuilder().name("Income Summary").number(ACCT_INCOME_SUMMARY);
+      storage().addOrReplace(incomeSummaryAccount);
       for (var a : storage().readAllAccounts()) {
         if (a.balance() == 0)
           continue;
-        pr("examining:", INDENT, a);
 
         // Process revenues
         if (a.number() >= ACCT_INCOME && a.number() < ACCT_INCOME + 1000
-            && a.number() != incSumAcct.number()) {
-          var tr = Transaction.newBuilder();
-
-          tr.timestamp(timestamp);
-          timestamp++;
-          tr.date(lastDateSec);
-
-          tr.debit(incSumAcct.number()).credit(incSumAcct.number());
-          if (a.balance() > 0) {
-            tr.amount(a.balance());
-            tr.credit(a.number());
-          } else {
-            tr.amount(-a.balance());
-            tr.debit(a.number());
-          }
-          pr("...adding transaction:", tr);
-          storage().addOrReplace(tr);
+            && a.number() != incomeSummaryAccount.number()) {
+          zeroAccount(a);
         }
 
-        // Process revenues
+        // Process expenses
         if (a.number() >= ACCT_EXPENSE && a.number() < ACCT_EXPENSE + 1000) {
-          var tr = Transaction.newBuilder();
-
-          tr.timestamp(timestamp);
-          timestamp++;
-          tr.date(lastDateSec);
-
-          tr.debit(incSumAcct.number()).credit(incSumAcct.number());
-          if (a.balance() > 0) {
-            tr.amount(a.balance());
-            tr.credit(a.number());
-          } else {
-            tr.amount(-a.balance());
-            tr.debit(a.number());
-          }
-          pr("...adding transaction:", tr);
-          storage().addOrReplace(tr);
+          zeroAccount(a);
         }
 
       }
       storage().flush();
     }
-//    UndoManager.SHARED_INSTANCE.popState();
-    
+
     RuleManager.SHARED_INSTANCE.popDisable();
-    
+
   }
+
+  private void zeroAccount(Account a) {
+    var tr = Transaction.newBuilder();
+
+    tr.timestamp(mClosingTimestamp);
+    mClosingTimestamp++;
+    tr.date(mClosingDate);
+
+    tr.debit(ACCT_INCOME_SUMMARY).credit(ACCT_INCOME_SUMMARY);
+    if (a.balance() > 0) {
+      tr.amount(a.balance());
+      tr.credit(a.number());
+    } else {
+      tr.amount(-a.balance());
+      tr.debit(a.number());
+    }
+    pr("...adding transaction:", tr);
+    storage().addOrReplace(tr);
+  }
+
+  // ------------------------------------------------------------------
+  // For closing accounts (will move to separate class later)
+  // ------------------------------------------------------------------
+
+  private long mClosingDate;
+  private long mClosingTimestamp;
+
 }

@@ -1,1 +1,1 @@
-enum { dormant, recording, undoing, redoing, inactive }
+enum { dormant, recording, undoing, redoing }

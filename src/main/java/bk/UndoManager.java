@@ -57,18 +57,6 @@ public class UndoManager extends BaseObject {
     return s;
   }
 
-  public UndoState pushState(UndoState s) {
-    mStateStack.add(mState);
-    return setState(s);
-  }
-
-  public UndoState popState() {
-    var s = pop(mStateStack);
-    return setState(s);
-  }
-
-  private List<UndoState> mStateStack = arrayList();
-
   private UndoState mState = UndoState.DORMANT;
 
   private UndoAction.Builder mAction;
