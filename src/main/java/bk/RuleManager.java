@@ -59,7 +59,6 @@ public class RuleManager extends BaseObject {
   }
 
   public Transaction applyRules(Transaction t) {
-    pr("...apply rules to; disabled:", mDisabled, INDENT, t);
     if (mDisabled)
       return t;
     // If this is a generated transaction, don't apply any rules

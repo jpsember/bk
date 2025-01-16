@@ -277,34 +277,41 @@ public class BkOper extends AppOper
         // Process revenues
         if (a.number() >= ACCT_INCOME && a.number() < ACCT_INCOME + 1000
             && a.number() != incomeSummaryAccount.number()) {
-          zeroAccount(a);
+          zeroAccount(a, ACCT_INCOME_SUMMARY);
         }
 
         // Process expenses
         if (a.number() >= ACCT_EXPENSE && a.number() < ACCT_EXPENSE + 1000) {
-          zeroAccount(a);
+          zeroAccount(a, ACCT_INCOME_SUMMARY);
         }
 
       }
-      storage().flush();
     }
 
+    // Close income summary account to equity
+    {
+      zeroAccount(account(ACCT_INCOME_SUMMARY), ACCT_EQUITY);
+    }
+
+    // Persist any changes
+    storage().flush();
   }
 
-  private void zeroAccount(Account a) {
+  private void zeroAccount(Account a, int targetAccount) {
     var tr = Transaction.newBuilder();
 
     tr.timestamp(mClosingTimestamp);
     mClosingTimestamp++;
     tr.date(mClosingDate);
 
-    tr.debit(ACCT_INCOME_SUMMARY).credit(ACCT_INCOME_SUMMARY);
     if (a.balance() > 0) {
       tr.amount(a.balance());
+      tr.debit(targetAccount);
       tr.credit(a.number());
     } else {
       tr.amount(-a.balance());
       tr.debit(a.number());
+      tr.credit(targetAccount);
     }
     pr("...adding transaction:", tr);
     storage().addOrReplace(tr);
