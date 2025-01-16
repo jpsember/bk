@@ -85,7 +85,7 @@ public class YearEnd extends BaseObject {
     }
 
     // Close income summary account to equity
-   {
+    {
       zeroAccount(account(ACCT_INCOME_SUMMARY), ACCT_EQUITY);
     }
 
@@ -97,40 +97,58 @@ public class YearEnd extends BaseObject {
     return Files.S;
   }
 
-  private void zeroAccount(Account a, int targetAccount) {
+  /**
+   * Add up transactions through closing date, and generate a transaction to
+   * close the balance to zero as of that date.
+   * 
+   * Returns list of transactions that are past the closing date
+   * 
+   * @param sourceAccount
+   * @param targetAccount
+   * @return
+   */
+  private List<Transaction> zeroAccount(Account sourceAccount, int targetAccount) {
+
+    List<Transaction> pushedTrans = arrayList();
+
     // Calculate balance through closing date
     long balanceAsOfCloseDate = 0;
     {
-      var trs = storage().readTransactionsForAccount(a.number());
+      var trs = storage().readTransactionsForAccount(sourceAccount.number());
       for (var t : trs) {
         if (t.date() <= mClosingDate) {
-          if (t.debit() == a.number())
+          if (t.debit() == sourceAccount.number())
             balanceAsOfCloseDate += t.amount();
           else
             balanceAsOfCloseDate -= t.amount();
+        } else {
+          // add transaction to list to be pushed to next year.
+          // Don't do this if it's a generated transaction...
+          if (t.parent() == 0L)
+            pushedTrans.add(t);
         }
       }
     }
-    if (balanceAsOfCloseDate == 0)
-      return;
 
-    var tr = Transaction.newBuilder();
+    if (balanceAsOfCloseDate != 0) {
+      var tr = Transaction.newBuilder();
+      tr.timestamp(mClosingTimestamp);
+      mClosingTimestamp++;
+      tr.date(mClosingDate);
 
-    tr.timestamp(mClosingTimestamp);
-    mClosingTimestamp++;
-    tr.date(mClosingDate);
-
-    if (balanceAsOfCloseDate > 0) {
-      tr.amount(balanceAsOfCloseDate);
-      tr.debit(targetAccount);
-      tr.credit(a.number());
-    } else {
-      tr.amount(-balanceAsOfCloseDate);
-      tr.debit(a.number());
-      tr.credit(targetAccount);
+      if (balanceAsOfCloseDate > 0) {
+        tr.amount(balanceAsOfCloseDate);
+        tr.debit(targetAccount);
+        tr.credit(sourceAccount.number());
+      } else {
+        tr.amount(-balanceAsOfCloseDate);
+        tr.debit(sourceAccount.number());
+        tr.credit(targetAccount);
+      }
+      pr("...adding transaction:", tr);
+      storage().addOrReplace(tr);
     }
-    pr("...adding transaction:", tr);
-    storage().addOrReplace(tr);
+    return pushedTrans;
   }
 
   private long mClosingDate;
