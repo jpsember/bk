@@ -140,7 +140,6 @@ public class RuleManager extends BaseObject {
   }
 
   private void applyRule(Rule rule) {
-    pr("............. applying rule:", INDENT, rule);
     switch (rule.action()) {
     case TRANSFER:
       performTransfer(rule);
