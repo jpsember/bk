@@ -16,6 +16,10 @@ public class Database implements AbstractData {
     return mTransactions;
   }
 
+  public Rules rules() {
+    return mRules;
+  }
+
   @Override
   public Builder toBuilder() {
     return new Builder(this);
@@ -23,6 +27,7 @@ public class Database implements AbstractData {
 
   protected static final String _0 = "accounts";
   protected static final String _1 = "transactions";
+  protected static final String _2 = "rules";
 
   @Override
   public String toString() {
@@ -44,6 +49,7 @@ public class Database implements AbstractData {
         j.put(e.getKey().toString(), e.getValue().toJson());
       m.put(_1, j);
     }
+    m.putUnsafe(_2, mRules.toJson());
     return m;
   }
 
@@ -82,6 +88,13 @@ public class Database implements AbstractData {
         }
       }
     }
+    {
+      mRules = Rules.DEFAULT_INSTANCE;
+      Object x = m.optUnsafe(_2);
+      if (x != null) {
+        mRules = Rules.DEFAULT_INSTANCE.parse(x);
+      }
+    }
   }
 
   public static Builder newBuilder() {
@@ -101,6 +114,8 @@ public class Database implements AbstractData {
       return false;
     if (!(mTransactions.equals(other.mTransactions)))
       return false;
+    if (!(mRules.equals(other.mRules)))
+      return false;
     return true;
   }
 
@@ -111,6 +126,7 @@ public class Database implements AbstractData {
       r = 1;
       r = r * 37 + mAccounts.hashCode();
       r = r * 37 + mTransactions.hashCode();
+      r = r * 37 + mRules.hashCode();
       m__hashcode = r;
     }
     return r;
@@ -118,6 +134,7 @@ public class Database implements AbstractData {
 
   protected Map<Integer, Account> mAccounts;
   protected Map<Long, Transaction> mTransactions;
+  protected Rules mRules;
   protected int m__hashcode;
 
   public static final class Builder extends Database {
@@ -125,6 +142,7 @@ public class Database implements AbstractData {
     private Builder(Database m) {
       mAccounts = DataUtil.mutableCopyOf(m.mAccounts);
       mTransactions = DataUtil.mutableCopyOf(m.mTransactions);
+      mRules = m.mRules;
     }
 
     @Override
@@ -143,6 +161,7 @@ public class Database implements AbstractData {
       Database r = new Database();
       r.mAccounts = DataUtil.immutableCopyOf(mAccounts);
       r.mTransactions = DataUtil.immutableCopyOf(mTransactions);
+      r.mRules = mRules;
       return r;
     }
 
@@ -156,6 +175,11 @@ public class Database implements AbstractData {
       return this;
     }
 
+    public Builder rules(Rules x) {
+      mRules = (x == null) ? Rules.DEFAULT_INSTANCE : x.build();
+      return this;
+    }
+
   }
 
   public static final Database DEFAULT_INSTANCE = new Database();
@@ -163,6 +187,7 @@ public class Database implements AbstractData {
   private Database() {
     mAccounts = DataUtil.emptyMap();
     mTransactions = DataUtil.emptyMap();
+    mRules = Rules.DEFAULT_INSTANCE;
   }
 
 }
