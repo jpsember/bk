@@ -19,7 +19,7 @@ import js.json.JSMap;
 public class Storage extends BaseObject {
 
   public Storage() {
-    alertVerbose();
+    //alertVerbose();
   }
 
   public void read(File file) {
@@ -458,7 +458,6 @@ public class Storage extends BaseObject {
   }
 
   private void readRules() {
-
     log("readRules");
 
     // Determine if an external rules file should be read instead of the rules field in the database
@@ -470,7 +469,6 @@ public class Storage extends BaseObject {
     boolean updateFromExternal = extRulesFile.exists()
         && (mDatabase.rules().rules().isEmpty() || extRulesFile.lastModified() > file().lastModified());
     log("external file:", Files.infoMap(extRulesFile));
-    log("update from external:", updateFromExternal);
 
     Rules r = mDatabase.rules();
     if (updateFromExternal) {
@@ -481,11 +479,10 @@ public class Storage extends BaseObject {
     r = RuleManager.updateRules(r);
     r = RuleManager.parseDates(r);
 
-    log("after update rules, parse:",INDENT,r);
+    log("after update rules, parse:", INDENT, r);
     if (!r.equals(mDatabase.rules())) {
       mDatabase.rules(r);
       setModified("rules have changed");
-      log("rules now:",mDatabase.rules());
     }
 
     RuleManager.SHARED_INSTANCE.setRules(r);
