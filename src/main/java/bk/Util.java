@@ -385,21 +385,15 @@ public final class Util {
       int c2 = t2.parent() != 0 ? 1 : 0;
       sep = Integer.compare(c1, c2);
     }
-
-    if (sep == 0)
-      sep = Integer.compare(t1.debit(), t2.debit());
-    if (sep == 0)
-      sep = Integer.compare(t1.credit(), t2.credit());
-    if (sep == 0)
-      sep = Long.compare(t1.amount(), t2.amount());
     if (sep == 0)
       sep = Long.compare(t1.timestamp(), t2.timestamp());
+    if (sep == 0)
+      badState("transaction timestamps are not unique:", INDENT, t1, CR, t2);
     return sep;
   };
 
   public static final Comparator<Account> ACCOUNT_COMPARATOR = (t1, t2) -> {
     return Integer.compare(t1.number(), t2.number());
-
   };
 
   public static boolean quitCommand(KeyEvent k) {
