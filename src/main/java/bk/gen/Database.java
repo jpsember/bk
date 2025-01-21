@@ -1,5 +1,6 @@
 package bk.gen;
 
+import bk.gen.rules.Rules;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import js.data.AbstractData;

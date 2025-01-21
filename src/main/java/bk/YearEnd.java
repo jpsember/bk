@@ -77,17 +77,13 @@ public class YearEnd extends BaseObject {
       var s = Files.removeExtension(f.toString()) + "_" + mCloseDateFilenameExpr.substring(0, 4) + "."
           + Files.EXT_JSON;
       var fPrev = new File(s);
-      var fPrevRules = Storage.rulesFile(fPrev);
 
       if (DBK) {
         files().deletePeacefully(fPrev);
-        files().deletePeacefully(fPrevRules);
       }
 
       Files.assertDoesNotExist(fPrev, "previous year database");
-      Files.assertDoesNotExist(fPrevRules, "previous year rules");
       files().moveFile(f, fPrev);
-      files().copyFile(storage().rulesFile(), fPrevRules);
     }
 
     // Discard the existing storage object, and replace with an empty one
@@ -167,7 +163,6 @@ public class YearEnd extends BaseObject {
 
     List<File> src = arrayList();
     src.add(storage().file());
-    src.add(storage().rulesFile());
     for (var f : src) {
       var target = new File(backupDir, f.getName());
       files().copyFile(f, target, true);

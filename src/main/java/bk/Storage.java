@@ -11,18 +11,22 @@ import java.util.Map;
 import bk.gen.Account;
 import bk.gen.Database;
 import bk.gen.Transaction;
+import bk.gen.rules.Rules;
 import js.base.BaseObject;
 import js.file.Files;
 import js.json.JSMap;
 
 public class Storage extends BaseObject {
 
+  public Storage() {
+    alertVerbose();
+  }
+
   public void read(File file) {
-    //alertVerbose();
     withFile(file);
     var m = JSMap.fromFileIfExists(file());
     if (!file().exists())
-      setModified();
+      setModified("no database file existed");
     var db = Files.parseAbstractData(Database.DEFAULT_INSTANCE, m);
     mDatabase = db.toBuilder();
     log("read", accounts().size(), "accounts and", transactions().size(), "transactions");
@@ -31,6 +35,8 @@ public class Storage extends BaseObject {
 
     if (bkConfig().generateTestData())
       generateTestData();
+
+    readRules();
   }
 
   private void generateTestData() {
@@ -106,7 +112,10 @@ public class Storage extends BaseObject {
     } while (false);
   }
 
-  private void setModified() {
+  private void setModified(String reason) {
+    if (mModified)
+      return;
+    log("setting modified; reason:", reason);
     mModified = true;
   }
 
@@ -131,15 +140,8 @@ public class Storage extends BaseObject {
     return mFile;
   }
 
-  public static File rulesFile(File databaseFile) {
+  private static File rulesFile(File databaseFile) {
     return new File(Files.removeExtension(databaseFile) + ".rules.json");
-  }
-
-  public File rulesFile() {
-    if (mRulesFile == null) {
-      mRulesFile = rulesFile(file());
-    }
-    return mRulesFile;
   }
 
   private Map<Integer, Account> accounts() {
@@ -200,7 +202,7 @@ public class Storage extends BaseObject {
         pr("*** account", a.number(), ":", a.name(), "balance was incorrect:", INDENT,
             formatCurrency(orig.balance()), ", should be:", CR, formatCurrency(a.balance()));
         accounts().put(a.number(), a.build());
-        setModified();
+        setModified("account balance was incorrect");
       }
     }
     flush();
@@ -259,7 +261,7 @@ public class Storage extends BaseObject {
 
   private void deleteDamaged(Transaction t) {
 
-    setModified();
+    setModified("delete damaged transaction");
 
     mDatabase.transactions().remove(id(t));
 
@@ -307,7 +309,6 @@ public class Storage extends BaseObject {
   private long mUniqueTimestamp;
   private Database.Builder mDatabase;
   private File mFile;
-  private File mRulesFile;
   private boolean mModified;
 
   // ------------------------------------------------------------------
@@ -322,7 +323,7 @@ public class Storage extends BaseObject {
       u.deleteAccount(existing);
     u.addAccount(account);
     accounts().put(account.number(), account);
-    setModified();
+    setModified("add or replace account");
   }
 
   public void deleteAccount(int number) {
@@ -341,7 +342,7 @@ public class Storage extends BaseObject {
       u.deleteAccount(acc);
     }
     accounts().remove(number);
-    setModified();
+    setModified("delete account");
   }
 
   /**
@@ -374,7 +375,7 @@ public class Storage extends BaseObject {
     transactions().put(t.timestamp(), t);
     applyTransactionToAccountBalances(t, false);
 
-    setModified();
+    setModified("add or replace trans");
 
     if (u.live()) {
       RuleManager.SHARED_INSTANCE.applyRules(t);
@@ -392,7 +393,8 @@ public class Storage extends BaseObject {
     }
     u.addTransaction(t);
     transactions().put(t.timestamp(), t);
-    setModified();
+    todo("why is this getting called at every start?");
+    setModified("replace transaction w/o update balances");
   }
 
   public void deleteTransaction(Transaction t) {
@@ -409,7 +411,7 @@ public class Storage extends BaseObject {
     checkState(t2 != null, "transaction wasn't in map");
     u.deleteTransaction(t2);
     applyTransactionToAccountBalances(t2, true);
-    setModified();
+    setModified("delete transaction");
   }
 
   public void deleteTransaction(long timestamp) {
@@ -452,7 +454,38 @@ public class Storage extends BaseObject {
     a = a.toBuilder().balance(a.balance() + currencyAmount).build();
     accounts().put(a.number(), a);
     u.addAccount(a);
-    setModified();
+    setModified("adjust balance");
+  }
+
+  private void readRules() {
+
+    log("readRules");
+
+    // Determine if an external rules file should be read instead of the rules field in the database
+
+    // 1) if a rules file exists, and
+    // 2) either the database has no rules, or the database file is older than the rules file
+
+    var extRulesFile = rulesFile(file());
+    boolean updateFromExternal = extRulesFile.exists()
+        && (mDatabase.rules().rules().isEmpty() || extRulesFile.lastModified() > file().lastModified());
+    log("external file:", Files.infoMap(extRulesFile));
+    log("update from external:", updateFromExternal);
+
+    Rules r = mDatabase.rules();
+    if (updateFromExternal) {
+      r = Files.parseAbstractDataOpt(Rules.DEFAULT_INSTANCE, extRulesFile);
+    }
+
+    r = RuleManager.updateRules(r);
+    r = RuleManager.parseDates(r);
+
+    if (!r.equals(mDatabase.rules())) {
+      mDatabase.rules(r);
+      setModified("rules have changed");
+    }
+
+    RuleManager.SHARED_INSTANCE.setRules(r);
   }
 
 }

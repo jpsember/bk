@@ -3,7 +3,6 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
-import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,7 +13,6 @@ import bk.gen.rules.Rule;
 import bk.gen.rules.Rules;
 import js.base.BaseObject;
 import js.data.LongArray;
-import js.file.Files;
 
 public class RuleManager extends BaseObject {
 
@@ -24,7 +22,11 @@ public class RuleManager extends BaseObject {
     //alertVerbose();
   }
 
-  public void deleteAllGeneratedTransactions() {
+  public void setRules(Rules r) {
+    mRules = r;
+  }
+
+  private void deleteAllGeneratedTransactions() {
     var allTrans = storage().readAllTransactions();
     for (var t : allTrans) {
       if (t.parent() != 0) {
@@ -324,28 +326,11 @@ public class RuleManager extends BaseObject {
   private static final String EXPECTED_VERSION = "2.0";
 
   private Rules rules() {
-    if (mRules == null) {
-      var r = Files.parseAbstractDataOpt(Rules.DEFAULT_INSTANCE, file());
-      r = updateRules(r);
-      r = parseDates(r);
-      mRules = r;
-      log("read rules:", INDENT, mRules);
-      // Reformat them, and save (with backup) if it has changed
-      var str = mRules.toString();
-      if (!file().exists())
-        Files.S.writeString(file(), "{}");
-      var content = Files.readString(file());
-      if (!content.equals(str)) {
-        log("...rules changed with formatting from:", INDENT, content);
-        log("to:", INDENT, str);
-        Files.S.copyFile(file(), Files.getDesktopFile("_rules_backup_.json"));
-        Files.S.writeString(file(), str);
-      }
-    }
+    checkNotNull(mRules, "rules");
     return mRules;
   }
 
-  private Rules updateRules(Rules r) {
+  public static Rules updateRules(Rules r) {
     var version = r.version();
     if (version.equals(EXPECTED_VERSION))
       return r;
@@ -359,7 +344,7 @@ public class RuleManager extends BaseObject {
     return r;
   }
 
-  private Rules parseDates(Rules r0) {
+  public static Rules parseDates(Rules r0) {
     Rules.Builder b = r0.toBuilder();
     Map<String, Rule> newMap = hashMap();
     for (var ent : b.rules().entrySet()) {
@@ -375,16 +360,12 @@ public class RuleManager extends BaseObject {
     return b.build();
   }
 
-  private long parseDate(String dateExpr) {
+  private static long parseDate(String dateExpr) {
     if (nullOrEmpty(dateExpr))
       return 0;
     var res = DATE_VALIDATOR.validate(dateExpr);
     long sec = res.typedValue();
     return sec;
-  }
-
-  private File file() {
-    return storage().rulesFile();
   }
 
   private Rules mRules;
