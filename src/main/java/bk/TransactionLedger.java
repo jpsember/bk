@@ -317,7 +317,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     plotString(s, clip.endX() - (mSlotWidth * (HEADER_SLOTS - slot)), y, Alignment.RIGHT, mSlotWidth);
   }
 
-  private static final boolean SHOW_TS = alert("showing timestamps");
+  private static final boolean SHOW_TS = false && alert("showing timestamps");
 
   private void addColumns() {
     if (mColumnsAdded)
