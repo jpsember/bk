@@ -7,6 +7,10 @@ import js.json.JSMap;
 
 public class Rule implements AbstractData {
 
+  public String description() {
+    return mDescription;
+  }
+
   public int[] accounts() {
     return mAccounts;
   }
@@ -48,15 +52,16 @@ public class Rule implements AbstractData {
     return new Builder(this);
   }
 
-  protected static final String _0 = "accounts";
-  protected static final String _1 = "action";
-  protected static final String _2 = "percent";
-  protected static final String _3 = "source_account";
-  protected static final String _4 = "target_account";
-  protected static final String _5 = "date_min";
-  protected static final String _6 = "date_max";
-  protected static final String _7 = "parsed_date_min";
-  protected static final String _8 = "parsed_date_max";
+  protected static final String _0 = "description";
+  protected static final String _1 = "accounts";
+  protected static final String _2 = "action";
+  protected static final String _3 = "percent";
+  protected static final String _4 = "source_account";
+  protected static final String _5 = "target_account";
+  protected static final String _6 = "date_min";
+  protected static final String _7 = "date_max";
+  protected static final String _8 = "parsed_date_min";
+  protected static final String _9 = "parsed_date_max";
 
   @Override
   public String toString() {
@@ -66,15 +71,16 @@ public class Rule implements AbstractData {
   @Override
   public JSMap toJson() {
     JSMap m = new JSMap();
-    m.putUnsafe(_0, DataUtil.encodeBase64Maybe(mAccounts));
-    m.putUnsafe(_1, mAction.toString().toLowerCase());
-    m.putUnsafe(_2, mPercent);
-    m.putUnsafe(_3, mSourceAccount);
-    m.putUnsafe(_4, mTargetAccount);
-    m.putUnsafe(_5, mDateMin);
-    m.putUnsafe(_6, mDateMax);
-    m.putUnsafe(_7, mParsedDateMin);
-    m.putUnsafe(_8, mParsedDateMax);
+    m.putUnsafe(_0, mDescription);
+    m.putUnsafe(_1, DataUtil.encodeBase64Maybe(mAccounts));
+    m.putUnsafe(_2, mAction.toString().toLowerCase());
+    m.putUnsafe(_3, mPercent);
+    m.putUnsafe(_4, mSourceAccount);
+    m.putUnsafe(_5, mTargetAccount);
+    m.putUnsafe(_6, mDateMin);
+    m.putUnsafe(_7, mDateMax);
+    m.putUnsafe(_8, mParsedDateMin);
+    m.putUnsafe(_9, mParsedDateMax);
     return m;
   }
 
@@ -89,24 +95,25 @@ public class Rule implements AbstractData {
   }
 
   private Rule(JSMap m) {
+    mDescription = m.opt(_0, "");
     {
       mAccounts = DataUtil.EMPTY_INT_ARRAY;
-      Object x = m.optUnsafe(_0);
+      Object x = m.optUnsafe(_1);
       if (x != null) {
         mAccounts = DataUtil.parseIntsFromArrayOrBase64(x);
       }
     }
     {
-      String x = m.opt(_1, "");
+      String x = m.opt(_2, "");
       mAction = x.isEmpty() ? ActionName.DEFAULT_INSTANCE : ActionName.valueOf(x.toUpperCase());
     }
-    mPercent = m.opt(_2, 0.0);
-    mSourceAccount = m.opt(_3, 0);
-    mTargetAccount = m.opt(_4, 0);
-    mDateMin = m.opt(_5, "");
-    mDateMax = m.opt(_6, "");
-    mParsedDateMin = m.opt(_7, 0L);
-    mParsedDateMax = m.opt(_8, 0L);
+    mPercent = m.opt(_3, 0.0);
+    mSourceAccount = m.opt(_4, 0);
+    mTargetAccount = m.opt(_5, 0);
+    mDateMin = m.opt(_6, "");
+    mDateMax = m.opt(_7, "");
+    mParsedDateMin = m.opt(_8, 0L);
+    mParsedDateMax = m.opt(_9, 0L);
   }
 
   public static Builder newBuilder() {
@@ -121,6 +128,8 @@ public class Rule implements AbstractData {
       return false;
     Rule other = (Rule) object;
     if (other.hashCode() != hashCode())
+      return false;
+    if (!(mDescription.equals(other.mDescription)))
       return false;
     if (!(Arrays.equals(mAccounts, other.mAccounts)))
       return false;
@@ -148,6 +157,7 @@ public class Rule implements AbstractData {
     int r = m__hashcode;
     if (r == 0) {
       r = 1;
+      r = r * 37 + mDescription.hashCode();
       r = r * 37 + Arrays.hashCode(mAccounts);
       r = r * 37 + mAction.ordinal();
       r = r * 37 + (int) mPercent;
@@ -162,6 +172,7 @@ public class Rule implements AbstractData {
     return r;
   }
 
+  protected String mDescription;
   protected int[] mAccounts;
   protected ActionName mAction;
   protected double mPercent;
@@ -176,6 +187,7 @@ public class Rule implements AbstractData {
   public static final class Builder extends Rule {
 
     private Builder(Rule m) {
+      mDescription = m.mDescription;
       mAccounts = m.mAccounts;
       mAction = m.mAction;
       mPercent = m.mPercent;
@@ -201,6 +213,7 @@ public class Rule implements AbstractData {
     @Override
     public Rule build() {
       Rule r = new Rule();
+      r.mDescription = mDescription;
       r.mAccounts = mAccounts;
       r.mAction = mAction;
       r.mPercent = mPercent;
@@ -211,6 +224,11 @@ public class Rule implements AbstractData {
       r.mParsedDateMin = mParsedDateMin;
       r.mParsedDateMax = mParsedDateMax;
       return r;
+    }
+
+    public Builder description(String x) {
+      mDescription = (x == null) ? "" : x;
+      return this;
     }
 
     public Builder accounts(int[] x) {
@@ -263,6 +281,7 @@ public class Rule implements AbstractData {
   public static final Rule DEFAULT_INSTANCE = new Rule();
 
   private Rule() {
+    mDescription = "";
     mAccounts = DataUtil.EMPTY_INT_ARRAY;
     mAction = ActionName.DEFAULT_INSTANCE;
     mDateMin = "";

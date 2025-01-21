@@ -1,5 +1,7 @@
 fields {
 
+  string description;  // for user documentation only
+
   // Account numbers that this rule should apply to
   *int accounts; // If an account is -1000, -2000, etc, it means use all accounts 1xxx, 2xxx etc
 

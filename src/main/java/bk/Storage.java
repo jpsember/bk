@@ -128,6 +128,7 @@ public class Storage extends BaseObject {
     Files.S.deleteFile(f);
     Files.S.moveFile(tmp, f);
     mModified = false;
+    log("flushing modified database");
   }
 
   private void withFile(File file) {
@@ -393,7 +394,6 @@ public class Storage extends BaseObject {
     }
     u.addTransaction(t);
     transactions().put(t.timestamp(), t);
-    todo("why is this getting called at every start?");
     setModified("replace transaction w/o update balances");
   }
 
@@ -475,14 +475,17 @@ public class Storage extends BaseObject {
     Rules r = mDatabase.rules();
     if (updateFromExternal) {
       r = Files.parseAbstractDataOpt(Rules.DEFAULT_INSTANCE, extRulesFile);
+      log("parsed external rules:", INDENT, r);
     }
 
     r = RuleManager.updateRules(r);
     r = RuleManager.parseDates(r);
 
+    log("after update rules, parse:",INDENT,r);
     if (!r.equals(mDatabase.rules())) {
       mDatabase.rules(r);
       setModified("rules have changed");
+      log("rules now:",mDatabase.rules());
     }
 
     RuleManager.SHARED_INSTANCE.setRules(r);

@@ -1,4 +1,7 @@
-{   "rules" : {            "w6th exp" : {        "accounts" : [ 5030,5040,5050 ],
+{   "rules" : {            "w6th exp" : {
+
+"description" : "transfer 2/3 of the utilities to the main floor",
+        "accounts" : [ 5030,5040,5050 ],
                                                    "action" : "transfer",
                                                  "date_max" : "",
                                                  "date_min" : "",
@@ -8,13 +11,16 @@
                                            "source_account" : 0,
                                            "target_account" : 5900
                                         },
-                "w6th utilities_flat" : {        "accounts" : [ 5010,5020 ],
+                "w6th utilities_flat" : {
+"description" : "transfer 1/3 of the utilities to the garden suite",
+
+                        "accounts" : [ 5010,5020 ],
                                                    "action" : "transfer",
                                                  "date_max" : "",
                                                  "date_min" : "2025/02/01",
                                           "parsed_date_max" : 0,
                                           "parsed_date_min" : 1738396800,
-                                                  "percent" : 25.0,
+                                                  "percent" : 33.3,
                                            "source_account" : 0,
                                            "target_account" : 1009
                                         },
