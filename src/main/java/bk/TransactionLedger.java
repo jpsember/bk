@@ -317,6 +317,8 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     plotString(s, clip.endX() - (mSlotWidth * (HEADER_SLOTS - slot)), y, Alignment.RIGHT, mSlotWidth);
   }
 
+  private static final boolean SHOW_TS = alert("showing timestamps");
+
   private void addColumns() {
     if (mColumnsAdded)
       return;
@@ -325,6 +327,11 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     var add = alt ? 4 : 0;
     spaceSeparators();
     addColumn(Column.newBuilder().name("Date").datatype(Datatype.DATE).width(CHARS_DATE));
+
+    if (SHOW_TS) {
+      addColumn(Column.newBuilder().name("Ts").alignment(Alignment.RIGHT).datatype(Datatype.TEXT).width(14));
+    }
+
     addColumn(Column.newBuilder().name("Amount").alignment(Alignment.RIGHT).datatype(Datatype.CURRENCY)
         .width(CHARS_CURRENCY));
     addColumn(
@@ -347,6 +354,10 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     for (var t : sorted) {
       openEntry();
       add(new DateField(t.date()));
+      if (SHOW_TS) {
+        var s = "" + t.timestamp();
+        add(new TextField(s));
+      }
 
       var amt = normalizeTransactionAmount(t);
 
