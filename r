@@ -32,6 +32,6 @@ java \
 /Users/home/.m2/repository/junit/junit/4.13.2/junit-4.13.2.jar:\
 /Users/home/.m2/repository/com/googlecode/lanterna/lanterna/3.1.2/lanterna-3.1.2.jar:\
 /Users/home/.m2/repository/com/github/librepdf/openpdf/1.4.2/openpdf-1.4.2.jar bk.Bk \
-database example/database.json \
+database example/alpha.json \
 log_file bk_log.txt \
 "$@"

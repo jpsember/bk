@@ -19,7 +19,7 @@ public class RuleManager extends BaseObject {
   public static final RuleManager SHARED_INSTANCE = new RuleManager();
 
   private RuleManager() {
-    //alertVerbose();
+    alertVerbose();
   }
 
   public void setRules(Rules r) {
@@ -115,20 +115,28 @@ public class RuleManager extends BaseObject {
    * Actually, only the TRANSFER rule gets applied here.
    */
   private void applyRules() {
+
+    log("applyRules to transaction:", mParent.timestamp());
+
     for (var entry : rules().rules().entrySet()) {
       var rule = entry.getValue();
-
-      if (!withinDateRange(mParent, rule))
-        continue;
-
       if (rule.action() != ActionName.TRANSFER)
         continue;
+
+      log("rule:", rule.description());
+
+      if (!withinDateRange(mParent, rule)) {
+        log("...not within date range");
+        continue;
+      }
+
       if (intWithinArray(rule.accounts(), mParent.debit())) {
         mTriggerAccountNumber = mParent.debit();
       } else if (intWithinArray(rule.accounts(), mParent.credit())) {
         mTriggerAccountNumber = mParent.credit();
       } else
         continue;
+      log("trigger account number:", mTriggerAccountNumber);
       applyRule(rule);
     }
   }
@@ -142,6 +150,8 @@ public class RuleManager extends BaseObject {
   }
 
   private void applyRule(Rule rule) {
+    log("applyRule:", INDENT, rule);
+    log("to trans:", INDENT, mParent);
     switch (rule.action()) {
     case TRANSFER:
       performTransfer(rule);
