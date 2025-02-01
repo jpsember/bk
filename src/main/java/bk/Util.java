@@ -789,4 +789,12 @@ public final class Util {
 
   //------------------------------------------------------------------
 
+  /**
+   * A helper function for debugging things involving a particular transaction
+   */
+  public static boolean deb(Transaction t) {
+    if (false && alert("special logging for transaction XXX"))
+      return (t != null && t.description().equals("XXX"));
+    return false;
+  }
 }

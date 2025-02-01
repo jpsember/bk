@@ -19,7 +19,7 @@ public class RuleManager extends BaseObject {
   public static final RuleManager SHARED_INSTANCE = new RuleManager();
 
   private RuleManager() {
-    alertVerbose();
+    //alertVerbose();
   }
 
   public void setRules(Rules r) {
@@ -117,6 +117,8 @@ public class RuleManager extends BaseObject {
   private void applyRules() {
 
     log("applyRules to transaction:", mParent.timestamp());
+    if (deb(mParent))
+      log("transaction is:", INDENT, mParent);
 
     for (var entry : rules().rules().entrySet()) {
       var rule = entry.getValue();
@@ -124,7 +126,8 @@ public class RuleManager extends BaseObject {
         continue;
 
       log("rule:", rule.description());
-
+      if (deb(mParent))
+        log("rule is:", INDENT, rule);
       if (!withinDateRange(mParent, rule)) {
         log("...not within date range");
         continue;
@@ -342,14 +345,29 @@ public class RuleManager extends BaseObject {
 
   public static Rules updateRules(Rules r) {
     var version = r.version();
-    if (version.equals(EXPECTED_VERSION))
-      return r;
 
     var b = r.toBuilder();
-    if (!(version.equals("") && EXPECTED_VERSION == "2.0")) {
-      badState("Rules have an unsupported version:", version);
+
+    if (!version.equals(EXPECTED_VERSION)) {
+      if (!(version.equals("") && EXPECTED_VERSION == "2.0")) {
+        badState("Rules have an unsupported version:", version);
+      }
+      b.version(EXPECTED_VERSION);
     }
-    b.version(EXPECTED_VERSION);
+
+    // Set any empty rule descriptions to their keys
+
+    Map<String, Rule> modMap = hashMap();
+    for (var ent : b.rules().entrySet()) {
+      String key = ent.getKey();
+      var rb = ent.getValue();
+      if (rb.description().isEmpty()) {
+        rb = rb.toBuilder().description(key);
+      }
+      modMap.put(key, rb);
+    }
+    b.rules(modMap);
+
     r = b.build();
     return r;
   }
