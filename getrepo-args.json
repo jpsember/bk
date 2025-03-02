@@ -2,10 +2,10 @@
 
   "entries" : [
     {
-      "repo_name":"jpsember/java-core",  "commit_hash":"5cc80a7", "version":"3.1",
+      "repo_name":"jpsember/java-core",
     },
     {
-      "repo_name":"jpsember/java-testutil",   "commit_hash":"da7e3b8", "version":"3.0",
+      "repo_name":"jpsember/java-testutil",
     },
   ]
 
