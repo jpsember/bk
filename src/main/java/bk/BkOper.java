@@ -25,16 +25,15 @@ public class BkOper extends AppOper
   }
 
   @Override
-  public BkConfig defaultArgs() {
-    return BkConfig.DEFAULT_INSTANCE;
-  }
-
-  @Override
   protected void longHelp(BasePrinter b) {
     var hf = new HelpFormatter();
     hf.addItem("[ file <filename> ]", "file containing database (default: books.json)");
     b.pr(hf);
-    super.longHelp(b);
+  }
+
+  @Override
+  public BkConfig defaultArgs() {
+    return BkConfig.DEFAULT_INSTANCE;
   }
 
   @Override
@@ -63,7 +62,6 @@ public class BkOper extends AppOper
 
     if (nonEmpty(config().closeAccounts())) {
       try {
-
         var res = DATE_VALIDATOR.validate(config().closeAccounts());
         long closingDateSec = res.typedValue();
         //pr("close accounts:",config().closeAccounts(),"res str:",res.string(),"typed val:",res.typedValue());
