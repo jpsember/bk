@@ -4,7 +4,6 @@ import static bk.Util.*;
 import static js.base.Tools.*;
 
 import java.io.File;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +41,7 @@ public class YearEnd extends BaseObject {
       var at = accountClass(a.number());
 
       if (at == ACCT_ASSET || at == ACCT_LIABILITY || at == ACCT_EQUITY) {
+        log("determining open balance for", a.number());
         var tr = storage().readTransactionsForAccount(a.number());
         if (DBK)
           tr.sort(TRANSACTION_COMPARATOR);
@@ -52,6 +52,7 @@ public class YearEnd extends BaseObject {
           }
         }
         if (bal != 0) {
+          log("...storing opening balance:", a.number(), "=>", bal);
           mOpeningBalances.put(a.number(), bal);
         }
       }
@@ -59,8 +60,8 @@ public class YearEnd extends BaseObject {
 
     log("opening balances:", INDENT, mOpeningBalances);
 
-    // Construct list of transactions occurring after closing date, to be added to the new database
-    List<Transaction> pushed = arrayList();
+    // Construct list of transactions occurring after closing date, to be moved to the new database
+    List<Transaction> movedTransactions = arrayList();
 
     for (var t : storage().readAllTransactions()) {
       // Don't include generated transactions
@@ -70,18 +71,16 @@ public class YearEnd extends BaseObject {
       }
       if (t.date() <= mClosingDate)
         continue;
-      pushed.add(t);
+      movedTransactions.add(t);
     }
 
     // Remove these pushed transactions from the (old year's) database
-    for (var t : pushed) {
+    for (var t : movedTransactions) {
+      log("...deleting from old database:", small(t));
       storage().deleteTransaction(t);
     }
 
     var allAcounts = storage().readAllAccounts();
-
-    // Construct a new database
-    // ...not done yet...
 
     // Persist any changes
     storage().flush();
@@ -132,8 +131,11 @@ public class YearEnd extends BaseObject {
       storage().addOrReplace(tr);
     }
 
-    for (var tr : pushed) {
-      tr = tr.toBuilder().children(null);
+    todo("adjust the timestamps so they occur AFTER any open transactions above");
+    for (var tr : movedTransactions) {
+      // Construct a new transaction just to get a new timestamp
+      var newTimestamp = newTransaction();
+      tr = tr.toBuilder().children(null).timestamp(newTimestamp.timestamp());
       log("adding push trans:", small(tr));
       storage().addOrReplace(tr);
     }
@@ -258,7 +260,7 @@ public class YearEnd extends BaseObject {
   }
 
   private int createRetainedEarningsAccountIfNec() {
-    var num = ACCT_EQUITY;
+    var num = ACCT_RETAINED_EARNINGS;
 
     var a = account(num);
     if (a == null) {
@@ -289,21 +291,21 @@ public class YearEnd extends BaseObject {
         trs.sort(TRANSACTION_COMPARATOR);
       }
       log("...read transactions for", sourceAccount.number(), "=>", trs.size());
-     long altBal = 0;
-     
+      long altBal = 0;
+
       for (var t : trs) {
         log("..... date:", t.date(), "?<=?", mClosingDate, INDENT, small(t));
         if (t.date() <= mClosingDate) {
-          
+
           todo("can we use Util.signedAmount for this?");
-           altBal += Util.signedAmount(t, sourceAccount.number());
+          altBal += Util.signedAmount(t, sourceAccount.number());
           if (t.debit() == sourceAccount.number())
             balanceAsOfCloseDate += t.amount();
           else
             balanceAsOfCloseDate -= t.amount();
         }
       }
-      checkState(altBal == balanceAsOfCloseDate,"expected",balanceAsOfCloseDate,"but got",altBal);
+      checkState(altBal == balanceAsOfCloseDate, "expected", balanceAsOfCloseDate, "but got", altBal);
     }
     log("balance as of close date:", balanceAsOfCloseDate);
 

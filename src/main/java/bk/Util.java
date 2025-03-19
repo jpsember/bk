@@ -48,7 +48,8 @@ public final class Util {
   public static final int ACCT_EXPENSE = 5000;
 
   public static final int ACCT_INCOME_SUMMARY = ACCT_INCOME + 999;
-
+  public static final int ACCT_RETAINED_EARNINGS = ACCT_EQUITY;
+  
   public final static void loadUtil() {
   }
 
