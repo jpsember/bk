@@ -3,6 +3,8 @@ package bk;
 import static bk.Util.*;
 import static js.base.Tools.*;
 
+import java.io.File;
+
 import bk.gen.Account;
 import bk.gen.BkConfig;
 import bk.gen.Transaction;
@@ -46,16 +48,22 @@ public class BkOper extends AppOper
 
   @Override
   public void perform() {
+
     logger(new Logger(config().logFile()));
 
     setUtilConfig(config());
+
+    processTesting();
+
     {
+
       var f = Files.assertNonEmpty(config().database());
       f = Files.addExpectedExtension(f, Files.EXT_JSON);
       if (!f.exists()) {
         if (!config().create())
           setError("Cannot locate database file:", f);
       }
+
       storage().read(f);
       RuleManager.SHARED_INSTANCE.applyRulesToAllTransactions();
     }
@@ -64,8 +72,9 @@ public class BkOper extends AppOper
       try {
         var res = DATE_VALIDATOR.validate(config().closeAccounts());
         long closingDateSec = res.typedValue();
-        //pr("close accounts:",config().closeAccounts(),"res str:",res.string(),"typed val:",res.typedValue());
-        var c = new YearEnd();
+        log("close accounts:", config().closeAccounts(), "res str:", res.string(), "typed val:",
+            res.typedValue());
+        var c = new YearEnd(config());
         c.close(closingDateSec);
       } catch (Throwable t) {
         setError(t);
@@ -123,6 +132,21 @@ public class BkOper extends AppOper
     } catch (Throwable t) {
       setError(mgr.closeIfError(t));
     }
+  }
+
+  private void processTesting() {
+    if (!config().testing())
+      return;
+    checkState(!config().create(), "can't create if testing is true");
+
+    var f = Files.assertNonEmpty(config().database());
+    f = Files.addExpectedExtension(f, Files.EXT_JSON);
+
+    var database_file = Files.absolute(f);
+    var template_file = new File(Files.parent(database_file), "template_" + Files.basename(database_file) + ".json");
+    Files.assertExists(template_file, "template file");
+    pr("Testing is true; restoring from template:", INDENT, template_file, "=>", CR, database_file);
+    files().copyFile(template_file, database_file, true);
   }
 
   // ------------------------------------------------------------------

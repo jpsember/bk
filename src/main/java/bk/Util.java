@@ -797,4 +797,13 @@ public final class Util {
       return (t != null && t.description().equals("XXX"));
     return false;
   }
+
+  public static final boolean DBK = true;
+
+  public static void ydb(Object... msg) {
+    if (!DBK)
+      return;
+    pr(insertStringToFront("<<DBK>>", msg));
+  }
+
 }

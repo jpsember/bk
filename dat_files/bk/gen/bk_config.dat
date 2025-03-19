@@ -1,5 +1,8 @@
 fields {
 
+  bool testing;
+
+
   // If database not found, create one?
   bool create;
 

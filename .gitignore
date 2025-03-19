@@ -39,3 +39,9 @@ bk-args.json
 jeff_books.*
 
 backup_close_*
+
+
+ra.sh
+rb.sh
+rb_close.sh
+rb_restore.sh

@@ -7,6 +7,10 @@ import js.json.JSMap;
 
 public class BkConfig implements AbstractData {
 
+  public boolean testing() {
+    return mTesting;
+  }
+
   public boolean create() {
     return mCreate;
   }
@@ -40,13 +44,14 @@ public class BkConfig implements AbstractData {
     return new Builder(this);
   }
 
-  protected static final String _0 = "create";
-  protected static final String _1 = "database";
-  protected static final String _2 = "log_file";
-  protected static final String _3 = "print_pdf";
-  protected static final String _4 = "apply_hint_to_transaction";
-  protected static final String _5 = "generate_test_data";
-  protected static final String _6 = "close_accounts";
+  protected static final String _0 = "testing";
+  protected static final String _1 = "create";
+  protected static final String _2 = "database";
+  protected static final String _3 = "log_file";
+  protected static final String _4 = "print_pdf";
+  protected static final String _5 = "apply_hint_to_transaction";
+  protected static final String _6 = "generate_test_data";
+  protected static final String _7 = "close_accounts";
 
   @Override
   public String toString() {
@@ -56,13 +61,14 @@ public class BkConfig implements AbstractData {
   @Override
   public JSMap toJson() {
     JSMap m = new JSMap();
-    m.putUnsafe(_0, mCreate);
-    m.putUnsafe(_1, mDatabase.toString());
-    m.putUnsafe(_2, mLogFile.toString());
-    m.putUnsafe(_3, mPrintPdf);
-    m.putUnsafe(_4, mApplyHintToTransaction);
-    m.putUnsafe(_5, mGenerateTestData);
-    m.putUnsafe(_6, mCloseAccounts);
+    m.putUnsafe(_0, mTesting);
+    m.putUnsafe(_1, mCreate);
+    m.putUnsafe(_2, mDatabase.toString());
+    m.putUnsafe(_3, mLogFile.toString());
+    m.putUnsafe(_4, mPrintPdf);
+    m.putUnsafe(_5, mApplyHintToTransaction);
+    m.putUnsafe(_6, mGenerateTestData);
+    m.putUnsafe(_7, mCloseAccounts);
     return m;
   }
 
@@ -77,25 +83,26 @@ public class BkConfig implements AbstractData {
   }
 
   private BkConfig(JSMap m) {
-    mCreate = m.opt(_0, false);
+    mTesting = m.opt(_0, false);
+    mCreate = m.opt(_1, false);
     {
-      mDatabase = _D1;
-      String x = m.opt(_1, (String) null);
+      mDatabase = _D2;
+      String x = m.opt(_2, (String) null);
       if (x != null) {
         mDatabase = new File(x);
       }
     }
     {
       mLogFile = Files.DEFAULT;
-      String x = m.opt(_2, (String) null);
+      String x = m.opt(_3, (String) null);
       if (x != null) {
         mLogFile = new File(x);
       }
     }
-    mPrintPdf = m.opt(_3, false);
-    mApplyHintToTransaction = m.opt(_4, false);
-    mGenerateTestData = m.opt(_5, false);
-    mCloseAccounts = m.opt(_6, "");
+    mPrintPdf = m.opt(_4, false);
+    mApplyHintToTransaction = m.opt(_5, false);
+    mGenerateTestData = m.opt(_6, false);
+    mCloseAccounts = m.opt(_7, "");
   }
 
   public static Builder newBuilder() {
@@ -110,6 +117,8 @@ public class BkConfig implements AbstractData {
       return false;
     BkConfig other = (BkConfig) object;
     if (other.hashCode() != hashCode())
+      return false;
+    if (!(mTesting == other.mTesting))
       return false;
     if (!(mCreate == other.mCreate))
       return false;
@@ -133,6 +142,7 @@ public class BkConfig implements AbstractData {
     int r = m__hashcode;
     if (r == 0) {
       r = 1;
+      r = r * 37 + (mTesting ? 1 : 0);
       r = r * 37 + (mCreate ? 1 : 0);
       r = r * 37 + mDatabase.hashCode();
       r = r * 37 + mLogFile.hashCode();
@@ -145,6 +155,7 @@ public class BkConfig implements AbstractData {
     return r;
   }
 
+  protected boolean mTesting;
   protected boolean mCreate;
   protected File mDatabase;
   protected File mLogFile;
@@ -157,6 +168,7 @@ public class BkConfig implements AbstractData {
   public static final class Builder extends BkConfig {
 
     private Builder(BkConfig m) {
+      mTesting = m.mTesting;
       mCreate = m.mCreate;
       mDatabase = m.mDatabase;
       mLogFile = m.mLogFile;
@@ -180,6 +192,7 @@ public class BkConfig implements AbstractData {
     @Override
     public BkConfig build() {
       BkConfig r = new BkConfig();
+      r.mTesting = mTesting;
       r.mCreate = mCreate;
       r.mDatabase = mDatabase;
       r.mLogFile = mLogFile;
@@ -190,13 +203,18 @@ public class BkConfig implements AbstractData {
       return r;
     }
 
+    public Builder testing(boolean x) {
+      mTesting = x;
+      return this;
+    }
+
     public Builder create(boolean x) {
       mCreate = x;
       return this;
     }
 
     public Builder database(File x) {
-      mDatabase = (x == null) ? _D1 : x;
+      mDatabase = (x == null) ? _D2 : x;
       return this;
     }
 
@@ -227,12 +245,12 @@ public class BkConfig implements AbstractData {
 
   }
 
-  private static final File _D1 = new File("database.json");
+  private static final File _D2 = new File("database.json");
 
   public static final BkConfig DEFAULT_INSTANCE = new BkConfig();
 
   private BkConfig() {
-    mDatabase = _D1;
+    mDatabase = _D2;
     mLogFile = Files.DEFAULT;
     mCloseAccounts = "";
   }
