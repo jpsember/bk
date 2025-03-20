@@ -19,13 +19,23 @@ public class StockCalculator extends BaseObject {
 
   public StockCalculator withTransactions(List<Transaction> transactions) {
     assertNotCalc();
-    mTransactions = transactions;
+    mTransactions =arrayList();
+    mTransactions.addAll(transactions);
+    mTransactions.sort(TRANSACTION_COMPARATOR);
     return this;
   }
 
   public StockCalculator withCursor(int cursorRow) {
     assertNotCalc();
+    assert (mOpeningDate == 0);
     mCursorRow = cursorRow;
+    return this;
+  }
+
+  public StockCalculator withClosingDate(long closeDateSeconds) {
+    assertNotCalc();
+    assert (mCursorRow < 0);
+    mOpeningDate = closeDateSeconds + 24 * 3600;
     return this;
   }
 
@@ -33,7 +43,7 @@ public class StockCalculator extends BaseObject {
     checkState(mShareCalcAll == null, "already calculated");
   }
 
- private void calculate() {
+  private void calculate() {
     if (mShareCalcAll != null)
       return;
 
@@ -47,6 +57,7 @@ public class StockCalculator extends BaseObject {
       Transaction t = mTransactions.get(mCursorRow);
       var d = epochSecondsToLocalDate(t.date());
       mCurrentYear = d.getYear();
+      log("current year set to:",mCurrentYear);
     }
 
     int index = INIT_INDEX;
@@ -64,6 +75,7 @@ public class StockCalculator extends BaseObject {
         capGainPrevYears = mShareCalcCurrentYear.capGain();
     }
     mShareCalcCurrentYear.capGain(mShareCalcCurrentYear.capGain() - capGainPrevYears);
+    log("currentYear:",INDENT,mShareCalcCurrentYear);
   }
 
   private void updateShare(Transaction t, ShareCalc.Builder c) {
@@ -154,9 +166,14 @@ public class StockCalculator extends BaseObject {
     return amt;
   }
 
+  public int currentYear() {
+    calculate();
+    return mCurrentYear;
+  }
+
   public ShareCalc toCursor() {
     calculate();
-    checkState(mCursorRow >= 0);
+   // checkState(mCursorRow >= 0);
     return mShareCalcToCursor;
   }
 
@@ -167,15 +184,16 @@ public class StockCalculator extends BaseObject {
 
   public ShareCalc forCurrentYear() {
     calculate();
-    checkState(mCursorRow >= 0);
+   // checkState(mCursorRow >= 0);
     return mShareCalcCurrentYear;
   }
 
   // For calculating share quantities, cost base, capital gains
   private ShareCalc.Builder mShareCalcToCursor, mShareCalcAll, mShareCalcCurrentYear;
   private int mCurrentYear;
-  private int mAccountNumber = -1;
+  private int mAccountNumber;
   private int mCursorRow = -1;
+  private long mOpeningDate;
   private List<Transaction> mTransactions;
 
 }

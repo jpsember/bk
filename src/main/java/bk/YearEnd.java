@@ -10,6 +10,7 @@ import java.util.Map;
 import bk.gen.Account;
 import bk.gen.BkConfig;
 import bk.gen.Database;
+import bk.gen.ShareCalc;
 import bk.gen.Transaction;
 import js.base.BaseObject;
 import js.data.AbstractData;
@@ -33,6 +34,8 @@ public class YearEnd extends BaseObject {
 
     mRetainedEarningsAccount = createRetainedEarningsAccountIfNec();
 
+    calculateStartShareStuff();
+
     closeAccountsToIncomeSummary();
 
     // Determine opening balances for ASSETS, LIABILITIES, EQUITY accounts
@@ -40,6 +43,9 @@ public class YearEnd extends BaseObject {
     for (var a : storage().readAllAccounts()) {
       var at = accountClass(a.number());
 
+      var sc = mShareCalcMap.get(a.number());
+      todo("if sc not null, store in comment");
+      pr("share calc map for:",a.number(),"is:",INDENT,sc);
       if (at == ACCT_ASSET || at == ACCT_LIABILITY || at == ACCT_EQUITY) {
         log("determining open balance for", a.number());
         var tr = storage().readTransactionsForAccount(a.number());
@@ -51,14 +57,22 @@ public class YearEnd extends BaseObject {
             bal += Util.signedAmount(t, a.number());
           }
         }
-        if (bal != 0) {
-          log("...storing opening balance:", a.number(), "=>", bal);
-          mOpeningBalances.put(a.number(), bal);
+
+        var bi = new OpenBalanceInfo();
+        bi.balance = bal;
+        bi.shareCalc = sc;
+        //        if (bal != 0) 
+        {
+          //          log("...storing opening balance:", a.number(), "=>", bal);
+          mOpeningBalances.put(a.number(), bi);
         }
+
+        sc = null;
       }
+      checkState(sc == null, "unexpected ShareCalc for account:", a.number());
     }
 
-    log("opening balances:", INDENT, mOpeningBalances);
+    //log("opening balances:", INDENT, mOpeningBalances);
 
     // Construct list of transactions occurring after closing date, to be moved to the new database
     List<Transaction> movedTransactions = arrayList();
@@ -112,11 +126,17 @@ public class YearEnd extends BaseObject {
     int retEarn = mRetainedEarningsAccount;
     for (var ent : mOpeningBalances.entrySet()) {
       int anum = ent.getKey();
+      var bi = ent.getValue();
       if (anum == retEarn)
         continue;
+      
+      pr("processing open balance for:",anum,bi.balance,bi.shareCalc);
+      if (bi.balance == 0 && bi.shareCalc == null)
+        continue;
+
       var tr = newTransaction();
       tr.date(mOpeningDate);
-      long bal = ent.getValue();
+      long bal = bi.balance;
       if (bal > 0) {
         tr.amount(bal);
         tr.debit(anum);
@@ -126,12 +146,19 @@ public class YearEnd extends BaseObject {
         tr.debit(retEarn);
         tr.credit(anum);
       }
-      tr.description("Open");
+
+      var desc = "Open";
+      var sc = bi.shareCalc;
+      if (sc != null) {
+        desc = String.format("=%.3f", sc.shares());
+        todo("add book value as well");
+      }
+
+      tr.description(desc);
       log("adding opening trans:", small(tr));
       storage().addOrReplace(tr);
     }
 
-    todo("adjust the timestamps so they occur AFTER any open transactions above");
     for (var tr : movedTransactions) {
       // Construct a new transaction just to get a new timestamp
       var newTimestamp = newTransaction();
@@ -157,15 +184,6 @@ public class YearEnd extends BaseObject {
         mOpeningDate, "expr:", openDateExpr);
     mCloseDateFilenameExpr = closeDateExpr.replace('/', '_');
   }
-  //
-  //  private File determineBackupDir() {
-  //    checkNotNull(mCloseDateFilenameExpr);
-  //    var df = storage().file();
-  //    var dir = Files.parent(df);
-  //    var basename = Files.basename(df);
-  //    var backupDir = new File(dir, "backup_close_" + basename + "_" + mCloseDateFilenameExpr);
-  //    return backupDir;
-  //  }
 
   /**
    * Make a backup of the database and rule files
@@ -224,7 +242,6 @@ public class YearEnd extends BaseObject {
    * Transfer balances from revenue and expense accounts to an income summary
    * account, then transfer that account's balance to the equity account
    */
-
   private void closeAccountsToIncomeSummary() {
 
     // Create an income summary account
@@ -258,6 +275,30 @@ public class YearEnd extends BaseObject {
     log("zeroing INCOME_SUMMARY account to retained earnings account");
     zeroAccount(account(ACCT_INCOME_SUMMARY), mRetainedEarningsAccount);
   }
+
+  /**
+   * Determine share quantity and book values for new year, for all accounts
+   * that track such things
+   */
+  private void calculateStartShareStuff() {
+    mShareCalcMap = hashMap();
+    for (var a : storage().readAllAccounts()) {
+      if (!a.stock())
+        continue;
+
+      var sc = new StockCalculator();
+      sc.setVerbose(a.number() == 1400);
+      sc.withAccountNumber(a.number());
+      sc.withTransactions(storage().readTransactionsForAccount(a.number()));
+      sc.withClosingDate(mClosingDate);
+
+      var stats = sc.forCurrentYear();
+      mShareCalcMap.put(a.number(), stats.build());
+      pr("stored share calc map:", a.number(), INDENT, stats);
+    }
+  }
+
+  private Map<Integer, ShareCalc> mShareCalcMap;
 
   private int createRetainedEarningsAccountIfNec() {
     var num = ACCT_RETAINED_EARNINGS;
@@ -337,12 +378,18 @@ public class YearEnd extends BaseObject {
     return mConfig.testing();
   }
 
+  class OpenBalanceInfo {
+    long balance;
+    String comment;
+    ShareCalc shareCalc;
+  }
+
   private BkConfig mConfig;
 
   private int mRetainedEarningsAccount;
   private long mClosingDate;
   private long mUniqueTransactionTimestamp = System.currentTimeMillis();
   private long mOpeningDate;
-  private Map<Integer, Long> mOpeningBalances = hashMap();
+  private Map<Integer, OpenBalanceInfo> mOpeningBalances = hashMap();
   private String mCloseDateFilenameExpr;
 }
