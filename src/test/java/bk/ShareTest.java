@@ -21,6 +21,7 @@ public class ShareTest extends MyTestCase {
     p("=.2345 assign");
     p("+1wtf23");
     p("=1.1.2wtf");
+    p("=0.234;1200.23 open with share quantity + book value");
     assertRes();
   }
 
