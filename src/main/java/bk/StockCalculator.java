@@ -100,6 +100,7 @@ public class StockCalculator extends BaseObject {
   }
 
   private void updateShare(Transaction t, ShareCalc.Builder c) {
+    //    alertVerbose();
     log(VERT_SP, "updateShare, calc:", INDENT, c);
     c.numTrans(c.numTrans() + 1);
     if (nonEmpty(c.error()))
@@ -116,16 +117,30 @@ public class StockCalculator extends BaseObject {
     case ERROR:
       c.error("descr: " + t.description());
       break;
-    case ASSIGN:
-      if (amt != 0) {
-        c.error("amount must be zero");
-        break;
+    case ASSIGN: {
+
+      // If the amount is zero, it is a stock split (or something), and the book value doesn't change;
+      // the parsed book value must be zero.
+      //
+      // Otherwise, if there is a nonzero book value, update the book value to that amount (this
+      // happens in an 'opening' transaction).
+      // 
+      if (amt == 0) {
+        if (si.bookValue() != 0) {
+          c.error("did not expect \";<book value>\"");
+          break;
+        }
       }
+      if (si.bookValue() != 0)
+        c.bookValue(si.bookValue());
       if (si.shares() < 0) {
         c.error("assign neg shares");
         break;
       }
+
       c.shares(si.shares());
+      log("ASSIGN; parsed info from:", t.description(), INDENT, si, OUTDENT, "calc:", INDENT, c);
+    }
       break;
     case BUY:
       if (amt < 0) {

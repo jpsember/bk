@@ -13,6 +13,10 @@ public class ShareInfo implements AbstractData {
     return mShares;
   }
 
+  public double bookValue() {
+    return mBookValue;
+  }
+
   public String notes() {
     return mNotes;
   }
@@ -24,7 +28,8 @@ public class ShareInfo implements AbstractData {
 
   protected static final String _0 = "action";
   protected static final String _1 = "shares";
-  protected static final String _2 = "notes";
+  protected static final String _2 = "book_value";
+  protected static final String _3 = "notes";
 
   @Override
   public String toString() {
@@ -36,7 +41,8 @@ public class ShareInfo implements AbstractData {
     JSMap m = new JSMap();
     m.putUnsafe(_0, mAction.toString().toLowerCase());
     m.putUnsafe(_1, mShares);
-    m.putUnsafe(_2, mNotes);
+    m.putUnsafe(_2, mBookValue);
+    m.putUnsafe(_3, mNotes);
     return m;
   }
 
@@ -56,7 +62,8 @@ public class ShareInfo implements AbstractData {
       mAction = x.isEmpty() ? ShareAction.DEFAULT_INSTANCE : ShareAction.valueOf(x.toUpperCase());
     }
     mShares = m.opt(_1, 0.0);
-    mNotes = m.opt(_2, "");
+    mBookValue = m.opt(_2, 0.0);
+    mNotes = m.opt(_3, "");
   }
 
   public static Builder newBuilder() {
@@ -76,6 +83,8 @@ public class ShareInfo implements AbstractData {
       return false;
     if (!(mShares == other.mShares))
       return false;
+    if (!(mBookValue == other.mBookValue))
+      return false;
     if (!(mNotes.equals(other.mNotes)))
       return false;
     return true;
@@ -88,6 +97,7 @@ public class ShareInfo implements AbstractData {
       r = 1;
       r = r * 37 + mAction.ordinal();
       r = r * 37 + (int) mShares;
+      r = r * 37 + (int) mBookValue;
       r = r * 37 + mNotes.hashCode();
       m__hashcode = r;
     }
@@ -96,6 +106,7 @@ public class ShareInfo implements AbstractData {
 
   protected ShareAction mAction;
   protected double mShares;
+  protected double mBookValue;
   protected String mNotes;
   protected int m__hashcode;
 
@@ -104,6 +115,7 @@ public class ShareInfo implements AbstractData {
     private Builder(ShareInfo m) {
       mAction = m.mAction;
       mShares = m.mShares;
+      mBookValue = m.mBookValue;
       mNotes = m.mNotes;
     }
 
@@ -123,6 +135,7 @@ public class ShareInfo implements AbstractData {
       ShareInfo r = new ShareInfo();
       r.mAction = mAction;
       r.mShares = mShares;
+      r.mBookValue = mBookValue;
       r.mNotes = mNotes;
       return r;
     }
@@ -134,6 +147,11 @@ public class ShareInfo implements AbstractData {
 
     public Builder shares(double x) {
       mShares = x;
+      return this;
+    }
+
+    public Builder bookValue(double x) {
+      mBookValue = x;
       return this;
     }
 

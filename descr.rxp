@@ -1,10 +1,7 @@
-WS:  $_WHITESPACE
-
-_DIG: \d+
-
-_INT: (\-|\+)?$_DIG
-_DBL: (\-|\+)?([0] | ([1-9]\d*)) . \d+
-
-NUMBER: _INT | _DBL
-EQUALS: =
-
+DIGITS: \d+
+PLUS: \+
+MINUS: \-
+EQUALS: \=
+SEMICOLON: \;
+PERIOD: \.
+OTHER: [^\+\-\=\;\.0-9]+

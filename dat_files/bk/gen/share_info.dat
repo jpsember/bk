@@ -1,6 +1,7 @@
 fields {
   enum ShareAction action;
   double shares;
+  double book_value;
   string notes;
  }
 
