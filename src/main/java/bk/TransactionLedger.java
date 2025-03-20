@@ -366,7 +366,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
     List<Transaction> sorted = (mAccountNumber == 0) ? storage().readAllTransactions()
         : storage().readTransactionsForAccount(mAccountNumber);
-    sorted.sort(TRANSACTION_COMPARATOR);
+     sorted.sort(TRANSACTION_COMPARATOR);
     mDisplayedTransactions = sorted;
     for (var t : sorted) {
       openEntry();

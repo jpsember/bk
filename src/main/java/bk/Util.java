@@ -840,13 +840,7 @@ public final class Util {
     return false;
   }
 
-  public static final boolean DBK = true;
-
-  public static void ydb(Object... msg) {
-    if (!DBK)
-      return;
-    pr(insertStringToFront("<<DBK>>", msg));
-  }
+  public static final boolean DBK = false;
 
   private static DFA descDFA() {
     if (sDescDFA == null) {

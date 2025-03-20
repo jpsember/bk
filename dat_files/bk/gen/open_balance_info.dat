@@ -1,0 +1,6 @@
+fields {
+  long balance;
+  string comment;
+  ShareCalc share_calc;
+}
+
