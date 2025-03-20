@@ -41,9 +41,4 @@ jeff_books.*
 backup_close_*
 
 
-ra.sh
-rb.sh
-rb_close.sh
-rb_restore.sh
-rold.sh
-rb_template.sh
+rb_*.sh

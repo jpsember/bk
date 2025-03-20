@@ -95,7 +95,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
         plotShareInfo("All", y, c.all());
         plotShareInfo("To cursor", y + 1, c.toCursor());
         if (c.currentYear() != 0)
-          plotInHeaderSlot(c.currentYear() + " Gain " + formatDollars(c.forCurrentYear().capGain()), 3,
+          plotInHeaderSlot(c.currentYear() + " Gain " + formatDollars(c.forCursorYear().capGain()), 3,
               y + 2);
       }
         break;

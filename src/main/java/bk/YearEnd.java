@@ -45,7 +45,7 @@ public class YearEnd extends BaseObject {
 
       var sc = mShareCalcMap.get(a.number());
       todo("if sc not null, store in comment");
-      pr("share calc map for:",a.number(),"is:",INDENT,sc);
+      pr("share calc map for:", a.number(), "is:", INDENT, sc);
       if (at == ACCT_ASSET || at == ACCT_LIABILITY || at == ACCT_EQUITY) {
         log("determining open balance for", a.number());
         var tr = storage().readTransactionsForAccount(a.number());
@@ -129,8 +129,8 @@ public class YearEnd extends BaseObject {
       var bi = ent.getValue();
       if (anum == retEarn)
         continue;
-      
-      pr("processing open balance for:",anum,bi.balance,bi.shareCalc);
+
+      pr("processing open balance for:", anum, bi.balance, bi.shareCalc);
       if (bi.balance == 0 && bi.shareCalc == null)
         continue;
 
@@ -150,8 +150,7 @@ public class YearEnd extends BaseObject {
       var desc = "Open";
       var sc = bi.shareCalc;
       if (sc != null) {
-        desc = String.format("=%.3f", sc.shares());
-        todo("add book value as well");
+        desc = String.format("=%.3f;%.2f (Open)", sc.shares(), sc.bookValue());
       }
 
       tr.description(desc);
@@ -292,7 +291,10 @@ public class YearEnd extends BaseObject {
       sc.withTransactions(storage().readTransactionsForAccount(a.number()));
       sc.withClosingDate(mClosingDate);
 
-      var stats = sc.forCurrentYear();
+      var stats = sc.toFiscalYearEnd();
+      if (a.number() == 1400)
+        checkState(stats.bookValue() != 0, "current year has no book value; but here is the total:", INDENT,
+            sc.all(), CR, stats);
       mShareCalcMap.put(a.number(), stats.build());
       pr("stored share calc map:", a.number(), INDENT, stats);
     }
