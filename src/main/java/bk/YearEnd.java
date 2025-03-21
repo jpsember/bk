@@ -31,8 +31,9 @@ public class YearEnd extends BaseObject {
     backupExistingDatabase();
     createRetainedEarningsAccountIfNec();
     calculateStartShareStuff();
-
     determineOpeningBalances();
+    closeAccountsToIncomeSummary();
+
     var movedTransactions = getTransactionsToMoveToNextYear();
     removeMovedTransactionsFromPrevYear(movedTransactions);
 
@@ -45,11 +46,11 @@ public class YearEnd extends BaseObject {
     moveDatabaseToPrevYear();
     replaceDatabaseWithEmpty();
     copyAccountsToNextYear(allAcounts);
-    storage().debug("copied accounts to next year");
+    //storage().debug("copied accounts to next year");
     addOpeningTransactionsToNextYear();
-    storage().debug("added opening trans");
+    //storage().debug("added opening trans");
     storeMovedTransactionsInNextYear(movedTransactions);
-    storage().debug("stored moved transactions");
+    //storage().debug("stored moved transactions");
     storage().flush();
   }
 
@@ -148,6 +149,83 @@ public class YearEnd extends BaseObject {
     }
   }
 
+  /**
+   * Transfer balances from revenue and expense accounts to an income summary
+   * account, then transfer that account's balance to the equity account
+   */
+  private void closeAccountsToIncomeSummary() {
+
+    // Create an income summary account
+
+    // Verify that there's not already an income summary account
+    var incomeSummaryAccount = account(ACCT_INCOME_SUMMARY);
+    log("creating income summary account", ACCT_INCOME_SUMMARY);
+
+    if (incomeSummaryAccount != null)
+      badState("Account already exists:", INDENT, incomeSummaryAccount);
+
+    incomeSummaryAccount = Account.newBuilder().name("Income Summary").number(ACCT_INCOME_SUMMARY);
+    storage().addOrReplace(incomeSummaryAccount);
+
+    for (var a : storage().readAllAccounts()) {
+      if (a.balance() == 0)
+        continue;
+
+      var ac = accountClass(a.number());
+
+      // Process revenues
+      if (ac == ACCT_INCOME && a.number() != incomeSummaryAccount.number())
+        zeroAccount(a, ACCT_INCOME_SUMMARY);
+
+      // Process expenses
+      if (ac == ACCT_EXPENSE)
+        zeroAccount(a, ACCT_INCOME_SUMMARY);
+    }
+
+    // Close income summary account to equity
+    log("zeroing INCOME_SUMMARY account to retained earnings account");
+    zeroAccount(account(ACCT_INCOME_SUMMARY), ACCT_RETAINED_EARNINGS);
+  }
+
+  /**
+   * Add up transactions through closing date, and generate a transaction to
+   * close the balance to zero as of that date.
+   */
+  private void zeroAccount(Account sourceAccount, int targetAccount) {
+
+    log("zeroing account:", small(sourceAccount), "to:", targetAccount);
+
+    // Calculate balance through closing date
+    long balanceAsOfCloseDate = 0;
+    {
+      var trs = storage().readTransactionsForAccount(sourceAccount.number());
+      log("...read transactions for", sourceAccount.number(), "=>", trs.size());
+      for (var t : trs) {
+        log("..... date:", t.date(), "?<=?", mClosingDate, INDENT, small(t));
+        if (t.date() <= mClosingDate) {
+          balanceAsOfCloseDate += Util.signedAmount(t, sourceAccount.number());
+        }
+      }
+    }
+    log("balance as of close date:", balanceAsOfCloseDate);
+
+    if (balanceAsOfCloseDate != 0) {
+      var tr =    newTransactionBuilder();
+      tr.date(mClosingDate);
+
+      if (balanceAsOfCloseDate > 0) {
+        tr.amount(balanceAsOfCloseDate);
+        tr.debit(targetAccount);
+        tr.credit(sourceAccount.number());
+      } else {
+        tr.amount(-balanceAsOfCloseDate);
+        tr.debit(sourceAccount.number());
+        tr.credit(targetAccount);
+      }
+      log("adding closing tr:", small(tr));
+      storage().addOrReplace(tr);
+    }
+  }
   private void determineOpeningBalances() {
     // Determine opening balances for ASSETS, LIABILITIES, EQUITY accounts
     //
@@ -228,7 +306,9 @@ public class YearEnd extends BaseObject {
 
   private void copyAccountsToNextYear(List<Account> allAccounts) {
     for (var a : allAccounts) {
-      a = a.toBuilder().balance(0);
+      // Don't write income summary
+      if (a.number() == ACCT_INCOME_SUMMARY)
+        continue;a = a.toBuilder().balance(0);
       storage().addOrReplace(a);
     }
   }

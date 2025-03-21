@@ -121,7 +121,9 @@ public class Storage extends BaseObject {
     mModified = true;
   }
 
-  @Deprecated
+  /**
+   * Dump (most of) the database to the console, with a messages
+   */
   public void debug(Object... msg) {
     pr(VERT_SP);
     pr(insertStringToFront(">>>DEBUG:", msg));
@@ -146,7 +148,8 @@ public class Storage extends BaseObject {
   private void withFile(File file) {
     file = Files.absolute(Files.ifEmpty(file, "database.json"));
     mFile = file;
-    log("storage file:", INDENT, Files.infoMap(mFile));
+    if (verbose())
+      log("storage file:", INDENT, Files.infoMap(mFile));
   }
 
   public File file() {
