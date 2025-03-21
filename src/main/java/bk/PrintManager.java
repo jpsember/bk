@@ -35,7 +35,6 @@ public class PrintManager extends BaseObject {
     mExpanded = expanded;
 
     var ts = storage().readTransactionsForAccount(a.number());
-    ts.sort(TRANSACTION_COMPARATOR);
 
     setMaxLength(CHARS_DATE).addCol("Date");
 

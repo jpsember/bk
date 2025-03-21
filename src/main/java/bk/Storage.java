@@ -158,7 +158,9 @@ public class Storage extends BaseObject {
   }
 
   public List<Transaction> readAllTransactions() {
-    return new ArrayList<>(transactions().values());
+    var x = new ArrayList<>(transactions().values());
+    x.sort(TRANSACTION_COMPARATOR2);
+    return x;
   }
 
   public List<Transaction> readTransactionsForAccount(int accountNumber) {
@@ -169,7 +171,7 @@ public class Storage extends BaseObject {
       if (tr.debit() == accountNumber || tr.credit() == accountNumber)
         out.add(tr);
     }
-    todo("!maybe ALWAYS sort transactions before returning?");
+    out.sort(TRANSACTION_COMPARATOR2);
     return out;
   }
 

@@ -12,7 +12,6 @@ import js.base.BaseObject;
 public class StockCalculator extends BaseObject {
 
   public StockCalculator withAccountNumber(int accountNumber) {
-    todo("add support for parsing book value from Open statement (=xxxx;YYYY)");
     assertNotCalc();
     mAccountNumber = accountNumber;
     return this;
@@ -22,7 +21,6 @@ public class StockCalculator extends BaseObject {
     assertNotCalc();
     mTransactions = arrayList();
     mTransactions.addAll(transactions);
-    mTransactions.sort(TRANSACTION_COMPARATOR);
     return this;
   }
 

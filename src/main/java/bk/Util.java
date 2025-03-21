@@ -392,7 +392,7 @@ public final class Util {
 
   private static Storage sStorage;
 
-  public static final Comparator<Transaction> TRANSACTION_COMPARATOR = (t1, t2) -> {
+  public static final Comparator<Transaction> TRANSACTION_COMPARATOR2= (t1, t2) -> {
     int sep = Long.compare(t1.date(), t2.date());
     if (sep == 0) {
       int c1 = t1.parent() != 0 ? 1 : 0;
@@ -839,8 +839,6 @@ public final class Util {
       return (t != null && t.description().equals("XXX"));
     return false;
   }
-
-  public static final boolean DBK = false;
 
   private static DFA descDFA() {
     if (sDescDFA == null) {

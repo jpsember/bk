@@ -95,8 +95,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
         plotShareInfo("All", y, c.all());
         plotShareInfo("To cursor", y + 1, c.toCursor());
         if (c.currentYear() != 0)
-          plotInHeaderSlot(c.currentYear() + " Gain " + formatDollars(c.forCursorYear().capGain()), 3,
-              y + 2);
+          plotInHeaderSlot(c.currentYear() + " Gain " + formatDollars(c.forCursorYear().capGain()), 3, y + 2);
       }
         break;
       case NORMAL: {
@@ -184,7 +183,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
     pr("calcShareStuff, currentRow:", INDENT, cr);
     if (cr != null) {
       c.withCursor(currentRowIndex());
-    pr("set cursor to:",currentRowIndex());
+      pr("set cursor to:", currentRowIndex());
     }
     c.withTransactions(mDisplayedTransactions);
     mCalc = c;
@@ -366,7 +365,6 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
 
     List<Transaction> sorted = (mAccountNumber == 0) ? storage().readAllTransactions()
         : storage().readTransactionsForAccount(mAccountNumber);
-     sorted.sort(TRANSACTION_COMPARATOR);
     mDisplayedTransactions = sorted;
     for (var t : sorted) {
       openEntry();

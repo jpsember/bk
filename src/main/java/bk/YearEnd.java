@@ -21,13 +21,10 @@ public class YearEnd extends BaseObject {
 
   public YearEnd(BkConfig config) {
     mConfig = config.build();
-    if (DBK)
-      setVerbose(alert("YearEnd verbosity"));
   }
 
   public void closeBooks(long closeTimestampSeconds) {
     log("closeBooks:", closeTimestampSeconds);
-    todo("!don't allow user to create a rule that refers to yearend accounts (retained earnings, etc)");
 
     calculateTimeDateExpressions(closeTimestampSeconds);
     calculateFilenames();
@@ -35,10 +32,6 @@ public class YearEnd extends BaseObject {
     createRetainedEarningsAccountIfNec();
     calculateStartShareStuff();
 
-    todo(
-        "We shouldn't close accounts to income summary yet, as this will delete some rule transactions that will screw up balances...");
-
-//    closeAccountsToIncomeSummary();
     determineOpeningBalances();
     var movedTransactions = getTransactionsToMoveToNextYear();
     removeMovedTransactionsFromPrevYear(movedTransactions);
@@ -153,116 +146,23 @@ public class YearEnd extends BaseObject {
     }
   }
 
-//  /**
-//   * Determine amount that 
-//   */
-//  private void closeAccountsToIncomeSummary() {
-//
-//    // Create an income summary account
-//
-//    // Verify that there's not already an income summary account
-//    var incomeSummaryAccount = account(ACCT_INCOME_SUMMARY);
-//    log("creating income summary account", ACCT_INCOME_SUMMARY);
-//
-//    if (incomeSummaryAccount != null)
-//      badState("Account already exists:", INDENT, incomeSummaryAccount);
-//
-//    incomeSummaryAccount = Account.newBuilder().name("Income Summary").number(ACCT_INCOME_SUMMARY);
-//    storage().addOrReplace(incomeSummaryAccount);
-//
-//    for (var a : storage().readAllAccounts()) {
-//      if (a.balance() == 0)
-//        continue;
-//
-//      var ac = accountClass(a.number());
-//
-//      // Process revenues
-//      if (ac == ACCT_INCOME && a.number() != incomeSummaryAccount.number())
-//        zeroAccount(a, ACCT_INCOME_SUMMARY);
-//
-//      // Process expenses
-//      if (ac == ACCT_EXPENSE)
-//        zeroAccount(a, ACCT_INCOME_SUMMARY);
-//    }
-//
-//    // Close income summary account to equity
-//    log("zeroing INCOME_SUMMARY account to retained earnings account");
-//    zeroAccount(account(ACCT_INCOME_SUMMARY), ACCT_RETAINED_EARNINGS);
-//  }
-
-//  /**
-//   * Add up transactions through closing date, and generate a transaction to
-//   * close the balance to zero as of that date.
-//   */
-//  private void zeroAccount(Account sourceAccount, int targetAccount) {
-//
-//    log("zeroing account:", small(sourceAccount), "to:", targetAccount);
-//
-//    // Calculate balance through closing date
-//    long balanceAsOfCloseDate = 0;
-//    {
-//      var trs = storage().readTransactionsForAccount(sourceAccount.number());
-//      if (DBK) {
-//        // Sort the transactions by date for debugging sanity
-//        trs.sort(TRANSACTION_COMPARATOR);
-//      }
-//      log("...read transactions for", sourceAccount.number(), "=>", trs.size());
-//      for (var t : trs) {
-//        log("..... date:", t.date(), "?<=?", mClosingDate, INDENT, small(t));
-//        if (t.date() <= mClosingDate) {
-//          balanceAsOfCloseDate += Util.signedAmount(t, sourceAccount.number());
-//        }
-//      }
-//    }
-//    log("balance as of close date:", balanceAsOfCloseDate);
-//
-//    if (balanceAsOfCloseDate != 0) {
-//      var tr = newTransaction();
-//      tr.date(mClosingDate);
-//
-//      if (balanceAsOfCloseDate > 0) {
-//        tr.amount(balanceAsOfCloseDate);
-//        tr.debit(targetAccount);
-//        tr.credit(sourceAccount.number());
-//      } else {
-//        tr.amount(-balanceAsOfCloseDate);
-//        tr.debit(sourceAccount.number());
-//        tr.credit(targetAccount);
-//      }
-//      log("adding closing tr:", small(tr));
-//      storage().addOrReplace(tr);
-//    }
-//  }
-
   private void determineOpeningBalances() {
     // Determine opening balances for ASSETS, LIABILITIES, EQUITY accounts
     //
     for (var a : storage().readAllAccounts()) {
-      var db = a.number() == 1008;
-      if (db)
-        pr(VERT_SP, "Determine opening balance for:", a.name());
 
       var at = accountClass(a.number());
-      if (db)
-        pr("acct class:", at);
 
       var sc = mShareCalcMap.get(a.number());
-      todo("if sc not null, store in comment");
       if (at == ACCT_ASSET || at == ACCT_LIABILITY || at == ACCT_EQUITY) {
         log("determining open balance for", a.number());
 
         long bal = 0;
         {
           var tr = storage().readTransactionsForAccount(a.number());
-          if (DBK)
-            tr.sort(TRANSACTION_COMPARATOR);
           for (var t : tr) {
             if (t.date() <= mClosingDate) {
-              if (db)
-                pr("proc:", small(t));
               bal += Util.signedAmount(t, a.number());
-              if (db)
-                pr("added", Util.signedAmount(t, a.number()), ", bal now", bal);
             }
           }
         }
@@ -271,8 +171,6 @@ public class YearEnd extends BaseObject {
         bi.shareCalc(sc);
         var bj = bi.build();
         mOpeningBalances.put(a.number(), bj);
-        if (db)
-          pr("stored in map:", INDENT, bj);
         sc = null;
       }
       checkState(sc == null, "unexpected ShareCalc for account:", a.number());
@@ -291,7 +189,6 @@ public class YearEnd extends BaseObject {
     for (var t : storage().readAllTransactions()) {
       // Don't include generated transactions
       if (t.parent() != 0L) {
-        todo("What do we do with generated transactions?");
         continue;
       }
       if (t.date() <= mClosingDate)
@@ -329,9 +226,6 @@ public class YearEnd extends BaseObject {
 
   private void copyAccountsToNextYear(List<Account> allAccounts) {
     for (var a : allAccounts) {
-//      // Don't write income summary
-//      if (a.number() == ACCT_INCOME_SUMMARY)
-//        continue;
       a = a.toBuilder().balance(0);
       storage().addOrReplace(a);
     }
@@ -347,11 +241,11 @@ public class YearEnd extends BaseObject {
       var bi = ent.getValue();
       if (accountNumber == retainedEearningsNumber)
         continue;
-      pr("==== account:", accountNumber, "balance info:", INDENT, bi);
-      var ap = account(accountNumber);
 
       if (bi.balance() == 0)
         continue;
+
+      var ap = account(accountNumber);
 
       var tr = newTransaction();
       tr.date(mOpeningDate);
