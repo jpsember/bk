@@ -29,6 +29,8 @@ public class Storage extends BaseObject {
       setModified("no database file existed");
     var db = Files.parseAbstractData(Database.DEFAULT_INSTANCE, m);
     mDatabase = db.toBuilder();
+    adjustUniqueTimestamp(mDatabase.transactions().values());
+
     log("read", accounts().size(), "accounts and", transactions().size(), "transactions");
     scanForProblems();
     verifyAccountBalances();
@@ -117,6 +119,16 @@ public class Storage extends BaseObject {
       return;
     log("setting modified; reason:", reason);
     mModified = true;
+  }
+
+  @Deprecated
+  public void debug(Object... msg) {
+    pr(VERT_SP);
+    pr(insertStringToFront(">>>DEBUG:", msg));
+    var db = mDatabase.build().toBuilder();
+    db.rules(null);
+    pr("database:", INDENT, db);
+    pr(DASHES, VERT_SP);
   }
 
   public void flush() {
@@ -300,17 +312,6 @@ public class Storage extends BaseObject {
     return account.name();
   }
 
-  /**
-   * Probably returns a unique timestamp
-   */
-  public long uniqueTimestamp() {
-    var ts = System.currentTimeMillis();
-    ts = Math.max(ts, mUniqueTimestamp + 1);
-    mUniqueTimestamp = ts;
-    return ts;
-  }
-
-  private long mUniqueTimestamp;
   private Database.Builder mDatabase;
   private File mFile;
   private boolean mModified;
@@ -347,6 +348,19 @@ public class Storage extends BaseObject {
     }
     accounts().remove(number);
     setModified("delete account");
+  }
+
+  /**
+   * Add a transaction. Throws exception if one already exists with that
+   * timestamp
+   */
+  public void add(Transaction t) {
+    var existing = transaction(t.timestamp());
+    if (existing != null) {
+      badState("Attempt to add transaction with same timestamp as another:", t.timestamp(), INDENT, t,
+          OUTDENT, "existing:", INDENT, existing);
+    }
+    addOrReplace(t);
   }
 
   /**

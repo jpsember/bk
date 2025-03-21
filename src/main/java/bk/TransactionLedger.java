@@ -539,8 +539,7 @@ public class TransactionLedger extends LedgerWindow implements ChangeListener {
       newestMovedDate = Math.max(newestMovedDate, t.date());
 
       var bn = t.toBuilder();
-
-      bn.timestamp(storage().uniqueTimestamp());
+      bn.timestamp(uniqueTimestamp());
       bn.parent(0).children(null);
 
       //      var b = t.toBuilder();

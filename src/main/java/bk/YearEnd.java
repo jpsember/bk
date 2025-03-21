@@ -45,9 +45,11 @@ public class YearEnd extends BaseObject {
     moveDatabaseToPrevYear();
     replaceDatabaseWithEmpty();
     copyAccountsToNextYear(allAcounts);
+    storage().debug("copied accounts to next year");
     addOpeningTransactionsToNextYear();
+    storage().debug("added opening trans");
     storeMovedTransactionsInNextYear(movedTransactions);
-
+    storage().debug("stored moved transactions");
     storage().flush();
   }
 
@@ -247,7 +249,7 @@ public class YearEnd extends BaseObject {
 
       var ap = account(accountNumber);
 
-      var tr = newTransaction();
+      var tr = newTransactionBuilder();
       tr.date(mOpeningDate);
       long bal = bi.balance();
       if (bal > 0) {
@@ -269,28 +271,21 @@ public class YearEnd extends BaseObject {
       }
       tr.description(desc);
       log("adding opening trans:", small(tr));
-      storage().addOrReplace(tr);
+      storage().add(tr);
     }
   }
 
   private void storeMovedTransactionsInNextYear(List<Transaction> movedTransactions) {
+    pr(VERT_SP, "storeMovedTransactions:", INDENT, movedTransactions);
     for (var tr : movedTransactions) {
-      // Construct a new transaction just to get a new timestamp
-      var newTimestamp = newTransaction();
-      tr = tr.toBuilder().children(null).timestamp(newTimestamp.timestamp());
+      tr = tr.toBuilder().children(null).timestamp(uniqueTimestamp());
       log("adding push trans:", small(tr));
-      storage().addOrReplace(tr);
+      storage().add(tr);
     }
   }
 
   private static String small(AbstractData d) {
     return d.toJson().toString();
-  }
-
-  private Transaction.Builder newTransaction() {
-    var tr = Transaction.newBuilder();
-    tr.timestamp(mUniqueTransactionTimestamp++);
-    return tr;
   }
 
   private Files files() {
@@ -303,7 +298,6 @@ public class YearEnd extends BaseObject {
   private Map<Integer, ShareCalc> mShareCalcMap;
   private BkConfig mConfig;
   private long mClosingDate;
-  private long mUniqueTransactionTimestamp = System.currentTimeMillis();
   private long mOpeningDate;
   private Map<Integer, OpenBalanceInfo> mOpeningBalances = hashMap();
   private String mCloseDateFilenameExpr;
