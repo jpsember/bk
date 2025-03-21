@@ -99,7 +99,8 @@ public class RuleManager extends BaseObject {
   }
 
   private boolean isClosingAcct(int anum) {
-    return anum == ACCT_RETAINED_EARNINGS || anum == ACCT_INCOME_SUMMARY;
+    return anum == ACCT_RETAINED_EARNINGS // || anum == ACCT_INCOME_SUMMARY
+        ;
   }
 
   private static final boolean intWithinArray(int[] array, int value) {

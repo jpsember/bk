@@ -75,7 +75,7 @@ public class BkOper extends AppOper
         log("close accounts:", config().closeAccounts(), "res str:", res.string(), "typed val:",
             res.typedValue());
         var c = new YearEnd(config());
-        c.close(closingDateSec);
+        c.closeBooks(closingDateSec);
       } catch (Throwable t) {
         setError(t);
       }
