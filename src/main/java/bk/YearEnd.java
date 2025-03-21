@@ -28,21 +28,18 @@ public class YearEnd extends BaseObject {
   public void close(long closeTimestampSeconds) {
     log("close:", closeTimestampSeconds);
     todo("!don't allow user to create a rule that refers to yearend accounts (retained earnings, etc)");
+
     calculateTimeDateExpressions(closeTimestampSeconds);
     calculateFilenames();
-
     backupExistingDatabase();
-
-    mRetainedEarningsAccount = createRetainedEarningsAccountIfNec();
-
+    createRetainedEarningsAccountIfNec();
     calculateStartShareStuff();
-
+    
+    todo("We shouldn't close accounts to income summary yet, as this will delete some rule transactions that will screw up balances...");
+    
     closeAccountsToIncomeSummary();
-
     determineOpeningBalances();
-
     var movedTransactions = getTransactionsToMoveToNextYear();
-
     removeMovedTransactionsFromPrevYear(movedTransactions);
 
     // Persist any changes
@@ -52,13 +49,9 @@ public class YearEnd extends BaseObject {
     var allAcounts = storage().readAllAccounts();
 
     moveDatabaseToPrevYear();
-
     replaceDatabaseWithEmpty();
-
     copyAccountsToNextYear(allAcounts);
-
     addOpeningTransactionsToNextYear();
-
     storeMovedTransactionsInNextYear(movedTransactions);
 
     storage().flush();
@@ -125,7 +118,7 @@ public class YearEnd extends BaseObject {
     }
   }
 
-  private int createRetainedEarningsAccountIfNec() {
+  private void createRetainedEarningsAccountIfNec() {
     var num = ACCT_RETAINED_EARNINGS;
 
     var a = account(num);
@@ -133,7 +126,6 @@ public class YearEnd extends BaseObject {
       a = Account.newBuilder().number(num).name("Retained Earnings");
       storage().addOrReplace(a);
     }
-    return a.number();
   }
 
   /**
@@ -196,7 +188,7 @@ public class YearEnd extends BaseObject {
 
     // Close income summary account to equity
     log("zeroing INCOME_SUMMARY account to retained earnings account");
-    zeroAccount(account(ACCT_INCOME_SUMMARY), mRetainedEarningsAccount);
+    zeroAccount(account(ACCT_INCOME_SUMMARY), ACCT_RETAINED_EARNINGS);
   }
 
   /**
@@ -350,13 +342,14 @@ public class YearEnd extends BaseObject {
 
     // Add opening transactions to new database
     //
-    int retEarn = mRetainedEarningsAccount;
+    int retainedEearningsNumber = ACCT_RETAINED_EARNINGS;
     for (var ent : mOpeningBalances.entrySet()) {
-      int anum = ent.getKey();
-      if (anum == retEarn)
-        continue;
-      var ap = account(anum);
+      int accountNumber = ent.getKey();
       var bi = ent.getValue();
+      if (accountNumber == retainedEearningsNumber)
+        continue;
+      pr("==== account:",accountNumber,"balance info:",INDENT,bi);
+      var ap = account(accountNumber);
 
       if (bi.balance() == 0)
         continue;
@@ -366,12 +359,12 @@ public class YearEnd extends BaseObject {
       long bal = bi.balance();
       if (bal > 0) {
         tr.amount(bal);
-        tr.debit(anum);
-        tr.credit(retEarn);
+        tr.debit(accountNumber);
+        tr.credit(retainedEearningsNumber);
       } else {
         tr.amount(-bal);
-        tr.debit(retEarn);
-        tr.credit(anum);
+        tr.debit(retainedEearningsNumber);
+        tr.credit(accountNumber);
       }
 
       var desc = "Open";
@@ -416,7 +409,6 @@ public class YearEnd extends BaseObject {
   private File mPreviousYearFile;
   private Map<Integer, ShareCalc> mShareCalcMap;
   private BkConfig mConfig;
-  private int mRetainedEarningsAccount;
   private long mClosingDate;
   private long mUniqueTransactionTimestamp = System.currentTimeMillis();
   private long mOpeningDate;
