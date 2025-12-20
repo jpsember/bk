@@ -1,13 +1,6 @@
-# ...add appropriate entries for generated Java files
-
 # OSX files
 #
 .DS_Store
-
-# Files marked for later removal, or temporary omission
-#
-_OLD_*
-_SKIP_*
 
 # Sublime text editor
 #
@@ -18,21 +11,12 @@ _SKIP_*
 #
 .idea
 
-# Eclipse IDE
-#
-.classpath
-.project
-.settings
-
 # Compile output
 #
 target
 
 database.json
 project_config
-tvl.*
-tvl_*.*
-
 
 bk_log.txt
 bk-args.json
@@ -40,6 +24,9 @@ jeff_books.*
 
 backup_close_*
 
-
 rb_*.sh
 example2
+
+probably_unused
+
+cmit-args.json

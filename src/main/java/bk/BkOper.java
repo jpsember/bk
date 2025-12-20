@@ -29,7 +29,7 @@ public class BkOper extends AppOper
   @Override
   protected void longHelp(BasePrinter b) {
     var hf = new HelpFormatter();
-    hf.addItem("[ file <filename> ]", "file containing database (default: books.json)");
+    hf.addItem("[ database <filename> ]", "file containing database (default: books.json)");
     b.pr(hf);
   }
 
