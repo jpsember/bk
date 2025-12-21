@@ -33,6 +33,13 @@ public class AccountIdHelper extends WidgetHelper implements ChangeListener {
     var output = accountNumberWithNameString(a);
     t.addSentence("" + a.number(), output);
     t.addSentence(a.name(), output);
+
+    if (!todo("maybe add this...?")) {
+    // Add entries for shortcut
+    if (!a.shortcut().isEmpty()) {
+      t.addSentence("."+a.shortcut(), output);
+    }
+    }
   }
 
   private static Trie sTri;

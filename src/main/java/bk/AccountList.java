@@ -63,6 +63,14 @@ public class AccountList extends LedgerWindow implements ChangeListener {
       addHint(accountNumberWithNameString(a));
       addHint(a.name());
 
+      // Add hints for shortcut
+      if (!todo("maybe add this???")) {
+        var shortcut = a.shortcut();
+        if (!shortcut.isEmpty())
+          addHint("." + shortcut);
+      }
+
+
       add(new AccountNameField(a.number(), storage().accountName(a.number())));
       long amount;
       if (hasBudget(a))
@@ -99,51 +107,51 @@ public class AccountList extends LedgerWindow implements ChangeListener {
 
     switch (k.toString()) {
 
-    case ":Q":
-      winMgr().quit();
-      break;
+      case ":Q":
+        winMgr().quit();
+        break;
 
-    case KeyEvent.RETURN:
-      if (a != null) {
-        mListener.viewAccount(a);
-      }
-      break;
+      case KeyEvent.RETURN:
+        if (a != null) {
+          mListener.viewAccount(a);
+        }
+        break;
 
-    case ":T":
-      focusManager().pushAppend(new TransactionLedger(0, mTransListener));
-      break;
+      case ":T":
+        focusManager().pushAppend(new TransactionLedger(0, mTransListener));
+        break;
 
-    case ":R":
-      RuleManager.SHARED_INSTANCE.applyRulesToAllTransactions();
-      break;
+      case ":R":
+        RuleManager.SHARED_INSTANCE.applyRulesToAllTransactions();
+        break;
 
-    case KeyEvent.ADD:
-      mListener.addAccount();
-      rebuild();
-      break;
-
-    case KeyEvent.DELETE_ACCOUNT:
-      if (a != null) {
-        mListener.deleteAccount(a);
+      case KeyEvent.ADD:
+        mListener.addAccount();
         rebuild();
-      }
-      break;
+        break;
 
-    case KeyEvent.EDIT:
-      if (a != null) {
-        mListener.editAccount(a);
-        rebuild();
-      }
-      break;
+      case KeyEvent.DELETE_ACCOUNT:
+        if (a != null) {
+          mListener.deleteAccount(a);
+          rebuild();
+        }
+        break;
 
-    case KeyEvent.PRINT:
-      if (a != null) {
-        PrintManager.SHARED_INSTANCE.printLedger(a);
-      }
-      break;
-    default:
-      super.processKeyEvent(k);
-      break;
+      case KeyEvent.EDIT:
+        if (a != null) {
+          mListener.editAccount(a);
+          rebuild();
+        }
+        break;
+
+      case KeyEvent.PRINT:
+        if (a != null) {
+          PrintManager.SHARED_INSTANCE.printLedger(a);
+        }
+        break;
+      default:
+        super.processKeyEvent(k);
+        break;
     }
   }
 

@@ -328,6 +328,7 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
   public LedgerWindow addHint(String sentence) {
     checkState(mLedgerFieldList != null);
     int target = mEntries.size();
+    //pr("addHint, sentence:",sentence,"target:",target);
     trie().addSentence(sentence, null);
     mHintToRowNumberMap.put(sentence, target);
     return this;

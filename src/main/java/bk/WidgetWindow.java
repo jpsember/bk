@@ -175,8 +175,9 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   }
 
   @Override
-  public void processKeyEvent(KeyEvent k) {
+  public final /*for now*/ void processKeyEvent(KeyEvent k) {
     var fm = focusManager();
+    pr("look at ways of reactivating hint processing; keytype:",k.keyType());
     switch (k.keyType()) {
     case Enter: {
       if (isButton())
@@ -250,6 +251,8 @@ public class WidgetWindow extends JWindow implements FocusHandler {
       break;
     default:
       //todo("have some sort of fallback");
+    //  pr("key type:",k.keyType());
+      todo("can we document the hint logic?");
       break;
     }
 
@@ -263,8 +266,10 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     mHint = null;
     if (!mHintDisabled) {
       if (mHelper != null) {
+        todo("refactor the 'disappearing' hints");
         var prefix = getHintForHelper();
         var newHint = mHelper.getHint(prefix);
+        pr("prefix:",quote(prefix),"hint:",quote(newHint));
         if (!newHint.equals(mHint)) {
           mHint = newHint;
           callHintListener(mHint);

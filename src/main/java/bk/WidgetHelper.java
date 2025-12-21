@@ -2,6 +2,8 @@ package bk;
 
 import static js.base.Tools.*;
 
+import static bk.Util.*;
+
 import java.util.Map;
 
 import js.base.BaseObject;
@@ -14,13 +16,17 @@ public abstract class WidgetHelper extends BaseObject {
   public abstract String constructHint(String prefix);
 
   public String getHint(String prefix) {
+    loadUtil();
     String hint = "";
     if (!prefix.isEmpty()) {
+
       var prefixLower = prefix.toLowerCase();
       hint = mHintResultsMap.get(prefix);
       if (hint == null) {
         hint = nullToEmpty(constructHint(prefixLower));
+        todo("What is the purpose of the hint result map?");
         mHintResultsMap.put(prefix, hint);
+        //pr("...stored", prefix, "=>", hint);
       }
     }
     return hint;
