@@ -33,6 +33,7 @@ public class AccountForm extends FormWindow {
         .addField("Name");
     mBudget = validator(BUDGET_VALIDATOR).value(account.budget()).addField("Budget");
     mStock = validator(STOCK_VALIDATOR).value(account.stock()).addField("Stock");
+    mShortcut = validator(SHORTCUT_VALIDATOR).value(account.shortcut()).addField("Shortcut");
     addVertSpace(1);
     addButton("Ok", () -> okHandler());
     addButton("Cancel", () -> cancelHandler());
@@ -54,11 +55,13 @@ public class AccountForm extends FormWindow {
         break;
       if (mStock.showAlert())
         break;
+if (mShortcut.showAlert()) break;
 
       ac.number(mNumber.validResult());
       ac.name(mName.validResult());
       ac.budget(mBudget.validResult());
       ac.stock(mStock.validResult());
+      ac.shortcut(mShortcut.validResult());
 
       switch (mType) {
       case TYPE_ADD: {
@@ -75,6 +78,14 @@ public class AccountForm extends FormWindow {
           problem = "This account number is taken!";
           break outer;
         }
+
+        todo("fn to check if shortcut taken");
+        var prob2 =  checkDupShortcut(ac);
+        if (prob2 != null) {
+          problem = prob2;
+          break outer;
+        }
+
       }
         break;
       }
@@ -141,12 +152,23 @@ public class AccountForm extends FormWindow {
     mListener.editedAccount(this, editedAccount);
   }
 
+  private String checkDupShortcut(Account a) {
+    String prob = null;
+    var sc = a.shortcut();
+    if (!sc.isEmpty()) {
+
+      todo("look through all the accounts looking for duplicate shortcut: "+sc);
+    }
+
+    return prob;
+  }
+
   private void cancelHandler() {
     mListener.editedAccount(this, null);
   }
 
   private int mType;
-  private WidgetWindow mNumber, mName, mBudget, mStock;
+  private WidgetWindow mNumber, mName, mBudget, mStock, mShortcut;
   private Account mOriginalAccount;
   private Listener mListener;
 

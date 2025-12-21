@@ -229,6 +229,29 @@ public class Storage extends BaseObject {
 
   private void scanForProblems() {
 
+    todo("validate the accounts as well");
+    {
+      Map<Integer, Account> copyOfAcct = hashMap();
+      copyOfAcct.putAll(accounts());
+
+
+      for (var t : copyOfAcct.entrySet()) {
+        String problem = null;
+        var a = t.getValue();
+
+        do {
+          var sc = a.shortcut();
+          if (sc.length() > 1) {
+            problem = "shortcut is too long";
+            break;
+          }
+        } while (false);
+        if (problem != null) {
+          pr("*** Problem with account:", problem);
+        }
+      }
+    }
+
     // Make a copy of the transactions so we can modify the original map
     List<Transaction> copyOfTrans = arrayList();
     copyOfTrans.addAll(transactions().values());

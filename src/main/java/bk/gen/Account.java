@@ -25,6 +25,10 @@ public class Account implements AbstractData {
     return mStock;
   }
 
+  public String shortcut() {
+    return mShortcut;
+  }
+
   @Override
   public Builder toBuilder() {
     return new Builder(this);
@@ -35,6 +39,7 @@ public class Account implements AbstractData {
   protected static final String _2 = "balance";
   protected static final String _3 = "budget";
   protected static final String _4 = "stock";
+  protected static final String _5 = "shortcut";
 
   @Override
   public String toString() {
@@ -49,6 +54,7 @@ public class Account implements AbstractData {
     m.putUnsafe(_2, mBalance);
     m.putUnsafe(_3, mBudget);
     m.putUnsafe(_4, mStock);
+    m.putUnsafe(_5, mShortcut);
     return m;
   }
 
@@ -68,6 +74,7 @@ public class Account implements AbstractData {
     mBalance = m.opt(_2, 0L);
     mBudget = m.opt(_3, 0L);
     mStock = m.opt(_4, false);
+    mShortcut = m.opt(_5, "");
   }
 
   public static Builder newBuilder() {
@@ -93,6 +100,8 @@ public class Account implements AbstractData {
       return false;
     if (!(mStock == other.mStock))
       return false;
+    if (!(mShortcut.equals(other.mShortcut)))
+      return false;
     return true;
   }
 
@@ -106,6 +115,7 @@ public class Account implements AbstractData {
       r = r * 37 + (int)mBalance;
       r = r * 37 + (int)mBudget;
       r = r * 37 + (mStock ? 1 : 0);
+      r = r * 37 + mShortcut.hashCode();
       m__hashcode = r;
     }
     return r;
@@ -116,6 +126,7 @@ public class Account implements AbstractData {
   protected long mBalance;
   protected long mBudget;
   protected boolean mStock;
+  protected String mShortcut;
   protected int m__hashcode;
 
   public static final class Builder extends Account {
@@ -126,6 +137,7 @@ public class Account implements AbstractData {
       mBalance = m.mBalance;
       mBudget = m.mBudget;
       mStock = m.mStock;
+      mShortcut = m.mShortcut;
     }
 
     @Override
@@ -147,6 +159,7 @@ public class Account implements AbstractData {
       r.mBalance = mBalance;
       r.mBudget = mBudget;
       r.mStock = mStock;
+      r.mShortcut = mShortcut;
       return r;
     }
 
@@ -175,12 +188,18 @@ public class Account implements AbstractData {
       return this;
     }
 
+    public Builder shortcut(String x) {
+      mShortcut = (x == null) ? "" : x;
+      return this;
+    }
+
   }
 
   public static final Account DEFAULT_INSTANCE = new Account();
 
   private Account() {
     mName = "";
+    mShortcut = "";
   }
 
 }

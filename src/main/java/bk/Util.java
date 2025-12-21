@@ -303,13 +303,13 @@ public final class Util {
 
   private static Random sRandom = new Random(1965);
 
-  public static final LedgerField EMPTY_FIELD = new TextField("");
   public static final Validator DEFAULT_VALIDATOR = new Validator() {
   };
 
   public static final Validator DATE_VALIDATOR = new DateValidator();
   public static final Validator BUDGET_VALIDATOR = new CurrencyValidator().withCanBeZero(true);
   public static final Validator STOCK_VALIDATOR = new YesNoValidator();
+  public static final Validator SHORTCUT_VALIDATOR = new ShortcutValidator();
 
   public static final Validator ACCOUNT_NAME_VALIDATOR = new Validator() {
     public ValidationResult validate(String value) {

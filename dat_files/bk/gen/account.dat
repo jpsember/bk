@@ -4,4 +4,5 @@ fields {
   long balance;
   long budget;
   bool stock;   // does this account track a quantity of shares, cost base, and capital gain?
+  string shortcut; // if nonempty, typing '.' followed by this string will select this account (in certain circumstances)
 }
