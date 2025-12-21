@@ -46,7 +46,8 @@ public class AccountForm extends FormWindow {
 
     String problem = "This field is invalid.";
 
-    outer: do {
+    outer:
+    do {
       if (mNumber.showAlert())
         break;
       if (mName.showAlert())
@@ -55,7 +56,7 @@ public class AccountForm extends FormWindow {
         break;
       if (mStock.showAlert())
         break;
-if (mShortcut.showAlert()) break;
+      if (mShortcut.showAlert()) break;
 
       ac.number(mNumber.validResult());
       ac.name(mName.validResult());
@@ -64,29 +65,28 @@ if (mShortcut.showAlert()) break;
       ac.shortcut(mShortcut.validResult());
 
       switch (mType) {
-      case TYPE_ADD: {
-        if (accountExists(ac.number())) {
-          problem = "This account number is taken!";
-          break outer;
+        case TYPE_ADD: {
+          if (accountExists(ac.number())) {
+            problem = "This account number is taken!";
+            break outer;
+          }
         }
-      }
         break;
 
-      case TYPE_EDIT: {
-        var existing = storage().account(ac.number());
-        if (existing != null && ac.number() != mOriginalAccount.number()) {
-          problem = "This account number is taken!";
-          break outer;
-        }
+        case TYPE_EDIT: {
+          var existing = storage().account(ac.number());
+          if (existing != null && ac.number() != mOriginalAccount.number()) {
+            problem = "This account number is taken!";
+            break outer;
+          }
 
-        todo("fn to check if shortcut taken");
-        var prob2 =  checkDupShortcut(ac);
-        if (prob2 != null) {
-          problem = prob2;
-          break outer;
-        }
+          var prob2 = checkDupShortcut(ac);
+          if (prob2 != null) {
+            problem = prob2;
+            break outer;
+          }
 
-      }
+        }
         break;
       }
       problem = null;
@@ -153,14 +153,17 @@ if (mShortcut.showAlert()) break;
   }
 
   private String checkDupShortcut(Account a) {
-    String prob = null;
-    var sc = a.shortcut();
-    if (!sc.isEmpty()) {
-
-      todo("look through all the accounts looking for duplicate shortcut: "+sc);
+    String problem = null;
+    if (!a.shortcut().isEmpty()) {
+      for (var otherAccount : storage().readAllAccounts()) {
+        if (otherAccount.number() == mOriginalAccount.number()) continue;
+        if (otherAccount.shortcut().equals(a.shortcut())) {
+          problem = "The shortcut is already assigned to " + Util.accountNumberWithNameString(otherAccount);
+          break;
+        }
+      }
     }
-
-    return prob;
+    return problem;
   }
 
   private void cancelHandler() {
