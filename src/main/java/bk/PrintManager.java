@@ -32,7 +32,6 @@ public class PrintManager extends BaseObject {
   public void auxPrintLedger(Account a, boolean expanded) {
     //    alertVerbose();
     init();
-    mExpanded = expanded;
 
     var ts = storage().readTransactionsForAccount(a.number());
 
@@ -40,7 +39,7 @@ public class PrintManager extends BaseObject {
 
     right().setMaxLength(CHARS_CURRENCY).addCol("Debit");
     right().setMaxLength(CHARS_CURRENCY).addCol("Credit");
-    if (mExpanded) {
+    if (expanded) {
       setMaxLength(CHARS_ACCOUNT_NUMBER_AND_NAME).stretchPct(30).shrinkPct(20).addCol("Account");
     } else {
       setMaxLength(CHARS_ACCOUNT_NAME).stretchPct(30).shrinkPct(25).addCol("Account");
@@ -48,7 +47,7 @@ public class PrintManager extends BaseObject {
     right().setMaxLength(CHARS_CURRENCY).addCol("Balance");
     var SMALL_DESCR_LEN = 24;
 
-    if (mExpanded)
+    if (expanded)
       setMaxLength(CHARS_TRANSACTION_DESCRIPTION).stretchPct(100).shrinkPct(50).addCol("Memo");
     else
       setMaxLength(SMALL_DESCR_LEN).shrinkPct(0).stretchPct(0).addCol("Memo");
@@ -70,14 +69,14 @@ public class PrintManager extends BaseObject {
         col("").col(curStr);
 
       var ac = otherAccount(t, a.number());
-      if (mExpanded) {
+      if (expanded) {
         col(accountNumberWithNameString(ac));
       } else {
         col(ac.name());
       }
 
       col(formatCurrency(currBal));
-      if (mExpanded)
+      if (expanded)
         col(t.description());
       else {
         var note = t.description();
@@ -122,7 +121,7 @@ public class PrintManager extends BaseObject {
     if (false)
       note = randomText(150, false);
     mFootnotes.add(note);
-    return "Note " + Integer.toString(mFootnotes.size());
+    return "Note " + mFootnotes.size();
   }
 
   public PrintManager setTitle(Object... msg) {
@@ -420,7 +419,6 @@ public class PrintManager extends BaseObject {
   private PrintCol mCurrentPrintCol;
   private int mColNumber;
   private int mLineLength;
-  private boolean mExpanded;
-  private List<String> mFootnotes;
+   private List<String> mFootnotes;
   private boolean mPDF = true;
 }

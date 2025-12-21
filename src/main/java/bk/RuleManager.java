@@ -103,7 +103,7 @@ public class RuleManager extends BaseObject {
     return anum == ACCT_RETAINED_EARNINGS || anum == ACCT_INCOME_SUMMARY;
   }
 
-  private static final boolean intWithinArray(int[] array, int value) {
+  private static  boolean intWithinArray(int[] array, int value) {
     for (int j = array.length - 1; j >= 0; j--)
       if (array[j] == value)
         return true;

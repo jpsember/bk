@@ -298,7 +298,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
       mContent = "";
       mCursorPos = 0;
     }
-    mContent = mContent.substring(0, mCursorPos) + Character.toString(c) + mContent.substring(mCursorPos);
+    mContent = mContent.substring(0, mCursorPos) + c + mContent.substring(mCursorPos);
     mCursorPos++;
   }
 

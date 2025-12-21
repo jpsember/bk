@@ -285,7 +285,7 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
       mSep = mPendingSep;
     }
 
-    if (mColumns.size() != 0) {
+    if (!mColumns.isEmpty()) {
       mColumns.add(mSep == 0 ? COLUMN_SEPARATOR_SPACES : COLUMN_SEPARATOR_VERTICAL_BAR);
     }
     column = adjustColumn(column);
@@ -318,7 +318,7 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
 
   public LedgerWindow add(LedgerField f) {
     checkState(mLedgerFieldList != null);
-    if (mLedgerFieldList.size() != 0) {
+    if (!mLedgerFieldList.isEmpty()) {
       mLedgerFieldList.add(mSep == 0 ? SEPARATOR_FIELD_SPACES : SEPARATOR_FIELD_VERTICAL_BAR);
     }
     mLedgerFieldList.add(f);
@@ -446,10 +446,8 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
   private static final LedgerField SEPARATOR_FIELD_VERTICAL_BAR = new LedgerField() {
     @Override
     public String toString() {
-      return SIN;
+      return " " + Symbols.SINGLE_LINE_VERTICAL + " ";
     }
-
-    private final String SIN = " " + Symbols.SINGLE_LINE_VERTICAL + " ";
   };
 
   private static final LedgerField SEPARATOR_FIELD_SPACES = new LedgerField() {

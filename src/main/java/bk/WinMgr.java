@@ -153,7 +153,7 @@ public class WinMgr extends BaseObject {
 
   public void doneConstruction() {
     // Ensure that only the root container remains on the stack
-    if (mStack.size() != 0)
+    if (!mStack.isEmpty())
       badState("window stack size is unexpected:", mStack.size(),
           "or doesn't have top-level container at bottom");
   }

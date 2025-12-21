@@ -53,9 +53,6 @@ public class TrieTest extends MyTestCase {
     addWords("al", "al");
 
     assertEquals("al", tri().query("al"));
-//
-//    log("Tri:", INDENT, tri());
-//    ask("a", "al", "alp", "alph", "alpha", "alphab");
   }
 
   @Test

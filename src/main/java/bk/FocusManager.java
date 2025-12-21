@@ -256,7 +256,7 @@ public class FocusManager extends BaseObject {
 
   public boolean popIfPossible() {
     // Don't pop the last container
-    if (mStack.size() == 0)
+    if (mStack.isEmpty())
       return false;
     pop();
     return true;
