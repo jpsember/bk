@@ -34,7 +34,7 @@ public class AccountIdHelper extends WidgetHelper implements ChangeListener {
     t.addSentence("" + a.number(), output);
     t.addSentence(a.name(), output);
 
-    if (!todo("maybe add this...?")) {
+    if (true && todo("maybe add entries for shortcut?")) {
     // Add entries for shortcut
     if (!a.shortcut().isEmpty()) {
       t.addSentence("."+a.shortcut(), output);

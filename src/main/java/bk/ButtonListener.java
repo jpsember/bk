@@ -1,5 +1,5 @@
 package bk;
 
 public interface ButtonListener {
-void buttonPressed();
+  void buttonPressed();
 }

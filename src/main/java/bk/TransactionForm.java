@@ -27,6 +27,19 @@ public class TransactionForm extends FormWindow implements HintListener {
 
     mType = type;
 
+
+//    mDrV = new AccountValidator();
+//    mCrV = new AccountValidator();
+
+    boolean newLoc =   d84("putting dr/cr first");
+    if (newLoc) {
+      mDr = validator(new AccountValidator()).value(accountNumberWithNameString(b.debit(), ""))
+          .fieldWidth(CHARS_ACCOUNT_NUMBER_AND_NAME).addField("Dr").helper(new AccountIdHelper());
+      mCr = validator(new AccountValidator()).value(accountNumberWithNameString(b.credit(), ""))
+          .fieldWidth(CHARS_ACCOUNT_NUMBER_AND_NAME).addField("Cr").helper(new AccountIdHelper());
+      addVertSpace(1);
+    }
+
     var dt = b.date();
     if (dt == 0)
       dt = defaultEpochSeconds();
@@ -37,13 +50,13 @@ public class TransactionForm extends FormWindow implements HintListener {
     // We need to allow zero-amount transactions for stock switches
     mAmount = validator(new CurrencyValidator().withCanBeZero(true)).value(b.amount()).addField("Amount");
 
-    mDrV = new AccountValidator();
-    mCrV = new AccountValidator();
 
-    mDr = validator(mDrV).value(accountNumberWithNameString(b.debit(), ""))
-        .fieldWidth(CHARS_ACCOUNT_NUMBER_AND_NAME).addField("Dr").helper(new AccountIdHelper());
-    mCr = validator(mCrV).value(accountNumberWithNameString(b.credit(), ""))
-        .fieldWidth(CHARS_ACCOUNT_NUMBER_AND_NAME).addField("Cr").helper(new AccountIdHelper());
+    if (!newLoc) {
+      mDr = validator(new AccountValidator()).value(accountNumberWithNameString(b.debit(), ""))
+          .fieldWidth(CHARS_ACCOUNT_NUMBER_AND_NAME).addField("Dr").helper(new AccountIdHelper());
+      mCr = validator(new AccountValidator()).value(accountNumberWithNameString(b.credit(), ""))
+          .fieldWidth(CHARS_ACCOUNT_NUMBER_AND_NAME).addField("Cr").helper(new AccountIdHelper());
+    }
 
     addButton("Ok", () -> okHandler());
 
@@ -206,7 +219,6 @@ public class TransactionForm extends FormWindow implements HintListener {
   private Listener mListener;
   private int mType;
   private WidgetWindow mDate, mAmount, mDr, mCr, mDesc;
-  private AccountValidator mDrV, mCrV;
   private int mAccountNumber;
   private Transaction mOrig;
   private TransactionDescriptionHelper mDescHelper;

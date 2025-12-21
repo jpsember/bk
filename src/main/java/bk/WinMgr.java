@@ -9,6 +9,7 @@ import java.util.Stack;
 import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.input.KeyStroke;
+import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.AbstractScreen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
@@ -188,7 +189,13 @@ public class WinMgr extends BaseObject {
       focusManager().update();
 
       KeyStroke keyStroke = mScreen.pollInput();
+
       if (keyStroke != null) {
+//        d84("keystroke:",keyStroke);
+        if (ISSUE_84 && keyStroke.getKeyType() == KeyType.F1) {
+          pr("....QUITTING IMMEDIATELY");
+          System.exit(0);
+        }
         var key = new KeyEvent(keyStroke);
 
         boolean processed = false;

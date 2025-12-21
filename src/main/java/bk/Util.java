@@ -32,6 +32,13 @@ import js.parsing.Scanner;
 
 public final class Util {
 
+  public static final boolean ISSUE_84 = alert("ISSUE_84 is in effect");
+  public static boolean d84(Object... messages) {
+    if (ISSUE_84)
+      pr(insertStringToFront("{ISSUE 84}",messages));
+    return ISSUE_84;
+  }
+
   public static final int BORDER_NONE = 0;
   public static final int BORDER_THIN = 1;
   public static final int BORDER_THICK = 2;

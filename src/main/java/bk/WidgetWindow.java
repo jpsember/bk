@@ -176,102 +176,111 @@ public class WidgetWindow extends JWindow implements FocusHandler {
 
   @Override
   public final /*for now*/ void processKeyEvent(KeyEvent k) {
+    d84("WidgetWindow, processKeyEvent:", k);
+
     var fm = focusManager();
-    pr("look at ways of reactivating hint processing; keytype:",k.keyType());
+    todo("can we document the hint logic?");
+    todo("look at ways of reactivating hint processing; keytype:", k.keyType());
+    todo("refactor the 'disappearing' hints");
     switch (k.keyType()) {
-    case Enter: {
-      if (isButton())
-        mButtonListener.buttonPressed();
-      else {
-        applyHint();
-        fm.move(mFocusRootWindow, 1);
+      case Enter: {
+        if (isButton())
+          mButtonListener.buttonPressed();
+        else {
+          applyHint();
+          fm.move(mFocusRootWindow, 1);
+        }
       }
-    }
       break;
 
-    case Tab:
-      applyHint();
-      fm.move(mFocusRootWindow, 1);
-      break;
-    case ArrowDown:
-      applyHint();
-      fm.move(mFocusRootWindow, 1);
-      break;
-    case ArrowUp:
-      applyHint();
-      fm.move(mFocusRootWindow, -1);
-      break;
-    case ArrowLeft:
-      suppressHint();
-      if (mCursorPos == 0)
+      case Tab:
+        applyHint();
+        fm.move(mFocusRootWindow, 1);
         break;
-      if (mCursorPos > 0)
-        mCursorPos--;
-      else
-        mCursorPos = mContent.length() - 1;
-      break;
-    case ArrowRight:
-      suppressHint();
-      if (mCursorPos < mContent.length())
-        mCursorPos++;
-      break;
-    case Backspace:
-      suppressHint();
-      if (mCursorPos > 0) {
-        mContent = mContent.substring(0, mCursorPos - 1) + mContent.substring(mCursorPos);
-        mCursorPos--;
-      } else {
-        mCursorPos = 0;
-        mContent = "";
-      }
-      break;
-    case Delete:
-      suppressHint();
-      if (mCursorPos < 0) {
-        mContent = "";
-        mCursorPos = 0;
-      } else {
+      case ArrowDown:
+        applyHint();
+        fm.move(mFocusRootWindow, 1);
+        break;
+      case ArrowUp:
+        applyHint();
+        fm.move(mFocusRootWindow, -1);
+        break;
+      case ArrowLeft:
+        suppressHint();
+        if (mCursorPos == 0)
+          break;
+        if (mCursorPos > 0)
+          mCursorPos--;
+        else
+          mCursorPos = mContent.length() - 1;
+        break;
+      case ArrowRight:
+        suppressHint();
         if (mCursorPos < mContent.length())
-          mContent = mContent.substring(0, mCursorPos) + mContent.substring(mCursorPos + 1);
+          mCursorPos++;
+        break;
+      case Backspace:
+        suppressHint();
+        if (mCursorPos > 0) {
+          mContent = mContent.substring(0, mCursorPos - 1) + mContent.substring(mCursorPos);
+          mCursorPos--;
+        } else {
+          mCursorPos = 0;
+          mContent = "";
+        }
+        break;
+      case Delete:
+        suppressHint();
+        if (mCursorPos < 0) {
+          mContent = "";
+          mCursorPos = 0;
+        } else {
+          if (mCursorPos < mContent.length())
+            mContent = mContent.substring(0, mCursorPos) + mContent.substring(mCursorPos + 1);
+        }
+        break;
+      case Home:
+        suppressHint();
+        mCursorPos = 0;
+        break;
+      case End:
+        suppressHint();
+        mCursorPos = mContent.length();
+        break;
+      case Character: {
+        var c = k.getCharacter();
+        insertChar(c);
+        mHumanEdited = true;
       }
       break;
-    case Home:
-      suppressHint();
-      mCursorPos = 0;
-      break;
-    case End:
-      suppressHint();
-      mCursorPos = mContent.length();
-      break;
-    case Character: {
-      var c = k.getCharacter();
-      insertChar(c);
-      mHumanEdited = true;
-    }
-      break;
-    default:
-      //todo("have some sort of fallback");
-    //  pr("key type:",k.keyType());
-      todo("can we document the hint logic?");
-      break;
+      default:
+        //todo("have some sort of fallback");
+        //  pr("key type:",k.keyType());
+         break;
     }
 
     // If this is no longer the focused window, return immediately
     if (fm.focus() != this)
       return;
 
+    d84("mWidth:",mWidth);
+    d84("mContent:",mContent);
+    d84("mCursorPos:",mCursorPos);
+
     mContent = truncate(mContent, mWidth);
     mCursorPos = MyMath.clamp(mCursorPos, -1, mWidth);
+
 
     mHint = null;
     if (!mHintDisabled) {
       if (mHelper != null) {
-        todo("refactor the 'disappearing' hints");
         var prefix = getHintForHelper();
         var newHint = mHelper.getHint(prefix);
-        pr("prefix:",quote(prefix),"hint:",quote(newHint));
+        d84("prefix:",quote(prefix));
+        d84("newHint:",quote(newHint));
         if (!newHint.equals(mHint)) {
           mHint = newHint;
+          d84("...updated hint:",mHint,"; calling listener");
           callHintListener(mHint);
         }
       }
