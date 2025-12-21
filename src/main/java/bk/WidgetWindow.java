@@ -108,9 +108,11 @@ public class WidgetWindow extends JWindow implements FocusHandler {
       var lx = b.x + labelWidth + SEP;
       var ly = b.y;
 
+      todo("is it safe to append hint to existing content?");
       var s = mContent;
       if (nonEmpty(mHint))
-        s = mHint;
+        s = s + "...HINT:{"+mHint+"}";
+//        s = mHint;
 
       var style = STYLE_NORMAL;
       if (hf) {
@@ -253,10 +255,6 @@ public class WidgetWindow extends JWindow implements FocusHandler {
         mHumanEdited = true;
       }
       break;
-      default:
-        //todo("have some sort of fallback");
-        //  pr("key type:",k.keyType());
-         break;
     }
 
     // If this is no longer the focused window, return immediately
@@ -289,12 +287,6 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     repaint();
   }
 
-  /**
-   * Disable any more hints during this focus session
-   */
-  private void suppressHint() {
-    mHintDisabled = true;
-  }
 
   public void setContent(String text) {
     text = nullToEmpty(text);
@@ -309,21 +301,6 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     }
     mContent = mContent.substring(0, mCursorPos) + c + mContent.substring(mCursorPos);
     mCursorPos++;
-  }
-
-  /**
-   * If a hint exists, replace user-typed content with it
-   */
-  private void applyHint() {
-    if (nonEmpty(mHint)) {
-      setContent(mHint);
-    }
-  }
-
-  private void callHintListener(String hint) {
-    if (mHintListener != null) {
-      mHintListener.hintChanged(hint);
-    }
   }
 
   private static String truncate(String s, int maxWidth) {
@@ -346,10 +323,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   private ButtonListener mButtonListener;
   private ValidationResult mValidationResult;
   private WidgetHelper mHelper;
-  private String mHint;
-  private HintListener mHintListener;
-  private boolean mHumanEdited;
-  private boolean mHintDisabled;
+
 
   public boolean isHumanEdited() {
     return mHumanEdited;
@@ -364,4 +338,40 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   public boolean undoEnabled() {
     return false;
   }
+
+  // ----------------------------------------------------------------------------------------------
+  // Hints
+  // ----------------------------------------------------------------------------------------------
+
+  private String mHint;
+  private HintListener mHintListener;
+  private boolean mHumanEdited;
+  private boolean mHintDisabled;
+
+  /**
+   * If a hint exists, replace user-typed content with it
+   */
+  private void applyHint() {
+    if (nonEmpty(mHint)) {
+      setContent(mHint);
+    }
+  }
+
+  /**
+   * Disable any more hints during this focus session
+   */
+  private void suppressHint() {
+    if (!d84("NOT suppressing hint"))
+    mHintDisabled = true;
+  }
+
+
+  private void callHintListener(String hint) {
+    if (mHintListener != null) {
+      mHintListener.hintChanged(hint);
+    }
+  }
+  // ----------------------------------------------------------------------------------------------
+
+
 }

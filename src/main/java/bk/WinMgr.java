@@ -182,37 +182,57 @@ public class WinMgr extends BaseObject {
     }
   }
 
+
+  private long startMs;
+
   public void update() {
     var m = winMgr();
     try {
+      todo("Can we display the hint result to the right, not overwriting what user typed?");
 
       focusManager().update();
 
       KeyStroke keyStroke = mScreen.pollInput();
+      var quitFlag = false;
 
-      if (keyStroke != null) {
-//        d84("keystroke:",keyStroke);
-        if (ISSUE_84 && keyStroke.getKeyType() == KeyType.F1) {
+      if (ISSUE_84) {
+        var tm = System.currentTimeMillis();
+        if (startMs == 0) {
+          startMs = tm;
+        }
+        if (tm - startMs > 1000 * 30) quitFlag = true;
+      }
+
+      if (ISSUE_84) {
+        if (keyStroke != null) {
+          startMs = 0;
+          if (
+              keyStroke.getKeyType() == KeyType.F1) quitFlag = true;
+        }
+        if (quitFlag) {
           pr("....QUITTING IMMEDIATELY");
           System.exit(0);
         }
+      }
+    
+      if (keyStroke != null) {
         var key = new KeyEvent(keyStroke);
 
         boolean processed = false;
 
         switch (key.toString()) {
-        case KeyEvent.QUIT:
-          quit();
-          return;
-        case KeyEvent.ESCAPE:
-          if (focusManager().popIfPossible()) {
-            processed = true;
-          }
-          break;
-        default:
-          if (focusManager().processUndoKeys(key))
-            processed = true;
-          break;
+          case KeyEvent.QUIT:
+            quit();
+            return;
+          case KeyEvent.ESCAPE:
+            if (focusManager().popIfPossible()) {
+              processed = true;
+            }
+            break;
+          default:
+            if (focusManager().processUndoKeys(key))
+              processed = true;
+            break;
         }
 
         if (!processed) {
@@ -275,9 +295,9 @@ public class WinMgr extends BaseObject {
   /**
    * If a view's layout is invalid, calls its layout() method, and invalidates
    * its paint.
-   * 
+   *
    * If the view's paint is invalid, renders it.
-   * 
+   *
    * Recursively processes all child views in this manner as well.
    */
   private void updateView(JWindow w) {

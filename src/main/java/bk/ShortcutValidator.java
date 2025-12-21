@@ -17,9 +17,6 @@ public class ShortcutValidator extends BaseObject implements Validator {
     var result = ValidationResult.NONE;
     try {
       value = value.trim();
-      // We will append a suffix to indicate if the shortcut is already used...
-
-      //      checkState(value.length() <= 1);
       if (!value.isEmpty()) {
         checkState(
             Character.isLetter(value.charAt(0)));

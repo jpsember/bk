@@ -27,11 +27,7 @@ public class TransactionForm extends FormWindow implements HintListener {
 
     mType = type;
 
-
-//    mDrV = new AccountValidator();
-//    mCrV = new AccountValidator();
-
-    boolean newLoc =   d84("putting dr/cr first");
+    boolean newLoc = d84("putting dr/cr first");
     if (newLoc) {
       mDr = validator(new AccountValidator()).value(accountNumberWithNameString(b.debit(), ""))
           .fieldWidth(CHARS_ACCOUNT_NUMBER_AND_NAME).addField("Dr").helper(new AccountIdHelper());
