@@ -108,11 +108,14 @@ public class WidgetWindow extends JWindow implements FocusHandler {
       var lx = b.x + labelWidth + SEP;
       var ly = b.y;
 
-      todo("is it safe to append hint to existing content?");
       var s = mContent;
-      if (nonEmpty(mHint))
-        s = s + "...HINT:{"+mHint+"}";
-//        s = mHint;
+      if (nonEmpty(mHintText)) {
+        s = mHintText;
+        if (false && ISSUE_84) {
+          todo("is it safe to append hint to existing content?");
+          s = mContent + spaces(12 - mContent.length()) + "{" + mHintText + "}";
+        }
+      }
 
       var style = STYLE_NORMAL;
       if (hf) {
@@ -178,7 +181,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
 
   @Override
   public final /*for now*/ void processKeyEvent(KeyEvent k) {
-    d84("WidgetWindow, processKeyEvent:", k);
+    //d84("WidgetWindow, processKeyEvent:", k);
 
     var fm = focusManager();
     todo("can we document the hint logic?");
@@ -251,7 +254,13 @@ public class WidgetWindow extends JWindow implements FocusHandler {
         break;
       case Character: {
         var c = k.getCharacter();
-        insertChar(c);
+        if (c == '`') {
+          mContent = "";
+          mCursorPos = 0;
+        } else {
+          insertChar(c);
+        }
+        todo("what is the point of human edited flag?");
         mHumanEdited = true;
       }
       break;
@@ -261,25 +270,27 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     if (fm.focus() != this)
       return;
 
-    d84("mWidth:",mWidth);
-    d84("mContent:",mContent);
-    d84("mCursorPos:",mCursorPos);
+    d84("mWidth:", mWidth);
+    d84("mContent:", mContent);
+    d84("mCursorPos:", mCursorPos);
 
     mContent = truncate(mContent, mWidth);
     mCursorPos = MyMath.clamp(mCursorPos, -1, mWidth);
 
 
-    mHint = null;
+    mHintText = null;
     if (!mHintDisabled) {
       if (mHelper != null) {
         var prefix = getHintForHelper();
         var newHint = mHelper.getHint(prefix);
-        d84("prefix:",quote(prefix));
-        d84("newHint:",quote(newHint));
-        if (!newHint.equals(mHint)) {
-          mHint = newHint;
-          d84("...updated hint:",mHint,"; calling listener");
-          callHintListener(mHint);
+        d84("prefix:", quote(prefix));
+        d84("newHint:", quote(newHint));
+        if (!newHint.equals(mHintText)) {
+          mHintText = newHint;
+          if (mHintListener != null) {
+            d84("...updated hint:", mHintText, "; calling listener");
+            mHintListener.hintChanged(mHintText);
+          }
         }
       }
     }
@@ -343,7 +354,7 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   // Hints
   // ----------------------------------------------------------------------------------------------
 
-  private String mHint;
+  private String mHintText;
   private HintListener mHintListener;
   private boolean mHumanEdited;
   private boolean mHintDisabled;
@@ -352,8 +363,9 @@ public class WidgetWindow extends JWindow implements FocusHandler {
    * If a hint exists, replace user-typed content with it
    */
   private void applyHint() {
-    if (nonEmpty(mHint)) {
-      setContent(mHint);
+    todo("Can I refactor so I don't need to call applyHint whenever leaving field?");
+    if (nonEmpty(mHintText)) {
+      setContent(mHintText);
     }
   }
 
@@ -362,15 +374,9 @@ public class WidgetWindow extends JWindow implements FocusHandler {
    */
   private void suppressHint() {
     if (!d84("NOT suppressing hint"))
-    mHintDisabled = true;
+      mHintDisabled = true;
   }
 
-
-  private void callHintListener(String hint) {
-    if (mHintListener != null) {
-      mHintListener.hintChanged(hint);
-    }
-  }
   // ----------------------------------------------------------------------------------------------
 
 

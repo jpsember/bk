@@ -214,7 +214,7 @@ public class WinMgr extends BaseObject {
           System.exit(0);
         }
       }
-    
+
       if (keyStroke != null) {
         var key = new KeyEvent(keyStroke);
 
