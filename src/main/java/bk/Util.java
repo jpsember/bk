@@ -32,7 +32,10 @@ import js.parsing.Scanner;
 
 public final class Util {
 
-  public static final boolean ISSUE_84 = alert("ISSUE_84 is in effect");
+  public static final boolean ISSUE_84 = false && alert("ISSUE_84 is in effect");
+
+  public static final boolean DEBUG_TIMEOUT = ISSUE_84 && alert("DEBUG_TIMEOUT is active");
+
   public static boolean d84(Object... messages) {
     if (ISSUE_84)
       pr(insertStringToFront("{ISSUE 84}",messages));

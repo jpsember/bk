@@ -75,7 +75,6 @@ public class WidgetWindow extends JWindow implements FocusHandler {
 
   @Override
   public void gainFocus() {
-    mHintDisabled = false;
     mCursorPos = -1;
   }
 
@@ -180,13 +179,9 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   }
 
   @Override
-  public final /*for now*/ void processKeyEvent(KeyEvent k) {
-    //d84("WidgetWindow, processKeyEvent:", k);
-
+  public void processKeyEvent(KeyEvent k) {
     var fm = focusManager();
-    todo("can we document the hint logic?");
-    todo("look at ways of reactivating hint processing; keytype:", k.keyType());
-    todo("refactor the 'disappearing' hints");
+    todo("!can we document the hint logic?");
     switch (k.keyType()) {
       case Enter: {
         if (isButton())
@@ -211,7 +206,6 @@ public class WidgetWindow extends JWindow implements FocusHandler {
         fm.move(mFocusRootWindow, -1);
         break;
       case ArrowLeft:
-        suppressHint();
         if (mCursorPos == 0)
           break;
         if (mCursorPos > 0)
@@ -220,12 +214,10 @@ public class WidgetWindow extends JWindow implements FocusHandler {
           mCursorPos = mContent.length() - 1;
         break;
       case ArrowRight:
-        suppressHint();
         if (mCursorPos < mContent.length())
           mCursorPos++;
         break;
       case Backspace:
-        suppressHint();
         if (mCursorPos > 0) {
           mContent = mContent.substring(0, mCursorPos - 1) + mContent.substring(mCursorPos);
           mCursorPos--;
@@ -235,7 +227,6 @@ public class WidgetWindow extends JWindow implements FocusHandler {
         }
         break;
       case Delete:
-        suppressHint();
         if (mCursorPos < 0) {
           mContent = "";
           mCursorPos = 0;
@@ -245,11 +236,9 @@ public class WidgetWindow extends JWindow implements FocusHandler {
         }
         break;
       case Home:
-        suppressHint();
         mCursorPos = 0;
         break;
       case End:
-        suppressHint();
         mCursorPos = mContent.length();
         break;
       case Character: {
@@ -259,9 +248,8 @@ public class WidgetWindow extends JWindow implements FocusHandler {
           mCursorPos = 0;
         } else {
           insertChar(c);
+          mHumanEdited = true;
         }
-        todo("what is the point of human edited flag?");
-        mHumanEdited = true;
       }
       break;
     }
@@ -279,18 +267,17 @@ public class WidgetWindow extends JWindow implements FocusHandler {
 
 
     mHintText = null;
-    if (!mHintDisabled) {
-      if (mHelper != null) {
-        var prefix = getHintForHelper();
-        var newHint = mHelper.getHint(prefix);
-        d84("prefix:", quote(prefix));
-        d84("newHint:", quote(newHint));
-        if (!newHint.equals(mHintText)) {
-          mHintText = newHint;
-          if (mHintListener != null) {
-            d84("...updated hint:", mHintText, "; calling listener");
-            mHintListener.hintChanged(mHintText);
-          }
+
+    if (mHelper != null) {
+      var prefix = getHintForHelper();
+      var newHint = mHelper.getHint(prefix);
+      d84("prefix:", quote(prefix));
+      d84("newHint:", quote(newHint));
+      if (!newHint.equals(mHintText)) {
+        mHintText = newHint;
+        if (mHintListener != null) {
+          d84("...updated hint:", mHintText, "; calling listener");
+          mHintListener.hintChanged(mHintText);
         }
       }
     }
@@ -357,7 +344,6 @@ public class WidgetWindow extends JWindow implements FocusHandler {
   private String mHintText;
   private HintListener mHintListener;
   private boolean mHumanEdited;
-  private boolean mHintDisabled;
 
   /**
    * If a hint exists, replace user-typed content with it
@@ -367,14 +353,6 @@ public class WidgetWindow extends JWindow implements FocusHandler {
     if (nonEmpty(mHintText)) {
       setContent(mHintText);
     }
-  }
-
-  /**
-   * Disable any more hints during this focus session
-   */
-  private void suppressHint() {
-    if (!d84("NOT suppressing hint"))
-      mHintDisabled = true;
   }
 
   // ----------------------------------------------------------------------------------------------

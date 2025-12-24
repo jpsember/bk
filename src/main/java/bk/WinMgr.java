@@ -188,14 +188,12 @@ public class WinMgr extends BaseObject {
   public void update() {
     var m = winMgr();
     try {
-      todo("Can we display the hint result to the right, not overwriting what user typed?");
-
       focusManager().update();
 
       KeyStroke keyStroke = mScreen.pollInput();
       var quitFlag = false;
 
-      if (ISSUE_84) {
+      if (DEBUG_TIMEOUT) {
         var tm = System.currentTimeMillis();
         if (startMs == 0) {
           startMs = tm;

@@ -190,36 +190,34 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
   public void processKeyEvent(KeyEvent k) {
     Integer targetEntry = null;
     int pageSize = mLastBodyRowTotal;
-
     boolean resetHint = true;
 
     switch (k.toString()) {
-    case KeyEvent.ARROW_UP:
-      targetEntry = mCursorRow - 1;
-      break;
-    case KeyEvent.ARROW_DOWN:
-      targetEntry = mCursorRow + 1;
-      break;
-    case ":PageUp":
-      targetEntry = mCursorRow - pageSize;
-      break;
-    case ":PageDown":
-      targetEntry = mCursorRow + pageSize;
-      break;
-    case ":Home":
-      targetEntry = 0;
-      break;
-    case ":End":
-      targetEntry = mEntries.size();
-      break;
-    case ":Q":
-      winMgr().quit();
-      return;
-    default:
-      if (processHelper(k)) {
+      case KeyEvent.ARROW_UP:
+        targetEntry = mCursorRow - 1;
+        break;
+      case KeyEvent.ARROW_DOWN:
+        targetEntry = mCursorRow + 1;
+        break;
+      case ":PageUp":
+        targetEntry = mCursorRow - pageSize;
+        break;
+      case ":PageDown":
+        targetEntry = mCursorRow + pageSize;
+        break;
+      case ":Home":
+        targetEntry = 0;
+        break;
+      case ":End":
+        targetEntry = mEntries.size();
+        break;
+      case ":Q":
+        winMgr().quit();
+        return;
+      default:
         resetHint = false;
-      }
-      break;
+        processKeyEventForHint(k);
+        break;
     }
 
     if (resetHint)
@@ -241,14 +239,14 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     var diff = width - text.length();
     if (diff > 0) {
       switch (alignment) {
-      case CENTER:
-        x += diff >> 1;
-        break;
-      case RIGHT:
-        x += diff;
-        break;
-      default:
-        break;
+        case CENTER:
+          x += diff >> 1;
+          break;
+        case RIGHT:
+          x += diff;
+          break;
+        default:
+          break;
       }
     }
     r.drawString(x, y, width, text);
@@ -364,19 +362,19 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
     var b = c.build().toBuilder();
     if (b.width() == 0) {
       switch (b.datatype()) {
-      case ACCOUNT_NUMBER:
-        b.width(4);
-        break;
-      case CURRENCY:
-        b.alignment(Alignment.RIGHT);
-        b.width(12);
-        break;
-      case DATE:
-        b.width(10);
-        break;
-      case TEXT:
-        b.width(25);
-        break;
+        case ACCOUNT_NUMBER:
+          b.width(4);
+          break;
+        case CURRENCY:
+          b.alignment(Alignment.RIGHT);
+          b.width(12);
+          break;
+        case DATE:
+          b.width(10);
+          break;
+        case TEXT:
+          b.width(25);
+          break;
       }
     }
     return b;
@@ -472,27 +470,46 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
   // ------------------------------------------------------------------
 
   private void resetHintCursor() {
+    d84("resent hint cursor, buffer:", quote(mHintBuffer), mHintBuffer.length());
+    if (mHintBuffer.length() != 0)
+      d84("resetting hint cursor; discarding:", quote(mHintBuffer));
     mHintBuffer.setLength(0);
   }
 
-  private boolean processHelper(KeyEvent event) {
-    if (event.keyType() == KeyType.Character && !event.hasCtrlOrAlt() && event.getCharacter() <= 127) {
-      var ts = System.currentTimeMillis();
-      if (ts - mLastHintKeyTime > DateTimeTools.MILLISECONDS(750))
-        resetHintCursor();
-      mLastHintKeyTime = ts;
-
-      char ch = event.getCharacter();
-      mHintBuffer.append(ch);
-      log("hint is now:", mHintBuffer);
-
-      var helperIndex = determineHelperValue(mHintBuffer.toString());
-      if (helperIndex != null) {
-        setCurrentRowIndex(helperIndex);
-      }
-      return true;
+  /**
+   * Process KeyEvent with regards to hint.
+   *
+   * If it is not a 'normal' character, do nothing.  Otherwise:
+   *
+   * If sufficient time has elapsed since the last such character was processed,
+   * clear the hint buffer.
+   *
+   * Append the character to the hint buffer.
+   *
+   * If the hint buffer matches a hint key, jump to that key's row.
+   */
+  private void processKeyEventForHint(KeyEvent event) {
+    if (!(event.keyType() == KeyType.Character && !event.hasCtrlOrAlt() && event.getCharacter() <= 127)) {
+      mLastHintKeyTime = 0;
+      return;
     }
-    return false;
+
+    var ts = System.currentTimeMillis();
+    if (ts - mLastHintKeyTime > DateTimeTools.MILLISECONDS(750))
+      resetHintCursor();
+    mLastHintKeyTime = ts;
+
+
+    char ch = event.getCharacter();
+    mHintBuffer.append(ch);
+    log("hint is now:", mHintBuffer);
+    d84("hint buffer now:", quote(mHintBuffer));
+
+    var helperIndex = determineHelperValue(mHintBuffer.toString());
+    if (helperIndex != null) {
+      d84("...hint is setting current row to", helperIndex);
+      setCurrentRowIndex(helperIndex);
+    }
   }
 
   private Integer determineHelperValue(String prefix) {

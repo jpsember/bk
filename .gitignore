@@ -11,6 +11,10 @@
 #
 .idea
 
+# Eclipse?
+#
+.project
+
 # Compile output
 #
 target

@@ -36,7 +36,7 @@ public class AccountIdHelper extends WidgetHelper implements ChangeListener {
 
     // Add entries for shortcut
     if (!a.shortcut().isEmpty()) {
-      t.addSentence(a.shortcut(), output);
+      t.addWord(a.shortcut(), output);
     }
   }
 

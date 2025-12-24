@@ -24,9 +24,7 @@ public abstract class WidgetHelper extends BaseObject {
       hint = mHintResultsMap.get(prefix);
       if (hint == null) {
         hint = nullToEmpty(constructHint(prefixLower));
-        todo("What is the purpose of the hint result map?");
         mHintResultsMap.put(prefix, hint);
-        //pr("...stored", prefix, "=>", hint);
       }
     }
     return hint;
