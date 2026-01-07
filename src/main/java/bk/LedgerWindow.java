@@ -513,7 +513,7 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
   }
 
   private Integer determineHelperValue(String prefix) {
-    var result = trie().query(prefix);
+    var result =  hintQuery(trie(),prefix); //tri().query(prefix);trie().query(prefix);
     return mHintToRowNumberMap.get(result);
   }
 

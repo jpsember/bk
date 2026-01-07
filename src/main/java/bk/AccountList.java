@@ -62,7 +62,7 @@ public class AccountList extends LedgerWindow implements ChangeListener {
 
       addHint(accountNumberWithNameString(a));
       addHint(a.name());
-      addHint(a.shortcut());
+      addHint(SHORTCUT_TRIE_PREFIX + a.shortcut());
       add(new AccountNameField(a.number(), storage().accountName(a.number())));
       long amount;
       if (hasBudget(a))

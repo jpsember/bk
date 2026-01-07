@@ -36,10 +36,13 @@ public final class Util {
 
   public static final boolean DEBUG_TIMEOUT = ISSUE_84 && alert("DEBUG_TIMEOUT is active");
 
+  // A special prefix to apply when searching for account shortcuts with a Trie
+  public static final String SHORTCUT_TRIE_PREFIX = "~";
+
   public static boolean d84(Object... messages) {
-    boolean dev =  devMode();
+    boolean dev = devMode();
     if (dev)
-      pr(insertStringToFront("{ISSUE 84}",messages));
+      pr(insertStringToFront("{ISSUE 84}", messages));
     return dev;
   }
 
@@ -797,6 +800,7 @@ public final class Util {
   public static boolean devMode() {
     return bkConfig().devMode();
   }
+
   public static void setUtilConfig(BkConfig config) {
     sConfig = config.build();
   }
@@ -894,4 +898,13 @@ public final class Util {
 
   private static DFA sDescDFA;
 
+
+  public static String hintQuery(Trie tri, String text) {
+    if (text.isEmpty()) return "";
+    var result = tri.query("~" + text);
+    if (result.isEmpty()) {
+      result = tri.query(text);
+    }
+    return result;
+  }
 }

@@ -12,7 +12,7 @@ public class TransactionDescriptionHelper extends WidgetHelper {
 
   @Override
   public String constructHint(String prefix) {
-    var hint = tri().query(prefix);
+    var hint = hintQuery(tri(),prefix); //tri().query(prefix);
     if (verbose())
       log("hint for", quote(prefix), INDENT, quote(hint));
     if (hint.length() < 4)

@@ -11,7 +11,7 @@ public class AccountIdHelper extends WidgetHelper implements ChangeListener {
 
   @Override
   public String constructHint(String prefix) {
-    var hint = tri().query(prefix);
+    var hint = hintQuery(tri(), prefix); //tri().query(prefix);tri().query(prefix);
     log("hint for", quote(prefix), INDENT, quote(hint));
     return hint;
   }
@@ -31,16 +31,16 @@ public class AccountIdHelper extends WidgetHelper implements ChangeListener {
   }
 
   private void addAccountInfo(Trie t, Account a) {
-//    d84("addAccountInfo for account:",a.name());
     var output = accountNumberWithNameString(a);
     t.addSentence("" + a.number(), output);
     t.addSentence(a.name(), output);
 
     // Add entries for shortcut
     if (!a.shortcut().isEmpty()) {
-      d84("addAccountInfo to trie, account name:",a.name(),"shortcut:",a.shortcut());
-      // Add the shortcut as a sentence, to give it higher priority over anything else
-      t.addSentence(a.shortcut(), output);
+      d84("addAccountInfo to trie, account name:", a.name(), "shortcut:", a.shortcut());
+      // Add the shortcut as a sentence, to give it higher priority over anything else;
+      // also, prefix the shortcut with '~' so it avoids confusion with others
+      t.addSentence(SHORTCUT_TRIE_PREFIX + a.shortcut(), output);
     }
   }
 
