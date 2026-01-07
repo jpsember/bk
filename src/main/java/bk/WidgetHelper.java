@@ -15,36 +15,24 @@ public abstract class WidgetHelper extends BaseObject {
    */
   public abstract String constructHint(String prefix);
 
-  public String getHint(String prefix) {
-    pr("Widget Helper, get hint for prefix:", quote(prefix));
+  public final String getHint(String prefix) {
+    d84   ("Widget Helper, get hint for prefix:", quote(prefix));
     loadUtil();
     String hint = "";
     if (!prefix.isEmpty()) {
       var prefixLower = prefix.toLowerCase();
-      hint = mHintResultsMap.get(prefix);
-      pr("...hint for prefix:", prefix, "is:", hint);
-      pr("prefix for LOWERCASE is:", mHintResultsMap.get(prefixLower));
-      if (hint == null) {
-        hint = nullToEmpty(constructHint(prefixLower));
-        mHintResultsMap.put(prefix, hint);
-      }
+      hint = nullToEmpty(constructHint(prefix));
+//
+//      hint = mHintResultsMap.get(prefix);
+      d84  ("...hint for prefix:", prefix, "is:", hint);
+//      d84("prefix for LOWERCASE is:", mHintResultsMap.get(prefixLower));
+//      if (hint == null) {
+//        hint = nullToEmpty(constructHint(prefixLower));
+//        mHintResultsMap.put(prefix, hint);
+//      }
     }
     return hint;
   }
-
-//  public static int compareLowerCase(String a, String b) {
-//    return String.CASE_INSENSITIVE_ORDER.compare(a, b);
-//  }
-
-//  public static boolean matchCaseInsens(String a, String b) {
-//    return compareLowerCase(a, b) == 0;
-//  }
-
-//  public static boolean hasPrefix(String string, String prefix) {
-//    if (string.length() < prefix.length())
-//      return false;
-//    return matchCaseInsens(string.substring(0, prefix.length()), prefix);
-//  }
 
   // A map of user prefix (in lower case) and the hint that should be shown for that prefix (which might be an empty string)
   private Map<String, String> mHintResultsMap = hashMap();

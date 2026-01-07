@@ -1,5 +1,6 @@
 package bk;
 
+import static bk.Util.devMode;
 import static js.base.Tools.*;
 
 import js.base.BaseObject;
@@ -8,7 +9,13 @@ import js.json.JSMap;
 
 public class Trie extends BaseObject {
 
+  public static void db(Object... messages) {
+    if (devMode())
+      pr(insertStringToFront("<TRIE:>",messages));
+  }
+
   public Trie addSentence(String inputSentence, String optOutputSentence) {
+    db("addSentence:",inputSentence);
     // It should perhaps automatically add words for all sentences, AFTER the sentences have been added? Or do we get the same tri?
     optOutputSentence = ifNullOrEmpty(optOutputSentence, inputSentence);
     add(inputSentence, optOutputSentence, true);
@@ -18,10 +25,12 @@ public class Trie extends BaseObject {
   }
 
   public void addWord(String inputWord, String outputSentence) {
+    //db("addWord:",inputWord);
     add(inputWord, outputSentence, false);
   }
 
   private void add(String inputText, String outputSentence, boolean sentenceFlag) {
+   // if (devMode()) pr("Trie.add:",inputText,sentenceFlag?"*S*":"","outputSentence:",outputSentence);
     if (verbose())
       log("add", (sentenceFlag ? "sentence:" : "word:"), quote(inputText), "outputText:",
           quote(outputSentence));
@@ -65,6 +74,7 @@ public class Trie extends BaseObject {
         }
       }
       if (update) {
+       // if (devMode()) pr("...update node sentenceFlag:",sentenceFlag,quote(outputSentence));
         node.isSentencePrefix = sentenceFlag;
         node.answer = outputSentence;
       }
@@ -72,22 +82,33 @@ public class Trie extends BaseObject {
   }
 
   public String query(String text) {
-    if (text.isEmpty())
-      return "";
-    var textBytes = toLowerCaseLetters(text);
-    var node = mRoot;
+    String result = "";
 
-    Node best = null;
-    for (int i = 0; i < textBytes.length; i++) {
-      byte c = textBytes[i];
-      var ci = indexOf(node.childLetters, c);
-      if (ci < 0)
-        return "";
-      var ch = node.childNodes[ci];
-      node = ch;
-      best = node;
+//    boolean db = devMode();
+    if (!text.isEmpty()) {
+      var textBytes = toLowerCaseLetters(text);
+      var node = mRoot;
+
+//      if (db) pr("\n\nquery, text:", quote(text));
+      Node best = null;
+      for (int i = 0; i < textBytes.length; i++) {
+        byte c = textBytes[i];
+//        if (db) pr("...next char:", quote(Character.toString(c)));
+        var ci = indexOf(node.childLetters, c);
+        if (ci < 0)
+          return "";
+        var ch = node.childNodes[ci];
+        node = ch;
+        best = node;
+//        if (db) pr("......found new best node:", node.answer);
+      }
+//      if (db) pr("...returning:", quote(best.answer));
+     result = best.answer;
     }
-    return best.answer;
+    db("query, text:",quote(text),"==>",quote(result));
+    if(devMode())
+      db("trie:",INDENT,toJson());
+    return result;
   }
 
   private static final Node[] EMPTY_NODE_ARRAY = new Node[0];

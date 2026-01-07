@@ -201,7 +201,7 @@ public class WinMgr extends BaseObject {
         if (tm - startMs > 1000 * 30) quitFlag = true;
       }
 
-      if (ISSUE_84) {
+      if (devMode()) {
         if (keyStroke != null) {
           startMs = 0;
           if (

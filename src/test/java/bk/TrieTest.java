@@ -10,6 +10,26 @@ import js.testutil.MyTestCase;
 
 public class TrieTest extends MyTestCase {
 
+
+  @Test
+  public void shortcuts() {
+    tri().addSentence("far", null);
+    tri().addSentence("f~", "fly");
+    log("Tri:", INDENT, tri());
+    dumpTrie();
+    ask("f", "fa", "fl", "fz", "f~", "fa~");
+  }
+
+
+  @Test
+  public void shortcuts2() { 
+    tri().addSentence("f~", "fly");
+    tri().addSentence("far", null);
+    log("Tri:", INDENT, tri());
+    dumpTrie();
+    ask("f", "fa", "fl", "fz");
+  }
+
   @Test
   public void small() {
     var s = "a";
@@ -71,12 +91,21 @@ public class TrieTest extends MyTestCase {
       tri().addWord(x, "w");
   }
 
+  private void dumpTrie() {
+    mDumpTrie = true;
+  }
+
+  private boolean mDumpTrie;
+
   private void ask(String... strs) {
     for (var s : strs) {
       var res = tri().query(s);
       result().putNumbered(s, res);
     }
-    generateMessage(result().prettyPrint());
+    var m = result();
+    if (mDumpTrie)
+      m.put("_trie", tri().toJson());
+    generateMessage(m.prettyPrint());
     assertGenerated();
   }
 

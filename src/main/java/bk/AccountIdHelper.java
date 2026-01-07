@@ -18,6 +18,7 @@ public class AccountIdHelper extends WidgetHelper implements ChangeListener {
 
   private Trie tri() {
     if (sTri == null) {
+      d84("...........constructing tri within AccountIdHelper");
       var t = new Trie();
       var ac = storage().readAllAccounts();
       for (var a : ac) {
@@ -30,13 +31,16 @@ public class AccountIdHelper extends WidgetHelper implements ChangeListener {
   }
 
   private void addAccountInfo(Trie t, Account a) {
+//    d84("addAccountInfo for account:",a.name());
     var output = accountNumberWithNameString(a);
     t.addSentence("" + a.number(), output);
     t.addSentence(a.name(), output);
 
     // Add entries for shortcut
     if (!a.shortcut().isEmpty()) {
-      t.addWord(a.shortcut(), output);
+      d84("addAccountInfo to trie, account name:",a.name(),"shortcut:",a.shortcut());
+      // Add the shortcut as a sentence, to give it higher priority over anything else
+      t.addSentence(a.shortcut(), output);
     }
   }
 

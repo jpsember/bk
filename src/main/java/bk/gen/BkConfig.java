@@ -39,6 +39,10 @@ public class BkConfig implements AbstractData {
     return mCloseAccounts;
   }
 
+  public boolean devMode() {
+    return mDevMode;
+  }
+
   @Override
   public Builder toBuilder() {
     return new Builder(this);
@@ -52,6 +56,7 @@ public class BkConfig implements AbstractData {
   protected static final String _5 = "apply_hint_to_transaction";
   protected static final String _6 = "generate_test_data";
   protected static final String _7 = "close_accounts";
+  protected static final String _8 = "dev_mode";
 
   @Override
   public String toString() {
@@ -69,6 +74,7 @@ public class BkConfig implements AbstractData {
     m.putUnsafe(_5, mApplyHintToTransaction);
     m.putUnsafe(_6, mGenerateTestData);
     m.putUnsafe(_7, mCloseAccounts);
+    m.putUnsafe(_8, mDevMode);
     return m;
   }
 
@@ -103,6 +109,7 @@ public class BkConfig implements AbstractData {
     mApplyHintToTransaction = m.opt(_5, false);
     mGenerateTestData = m.opt(_6, false);
     mCloseAccounts = m.opt(_7, "");
+    mDevMode = m.opt(_8, false);
   }
 
   public static Builder newBuilder() {
@@ -134,6 +141,8 @@ public class BkConfig implements AbstractData {
       return false;
     if (!(mCloseAccounts.equals(other.mCloseAccounts)))
       return false;
+    if (!(mDevMode == other.mDevMode))
+      return false;
     return true;
   }
 
@@ -150,6 +159,7 @@ public class BkConfig implements AbstractData {
       r = r * 37 + (mApplyHintToTransaction ? 1 : 0);
       r = r * 37 + (mGenerateTestData ? 1 : 0);
       r = r * 37 + mCloseAccounts.hashCode();
+      r = r * 37 + (mDevMode ? 1 : 0);
       m__hashcode = r;
     }
     return r;
@@ -163,6 +173,7 @@ public class BkConfig implements AbstractData {
   protected boolean mApplyHintToTransaction;
   protected boolean mGenerateTestData;
   protected String mCloseAccounts;
+  protected boolean mDevMode;
   protected int m__hashcode;
 
   public static final class Builder extends BkConfig {
@@ -176,6 +187,7 @@ public class BkConfig implements AbstractData {
       mApplyHintToTransaction = m.mApplyHintToTransaction;
       mGenerateTestData = m.mGenerateTestData;
       mCloseAccounts = m.mCloseAccounts;
+      mDevMode = m.mDevMode;
     }
 
     @Override
@@ -200,6 +212,7 @@ public class BkConfig implements AbstractData {
       r.mApplyHintToTransaction = mApplyHintToTransaction;
       r.mGenerateTestData = mGenerateTestData;
       r.mCloseAccounts = mCloseAccounts;
+      r.mDevMode = mDevMode;
       return r;
     }
 
@@ -240,6 +253,11 @@ public class BkConfig implements AbstractData {
 
     public Builder closeAccounts(String x) {
       mCloseAccounts = (x == null) ? "" : x;
+      return this;
+    }
+
+    public Builder devMode(boolean x) {
+      mDevMode = x;
       return this;
     }
 

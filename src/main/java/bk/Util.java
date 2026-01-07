@@ -37,9 +37,10 @@ public final class Util {
   public static final boolean DEBUG_TIMEOUT = ISSUE_84 && alert("DEBUG_TIMEOUT is active");
 
   public static boolean d84(Object... messages) {
-    if (ISSUE_84)
+    boolean dev =  devMode();
+    if (dev)
       pr(insertStringToFront("{ISSUE 84}",messages));
-    return ISSUE_84;
+    return dev;
   }
 
   public static final int BORDER_NONE = 0;
@@ -790,8 +791,12 @@ public final class Util {
   public static final int CHARS_TRANSACTION_DESCRIPTION = 30;
   public static final int CHARS_ACCOUNT_NUMBER_AND_NAME = CHARS_ACCOUNT_NAME + 5;
 
-  private static BkConfig sConfig;
+  // In case we're doing unit tests, initialize it to something non-null
+  private static BkConfig sConfig = BkConfig.newBuilder().devMode(true).build();
 
+  public static boolean devMode() {
+    return bkConfig().devMode();
+  }
   public static void setUtilConfig(BkConfig config) {
     sConfig = config.build();
   }
