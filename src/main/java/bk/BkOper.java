@@ -52,9 +52,9 @@ public class BkOper extends AppOper
     logger(new Logger(config().logFile()));
 
     setUtilConfig(config());
-  if (devMode()) {
-    for (int i = 0; i<50; i++) pr("<<<devMode>>>");
-  }
+    if (devMode()) {
+      for (int i = 0; i < 50; i++) pr("<<<devMode>>>");
+    }
     processTesting();
 
     {
@@ -97,7 +97,7 @@ public class BkOper extends AppOper
       {
         var h = new MessageWindow();
         Util.sHeader = h;
-        h.setMessageAt(MessageWindow.CENTER, "bk 1.0" + (devMode()? " *** DEV MODE ***":"")).setMessageAt(MessageWindow.RIGHT, "opt-x: quit");
+        h.setMessageAt(MessageWindow.CENTER, "bk 1.0" + (devMode() ? " *** DEV MODE ***" : "")).setMessageAt(MessageWindow.RIGHT, "opt-x: quit");
         mgr.chars(1).window(h);
       }
 

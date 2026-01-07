@@ -11,14 +11,13 @@ public class AccountIdHelper extends WidgetHelper implements ChangeListener {
 
   @Override
   public String constructHint(String prefix) {
-    var hint = hintQuery(tri(), prefix); //tri().query(prefix);tri().query(prefix);
+    var hint = hintQuery(tri(), prefix);
     log("hint for", quote(prefix), INDENT, quote(hint));
     return hint;
   }
 
   private Trie tri() {
     if (sTri == null) {
-      d84("...........constructing tri within AccountIdHelper");
       var t = new Trie();
       var ac = storage().readAllAccounts();
       for (var a : ac) {

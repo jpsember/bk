@@ -470,7 +470,7 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
   // ------------------------------------------------------------------
 
   private void resetHintCursor() {
-    d84("resent hint cursor, buffer:", quote(mHintBuffer), mHintBuffer.length());
+    d84("reset hint cursor, buffer:", quote(mHintBuffer), mHintBuffer.length());
     if (mHintBuffer.length() != 0)
       d84("resetting hint cursor; discarding:", quote(mHintBuffer));
     mHintBuffer.setLength(0);
@@ -513,7 +513,7 @@ public abstract class LedgerWindow extends JWindow implements FocusHandler {
   }
 
   private Integer determineHelperValue(String prefix) {
-    var result =  hintQuery(trie(),prefix); //tri().query(prefix);trie().query(prefix);
+    var result = hintQuery(trie(),prefix);
     return mHintToRowNumberMap.get(result);
   }
 

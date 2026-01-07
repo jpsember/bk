@@ -22,14 +22,7 @@ public abstract class WidgetHelper extends BaseObject {
     if (!prefix.isEmpty()) {
       var prefixLower = prefix.toLowerCase();
       hint = nullToEmpty(constructHint(prefix));
-//
-//      hint = mHintResultsMap.get(prefix);
       d84  ("...hint for prefix:", prefix, "is:", hint);
-//      d84("prefix for LOWERCASE is:", mHintResultsMap.get(prefixLower));
-//      if (hint == null) {
-//        hint = nullToEmpty(constructHint(prefixLower));
-//        mHintResultsMap.put(prefix, hint);
-//      }
     }
     return hint;
   }
