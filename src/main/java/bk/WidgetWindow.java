@@ -110,10 +110,6 @@ public class WidgetWindow extends JWindow implements FocusHandler {
       var s = mContent;
       if (nonEmpty(mHintText)) {
         s = mHintText;
-        if (false && ISSUE_84) {
-          todo("is it safe to append hint to existing content?");
-          s = mContent + spaces(12 - mContent.length()) + "{" + mHintText + "}";
-        }
       }
 
       var style = STYLE_NORMAL;

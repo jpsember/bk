@@ -32,11 +32,7 @@ import js.parsing.Scanner;
 
 public final class Util {
 
-  public static final boolean ISSUE_84 = false && alert("ISSUE_84 is in effect");
-
-  public static final boolean DEBUG_TIMEOUT = ISSUE_84 && alert("DEBUG_TIMEOUT is active");
-
-  // A special prefix to apply when searching for account shortcuts with a Trie
+   // A special prefix to apply when searching for account shortcuts with a Trie
   public static final String SHORTCUT_TRIE_PREFIX = "~";
 
   public static boolean d84(Object... messages) {

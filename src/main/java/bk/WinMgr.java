@@ -193,7 +193,7 @@ public class WinMgr extends BaseObject {
       KeyStroke keyStroke = mScreen.pollInput();
       var quitFlag = false;
 
-      if (DEBUG_TIMEOUT) {
+      if (devMode() && alert("TIMEOUT is in effect!")) {
         var tm = System.currentTimeMillis();
         if (startMs == 0) {
           startMs = tm;
