@@ -28,11 +28,11 @@ import js.file.Files;
 import js.geometry.MyMath;
 import js.json.JSMap;
 import js.parsing.DFA;
-import js.parsing.Scanner;
+import js.parsing.Lexer;
 
 public final class Util {
 
-   // A special prefix to apply when searching for account shortcuts with a Trie
+  // A special prefix to apply when searching for account shortcuts with a Trie
   public static final String SHORTCUT_TRIE_PREFIX = "~";
 
   public static boolean d84(Object... messages) {
@@ -674,7 +674,6 @@ public final class Util {
    */
   public static ShareInfo parseShareInfo(String value) {
 
-    todo("Update to use lexer");
     final boolean db = false && alert("verbose");
     if (db)
       pr(VERT_SP, DASHES, "parseShareInfo, value:", quote(value));
@@ -682,7 +681,8 @@ public final class Util {
     var si = ShareInfo.newBuilder();
     si.notes(value);
 
-    var s = new Scanner(descDFA(), value.trim(), -1);
+
+    var s = new Lexer(descDFA()).withNoSkip().withText(value.trim());
 
     if (db)
       s.setVerbose();
@@ -714,7 +714,7 @@ public final class Util {
         // Attempt to parse float
         si.shares(attemptParseDouble(s));
 
-        if (s.readIf(T_SEMICOLON) != null) {
+        if (s.readIf(T_SEMICOLON)) {
           si.bookValue(attemptParseDouble(s));
         }
 
@@ -736,19 +736,16 @@ public final class Util {
     return si.build();
   }
 
-  public static double attemptParseDouble(Scanner s) {
+  public static double attemptParseDouble(Lexer s) {
     var sb = new StringBuilder();
-    var t = s.readIf(T_DIGITS);
-    if (t != null) {
-      sb.append(t.text());
+    if (s.readIf(T_DIGITS)) {
+      sb.append(s.token().text());
     }
-    if (s.readIf(T_PERIOD) != null)
-      sb.append('.');
+    if (s.readIf(T_PERIOD))
+      sb.append(s.token().text());
 
-    t = s.readIf(T_DIGITS);
-    if (t != null) {
-      sb.append(t.text());
-    }
+    if (s.readIf(T_DIGITS))
+      sb.append(s.token().text());
 
     return Double.parseDouble(sb.toString());
   }
