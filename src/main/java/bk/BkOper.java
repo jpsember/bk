@@ -72,10 +72,17 @@ public class BkOper extends AppOper
 
     if (nonEmpty(config().closeAccounts())) {
       try {
-        var res = DATE_VALIDATOR.validate(config().closeAccounts());
+        // Verify that the closing date is of the form YYYY/MM/DD
+        var arg = config().closeAccounts();
+        // Replace spaces with '/'
+        arg = arg.replace(' ', '/');
+        var components = split(arg, '/');
+        checkArgument(arg.length() == 10 && components.size() == 3, "expected YYYY/MM/DD; not:", quote(arg));
+        var yr = Integer.parseInt(components.get(0));
+        checkArgument(yr >= 2020 && yr < 2100, "unexpected year:", yr);
+        var res = DATE_VALIDATOR.validate(arg);
+        checkArgument(!res.string().isEmpty(), "failed to validate expression:", quote(arg));
         long closingDateSec = res.typedValue();
-        log("close accounts:", config().closeAccounts(), "res str:", res.string(), "typed val:",
-            res.typedValue());
         var c = new YearEnd(config());
         c.closeBooks(closingDateSec);
       } catch (Throwable t) {
